@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ scan.name }} - Developer Dashboard</title>
+    <title>LDMS — {{ scan.name }}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
@@ -21,14 +23,16 @@
             --danger: #ef4444;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
             font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.14), transparent 36%),
-                        radial-gradient(circle at 85% 10%, rgba(34, 211, 238, 0.1), transparent 32%),
-                        linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
+                radial-gradient(circle at 85% 10%, rgba(34, 211, 238, 0.1), transparent 32%),
+                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
             color: var(--ink);
             min-height: 100vh;
             padding: 1.5rem 1rem 3rem;
@@ -47,9 +51,9 @@
             position: relative;
             padding: 1.25rem 1.35rem;
             border-radius: 18px;
-            background: linear-gradient(150deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
             border: 1px solid var(--edge);
-            box-shadow: 0 16px 36px rgba(0,0,0,0.35);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
             overflow: hidden;
         }
 
@@ -57,131 +61,736 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124,58,237,0.12), transparent 60%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.12), transparent 60%);
             pointer-events: none;
         }
 
-        .span-2 { grid-column: span 2; }
-        @media (max-width: 960px) { .span-2 { grid-column: span 1; } }
+        .span-2 {
+            grid-column: span 2;
+        }
 
-        .breadcrumbs { display: flex; align-items: center; gap: 0.55rem; color: var(--muted); font-size: 0.92rem; }
-        .breadcrumbs a { color: var(--accent-2); text-decoration: none; }
-        .breadcrumbs a:hover { text-decoration: underline; }
+        @media (max-width: 960px) {
+            .span-2 {
+                grid-column: span 1;
+            }
+        }
 
-        .hero { display: grid; gap: 0.8rem; }
-        .hero-top { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
-        .back-link { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
-        .back-link i { color: var(--accent-2); }
-        .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(34,211,238,0.12); color: #e0f2fe; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
 
-        h1 { margin: 0; font-size: 2rem; display: flex; align-items: center; gap: 10px; color: #f8fafc; }
-        h1 i { color: var(--accent-2); }
-        .subtitle { margin: 0.25rem 0 0.8rem; color: var(--muted); max-width: 820px; }
+        .breadcrumbs a {
+            color: var(--accent-2);
+            text-decoration: none;
+        }
 
-        .chip-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        .chip { padding: 0.5rem 0.75rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); font-weight: 700; color: #e2e8f0; }
-        .chip i { color: var(--accent-2); }
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
 
-        .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-        .btn { padding: 0.6rem 1.05rem; border-radius: 10px; border: 1px solid rgba(34,211,238,0.35); cursor: pointer; font-size: 0.95rem; font-weight: 700; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #22d3ee, #7c3aed); color: #0b1020; }
-        .btn.secondary { background: rgba(255,255,255,0.06); color: var(--ink); border-color: var(--edge); }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(34,211,238,0.25); }
+        .hero {
+            display: grid;
+            gap: 0.8rem;
+        }
 
-        .bulk-card { display: grid; gap: 0.75rem; position: sticky; top: 10px; z-index: 10; }
-        .select-all-container { display: flex; align-items: center; gap: 0.55rem; padding: 0.65rem 0.8rem; border-radius: 12px; background: #0f172a; border: 1px solid rgba(34,211,238,0.6); }
-        .defect-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #22d3ee; }
-        .bulk-actions-bar { display: none; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 1rem; border-radius: 12px; background: #0f172a; border: 1px solid rgba(34,211,238,0.6); }
-        .bulk-actions-bar.active { display: flex; }
-        .count { font-weight: 700; color: #e0f2fe; }
-        .bulk-actions-bar select { padding: 0.55rem 0.7rem; border-radius: 10px; border: 1px solid var(--edge); background: rgba(255,255,255,0.06); color: var(--ink); font-weight: 600; }
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
-        .charts-card h3, .locations-card h3 { margin: 0 0 0.4rem; color: #f8fafc; }
-        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.75rem; }
-        .chart-box { padding: 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--edge); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
+        .back-link {
+            color: var(--ink);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
 
-        .locations-card { display: grid; gap: 0.75rem; }
-        .heat-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .heat-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
-        .heat-bar span { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); }
+        .back-link i {
+            color: var(--accent-2);
+        }
 
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; }
-        .info-item { padding: 0.75rem 0.85rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--edge); display: flex; flex-direction: column; gap: 6px; }
-        .info-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.02em; text-transform: uppercase; font-weight: 700; }
-        .info-value { font-size: 0.98rem; font-weight: 700; color: #f8fafc; }
-        .info-note { color: var(--muted); font-size: 0.9rem; margin: 0; }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(34, 211, 238, 0.12);
+            color: #e0f2fe;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
 
-        .defects-wrapper { display: grid; gap: 0.85rem; }
-        .defects-grid { display: grid; gap: 0.85rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-        .defect-card { background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02)); border: 1px solid var(--edge); border-radius: 14px; box-shadow: 0 12px 28px rgba(0,0,0,0.35); overflow: hidden; transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease; }
-        .defect-card:hover { transform: translateY(-3px); border-color: rgba(124,58,237,0.35); box-shadow: 0 14px 34px rgba(0,0,0,0.42); }
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fafc;
+        }
 
-        .defect-header { padding: 1rem; border-bottom: 1px solid var(--edge); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        .defect-title { margin: 0; display: flex; align-items: center; gap: 10px; color: #f8fafc; font-size: 1rem; font-weight: 700; }
-        .defect-id { background: rgba(34,211,238,0.12); color: #e0f2fe; padding: 4px 8px; border-radius: 8px; font-size: 0.82rem; border: 1px solid rgba(34,211,238,0.25); }
-        .status-badge { padding: 5px 9px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid var(--edge); }
-        .status-reported { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border-color: rgba(245,158,11,0.35); }
-        .status-underreview { background: rgba(59, 130, 246, 0.16); color: #bfdbfe; border-color: rgba(59,130,246,0.35); }
-        .status-fixed { background: rgba(16, 185, 129, 0.16); color: #bbf7d0; border-color: rgba(16,185,129,0.35); }
-        .priority-badge { padding: 4px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid var(--edge); }
-        .priority-urgent { background: rgba(239,68,68,0.16); color: #fecdd3; border-color: rgba(239,68,68,0.35); }
-        .priority-high { background: rgba(245,158,11,0.18); color: #fcd34d; border-color: rgba(245,158,11,0.35); }
-        .priority-medium { background: rgba(59,130,246,0.16); color: #bfdbfe; border-color: rgba(59,130,246,0.35); }
-        .priority-low { background: rgba(16,185,129,0.16); color: #bbf7d0; border-color: rgba(16,185,129,0.35); }
+        h1 i {
+            color: var(--accent-2);
+        }
 
-        .defect-content { padding: 1rem; display: grid; gap: 0.9rem; }
-        .defect-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
-        .defect-field { display: flex; flex-direction: column; gap: 4px; }
-        .field-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.02em; }
-        .field-value { font-size: 0.95rem; color: #f8fafc; font-weight: 600; }
-        .coordinates { font-family: 'Courier New', monospace; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 8px; border: 1px solid var(--edge); color: #e2e8f0; }
-        .severity-high { color: #fca5a5; }
-        .severity-medium { color: #fcd34d; }
-        .severity-low { color: #bbf7d0; }
+        .subtitle {
+            margin: 0.25rem 0 0.8rem;
+            color: var(--muted);
+            max-width: 820px;
+        }
 
-        .defect-image { margin-top: 0.5rem; padding-top: 0.6rem; border-top: 1px dashed var(--edge); }
-        .defect-image img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; border: 1px solid var(--edge); cursor: pointer; transition: transform 0.18s ease; }
-        .defect-image img:hover { transform: scale(1.02); }
+        .chip-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
 
-        .update-form { margin-top: 0.5rem; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px dashed var(--edge); }
-        .form-group { margin-bottom: 0.85rem; }
-        .form-group label { display: block; margin-bottom: 0.35rem; font-weight: 700; color: #e2e8f0; }
-        .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-weight: 600; }
-        .form-group textarea { resize: vertical; min-height: 80px; }
+        .chip {
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 700;
+            color: #e2e8f0;
+        }
 
-        .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--muted); border: 1px dashed var(--edge); background: rgba(255,255,255,0.02); border-radius: 14px; }
-        .empty-state i { font-size: 3.2rem; color: rgba(255,255,255,0.35); margin-bottom: 0.8rem; }
-        .empty-state h3 { margin: 0 0 0.5rem; color: #f8fafc; }
+        .chip i {
+            color: var(--accent-2);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.05rem;
+            border-radius: 10px;
+            border: 1px solid rgba(34, 211, 238, 0.35);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #22d3ee, #7c3aed);
+            color: #0b1020;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            border-color: var(--edge);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.25);
+        }
+
+        .bulk-card {
+            display: grid;
+            gap: 0.75rem;
+            position: sticky;
+            top: 10px;
+            z-index: 10;
+        }
+
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 12px;
+            background: #0f172a;
+            border: 1px solid rgba(34, 211, 238, 0.6);
+        }
+
+        .defect-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #22d3ee;
+        }
+
+        .bulk-actions-bar {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            background: #0f172a;
+            border: 1px solid rgba(34, 211, 238, 0.6);
+        }
+
+        .bulk-actions-bar.active {
+            display: flex;
+        }
+
+        .count {
+            font-weight: 700;
+            color: #e0f2fe;
+        }
+
+        .bulk-actions-bar select {
+            padding: 0.55rem 0.7rem;
+            border-radius: 10px;
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .charts-card h3,
+        .locations-card h3 {
+            margin: 0 0 0.4rem;
+            color: #f8fafc;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .chart-box {
+            padding: 0.85rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--edge);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .locations-card {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .heat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .heat-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .heat-bar span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .info-item {
+            padding: 0.75rem 0.85rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--edge);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .info-value {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .info-note {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .defects-wrapper {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .defects-grid {
+            display: grid;
+            gap: 0.85rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
+        .defect-card {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--edge);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
+        }
+
+        .defect-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(124, 58, 237, 0.35);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+        }
+
+        .defect-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--edge);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .defect-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fafc;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .defect-id {
+            background: rgba(34, 211, 238, 0.12);
+            color: #e0f2fe;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        .status-badge {
+            padding: 5px 9px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--edge);
+        }
+
+        .status-reported {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .status-underreview {
+            background: rgba(59, 130, 246, 0.16);
+            color: #bfdbfe;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .status-fixed {
+            background: rgba(16, 185, 129, 0.16);
+            color: #bbf7d0;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--edge);
+        }
+
+        .priority-urgent {
+            background: rgba(239, 68, 68, 0.16);
+            color: #fecdd3;
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
+        .priority-high {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .priority-medium {
+            background: rgba(59, 130, 246, 0.16);
+            color: #bfdbfe;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .priority-low {
+            background: rgba(16, 185, 129, 0.16);
+            color: #bbf7d0;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .defect-content {
+            padding: 1rem;
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .defect-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .defect-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .field-value {
+            font-size: 0.95rem;
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .coordinates {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--edge);
+            color: #e2e8f0;
+        }
+
+        .severity-high {
+            color: #fca5a5;
+        }
+
+        .severity-medium {
+            color: #fcd34d;
+        }
+
+        .severity-low {
+            color: #bbf7d0;
+        }
+
+        .defect-image {
+            margin-top: 0.5rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--edge);
+        }
+
+        .defect-image img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--edge);
+            cursor: pointer;
+            transition: transform 0.18s ease;
+        }
+
+        .defect-image img:hover {
+            transform: scale(1.02);
+        }
+
+        .update-form {
+            margin-top: 0.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--edge);
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.05);
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--muted);
+            border: 1px dashed var(--edge);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+        }
+
+        .empty-state i {
+            font-size: 3.2rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 0.8rem;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 0.5rem;
+            color: #f8fafc;
+        }
 
         /* Toast + modal */
-        .toast { position: fixed; top: 20px; right: 20px; background: #0b1020; color: var(--ink); border-radius: 10px; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35); padding: 1rem 1.4rem; display: flex; align-items: center; gap: 12px; max-width: 420px; z-index: 10000; animation: slideIn 0.3s ease-out; border-left: 4px solid var(--accent-2); }
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: var(--danger); }
-        @keyframes slideIn { from { transform: translateX(420px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #0b1020;
+            color: var(--ink);
+            border-radius: 10px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+            padding: 1rem 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 420px;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid var(--accent-2);
+        }
 
-        .lightbox { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 10000; justify-content: center; align-items: center; cursor: zoom-out; }
-        .lightbox.active { display: flex; }
-        .lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 16px 40px rgba(0,0,0,0.45); }
-        .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; background: rgba(0, 0, 0, 0.5); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-        .lightbox-close:hover { background: rgba(0, 0, 0, 0.75); }
+        .toast.success {
+            border-left-color: var(--success);
+        }
 
-        .spinner { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; }
-        .spinner.active { display: block; }
-        .spinner-circle { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.15); border-top-color: var(--accent-2); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner-backdrop { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 9998; }
-        .spinner-backdrop.active { display: block; }
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(420px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(0, 0, 0, 0.75);
+        }
+
+        .spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        .spinner-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top-color: var(--accent-2);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 9998;
+        }
+
+        .spinner-backdrop.active {
+            display: block;
+        }
 
         /* Print */
         @media print {
-            body { background: white; color: black; }
-            .btn, .bulk-card, .lightbox, .spinner, .spinner-backdrop, .toast { display: none !important; }
-            .bento-grid { display: block; }
-            .bento-card { box-shadow: none; background: white; color: black; border: 1px solid #ccc; }
-            .defect-card { page-break-inside: avoid; }
+            body {
+                background: white;
+                color: black;
+            }
+
+            .btn,
+            .bulk-card,
+            .lightbox,
+            .spinner,
+            .spinner-backdrop,
+            .toast {
+                display: none !important;
+            }
+
+            .bento-grid {
+                display: block;
+            }
+
+            .bento-card {
+                box-shadow: none;
+                background: white;
+                color: black;
+                border: 1px solid #ccc;
+            }
+
+            .defect-card {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Loading overlay */
+        #ldms-loader {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(11, 16, 32, 0.8);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #ldms-loader.active {
+            display: flex;
+        }
+
+        .loader-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: ldms-spin 0.8s linear infinite;
+        }
+
+        .loader-text {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @keyframes ldms-spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
+    <div id="ldms-loader">
+        <div class="loader-spinner"></div>
+        <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+    </div>
+    <div style="position:fixed;top:12px;right:12px;z-index:9999;display:flex;gap:8px;align-items:center;">
+        <a href="{{ url_for('auth.logout') }}"
+            style="display:inline-flex;align-items:center;gap:8px;padding:0.45rem 0.9rem;border-radius:999px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;text-decoration:none;font-family:system-ui;font-weight:600;font-size:0.85rem;backdrop-filter:blur(8px);">
+            <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     {% set reported_count = defects|selectattr('status', 'equalto', 'Reported')|list|length %}
     {% set review_count = defects|selectattr('status', 'equalto', 'Under Review')|list|length %}
@@ -194,31 +803,44 @@
                     <i class="fas fa-chevron-right"></i>
                     <span>{{ scan.name }}</span>
                 </div>
-                <a href="{{ url_for('developer.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
+                <a href="{{ url_for('developer.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i>
+                    Back</a>
             </div>
             <div>
                 <span class="eyebrow"><i class="fas fa-bolt"></i> Scan overview</span>
                 <h1><i class="fas fa-cube"></i> {{ scan.name }}</h1>
-                <p class="subtitle">Manage defect progress, bulk updates, and review activity for this scan. Total: {{ defects|length }} defect(s).</p>
+                <p class="subtitle">Manage defect progress, bulk updates, and review activity for this scan. Total: {{
+                    defects|length }} defect(s).</p>
             </div>
             <div class="chip-row">
                 <span class="chip"><i class="fas fa-hashtag"></i> ID {{ scan.id }}</span>
-                <span class="chip"><i class="fas fa-calendar"></i> {{ scan.created_at.strftime('%Y-%m-%d') if scan.created_at else 'Unknown date' }}</span>
-                <span class="chip"><i class="fas fa-file"></i> {{ scan.model_path.split('/')[-1] if scan.model_path else 'No model file' }}</span>
-                <span class="chip" style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.25); color: #ccf4e0;"><i class="fas fa-check-circle"></i> {{ fixed_count }} fixed</span>
-                <span class="chip" style="background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.25); color: #dbeafe;"><i class="fas fa-hourglass-half"></i> {{ review_count }} under review</span>
-                <span class="chip" style="background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.35); color: #fcd34d;"><i class="fas fa-flag"></i> {{ reported_count }} reported</span>
+                <span class="chip"><i class="fas fa-calendar"></i> {{ scan.created_at.strftime('%Y-%m-%d') if
+                    scan.created_at else 'Unknown date' }}</span>
+                <span class="chip"><i class="fas fa-file"></i> {{ scan.model_path.split('/')[-1] if scan.model_path else
+                    'No model file' }}</span>
+                <span class="chip"
+                    style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.25); color: #ccf4e0;"><i
+                        class="fas fa-check-circle"></i> {{ fixed_count }} fixed</span>
+                <span class="chip"
+                    style="background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.25); color: #dbeafe;"><i
+                        class="fas fa-hourglass-half"></i> {{ review_count }} under review</span>
+                <span class="chip"
+                    style="background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.35); color: #fcd34d;"><i
+                        class="fas fa-flag"></i> {{ reported_count }} reported</span>
             </div>
             <div class="actions">
-                <a href="{{ url_for('developer.export_scan_csv', scan_id=scan.id) }}" class="btn secondary"><i class="fas fa-download"></i> Export CSV</a>
-                <button onclick="window.print()" class="btn secondary"><i class="fas fa-print"></i> Print Report</button>
+                <a href="{{ url_for('developer.export_scan_csv', scan_id=scan.id) }}" class="btn secondary"><i
+                        class="fas fa-download"></i> Export CSV</a>
+                <button onclick="window.print()" class="btn secondary"><i class="fas fa-print"></i> Print
+                    Report</button>
             </div>
         </section>
 
         <section class="bento-card span-2 house-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
                 <h2 style="margin: 0; color: #f8fafc;">House Details</h2>
-                <span class="chip" style="background: rgba(255,255,255,0.05); color: var(--muted);">From latest upload</span>
+                <span class="chip" style="background: rgba(255,255,255,0.05); color: var(--muted);">From latest
+                    upload</span>
             </div>
             {% set meta = upload_metadata or {} %}
             {% if upload_metadata %}
@@ -237,7 +859,8 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">Scan Date</div>
-                    <div class="info-value">{{ meta.scan_date or (scan.created_at.strftime('%Y-%m-%d') if scan.created_at else 'N/A') }}</div>
+                    <div class="info-value">{{ meta.scan_date or (scan.created_at.strftime('%Y-%m-%d') if
+                        scan.created_at else 'N/A') }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Latitude</div>
@@ -255,30 +878,39 @@
                 {% endif %}
             </div>
             {% else %}
-            <p class="info-note">No house details available yet. Upload data to populate project address and scan metadata.</p>
+            <p class="info-note">No house details available yet. Upload data to populate project address and scan
+                metadata.</p>
             {% endif %}
         </section>
 
         <!-- Search & Filter Card -->
         <section class="bento-card span-2 search-card" style="padding: 1rem;">
-            <form method="get" action="{{ url_for('developer.view_scan', scan_id=scan.id) }}" style="display: flex; gap: 0.75rem; align-items: center;">
+            <form method="get" action="{{ url_for('developer.view_scan', scan_id=scan.id) }}"
+                style="display: flex; gap: 0.75rem; align-items: center;">
                 <div style="flex: 1; position: relative;">
-                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
-                    <input type="text" name="search" value="{{ search_query or '' }}" placeholder="Search defects by description, location, type, or notes..." 
-                           style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.8rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-size: 1rem; outline: none; transition: border-color 0.2s;">
+                    <i class="fas fa-search"
+                        style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
+                    <input type="text" name="search" value="{{ search_query or '' }}"
+                        placeholder="Search defects by location, type, severity, or notes..."
+                        style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.8rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-size: 1rem; outline: none; transition: border-color 0.2s;">
                 </div>
-                
-                <select name="sort_by" onchange="this.form.submit()" style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-weight: 600; cursor: pointer; outline: none;">
-                    <option value="created_desc" {% if sort_by == 'created_desc' %}selected{% endif %}>Newest First</option>
-                    <option value="created_asc" {% if sort_by == 'created_asc' %}selected{% endif %}>Oldest First</option>
-                    <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority (High → Low)</option>
-                    <option value="severity" {% if sort_by == 'severity' %}selected{% endif %}>Severity (High → Low)</option>
-                    <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
+
+                <select name="sort_by" onchange="this.form.submit()"
+                    style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-weight: 600; cursor: pointer; outline: none;">
+                    <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Newest First
+                    </option>
+                    <option value="created_asc" {% if sort_by=='created_asc' %}selected{% endif %}>Oldest First</option>
+                    <option value="priority" {% if sort_by=='priority' %}selected{% endif %}>Priority (High → Low)
+                    </option>
+                    <option value="severity" {% if sort_by=='severity' %}selected{% endif %}>Severity (High → Low)
+                    </option>
+                    <option value="status" {% if sort_by=='status' %}selected{% endif %}>Status</option>
                 </select>
 
                 <button type="submit" class="btn">Search</button>
                 {% if search_query %}
-                <a href="{{ url_for('developer.view_scan', scan_id=scan.id) }}" class="btn secondary" style="min-width: 80px; justify-content: center;">
+                <a href="{{ url_for('developer.view_scan', scan_id=scan.id) }}" class="btn secondary"
+                    style="min-width: 80px; justify-content: center;">
                     <i class="fas fa-times-circle"></i> Clear
                 </a>
                 {% endif %}
@@ -293,7 +925,10 @@
             </div>
             <div class="bulk-actions-bar" id="bulk-actions">
                 <span class="count"><span id="selected-count">0</span> selected</span>
-                <form method="post" action="{{ url_for('developer.bulk_update_defects', scan_id=scan.id) }}" id="bulk-form" onsubmit="return confirmBulkUpdate()" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
+                <form method="post" action="{{ url_for('developer.bulk_update_defects', scan_id=scan.id) }}"
+                    id="bulk-form" onsubmit="return confirmBulkUpdate()"
+                    style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <select name="bulk_status">
                         <option value="">-- Update Status --</option>
                         <option value="Reported">Reported</option>
@@ -308,7 +943,8 @@
                         <option value="Low">Low</option>
                     </select>
                     <button type="submit" class="btn"><i class="fas fa-edit"></i> Apply to Selected</button>
-                    <button type="button" class="btn secondary" onclick="clearSelection()"><i class="fas fa-times"></i> Clear</button>
+                    <button type="button" class="btn secondary" onclick="clearSelection()"><i class="fas fa-times"></i>
+                        Clear</button>
                 </form>
             </div>
         </section>
@@ -354,12 +990,14 @@
                 {% for defect in defects %}
                 <div class="defect-card">
                     <div class="defect-header">
-                        <input type="checkbox" class="defect-checkbox" data-defect-id="{{ defect.id }}" onchange="updateBulkActions()">
+                        <input type="checkbox" class="defect-checkbox" data-defect-id="{{ defect.id }}"
+                            onchange="updateBulkActions()">
                         <h3 class="defect-title">
                             <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
                             <span class="defect-id">#{{ defect.id }}</span>
                         </h3>
-                        <span class="status-badge status-{{ defect.status.lower().replace(' ', '') }}">{{ defect.status }}</span>
+                        <span class="status-badge status-{{ defect.status.lower().replace(' ', '') }}">{{ defect.status
+                            }}</span>
                         {% set priority = defect.priority or 'Medium' %}
                         <span class="priority-badge priority-{{ priority.lower() }}">{{ priority }}</span>
                     </div>
@@ -367,8 +1005,8 @@
                     <div class="defect-content">
                         <div class="defect-grid">
                             <div class="defect-field">
-                                <div class="field-label">Element</div>
-                                <div class="field-value">{{ defect.element or 'Unknown' }}</div>
+                                <div class="field-label">Location</div>
+                                <div class="field-value">{{ defect.location or 'Not specified' }}</div>
                             </div>
                             <div class="defect-field">
                                 <div class="field-label">Type</div>
@@ -376,11 +1014,8 @@
                             </div>
                             <div class="defect-field">
                                 <div class="field-label">Severity</div>
-                                <div class="field-value severity-{{ defect.severity.lower() }}">{{ defect.severity or 'Medium' }}</div>
-                            </div>
-                            <div class="defect-field">
-                                <div class="field-label">Location</div>
-                                <div class="field-value">{{ defect.location or 'Not specified' }}</div>
+                                <div class="field-value severity-{{ defect.severity.lower() }}">{{ defect.severity or
+                                    'Medium' }}</div>
                             </div>
                             <div class="defect-field">
                                 <div class="field-label">Coordinates</div>
@@ -392,21 +1027,18 @@
                             </div>
                             <div class="defect-field">
                                 <div class="field-label">Created</div>
-                                <div class="field-value">{{ defect.created_at.strftime('%Y-%m-%d %H:%M') if defect.created_at else 'Unknown' }}</div>
+                                <div class="field-value">{{ defect.created_at.strftime('%Y-%m-%d %H:%M') if
+                                    defect.created_at else 'Unknown' }}</div>
                             </div>
                         </div>
 
-                        {% if defect.description %}
-                        <div class="defect-field">
-                            <div class="field-label">Description</div>
-                            <div class="field-value">{{ defect.description }}</div>
-                        </div>
-                        {% endif %}
+
 
                         {% if defect.image_path %}
                         <div class="defect-image">
                             <div class="field-label">Defect Image</div>
-                            <img src="{{ url_for('developer.serve_defect_image', image_path=defect.image_path) }}" alt="Defect image" />
+                            <img src="{{ url_for('developer.serve_defect_image', image_path=defect.image_path) }}"
+                                alt="Defect image" />
                         </div>
                         {% endif %}
 
@@ -417,13 +1049,19 @@
                         </div>
                         {% endif %}
 
-                        <form method="post" action="{{ url_for('developer.update_defect_progress', defect_id=defect.id) }}" class="update-form" onsubmit="return confirmUpdate()">
+                        <form method="post"
+                            action="{{ url_for('developer.update_defect_progress', defect_id=defect.id) }}"
+                            class="update-form" onsubmit="return confirmUpdate()">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="form-group">
                                 <label for="status-{{ defect.id }}">Update Status:</label>
                                 <select id="status-{{ defect.id }}" name="status" required>
-                                    <option value="Reported" {{ 'selected' if defect.status == 'Reported' else '' }}>Reported</option>
-                                    <option value="Under Review" {{ 'selected' if defect.status == 'Under Review' else '' }}>Under Review</option>
-                                    <option value="Fixed" {{ 'selected' if defect.status == 'Fixed' else '' }}>Fixed</option>
+                                    <option value="Reported" {{ 'selected' if defect.status=='Reported' else '' }}>
+                                        Reported</option>
+                                    <option value="Under Review" {{ 'selected' if defect.status=='Under Review' else ''
+                                        }}>Under Review</option>
+                                    <option value="Fixed" {{ 'selected' if defect.status=='Fixed' else '' }}>Fixed
+                                    </option>
                                 </select>
                             </div>
 
@@ -431,16 +1069,20 @@
                                 <label for="priority-{{ defect.id }}">Priority:</label>
                                 <select id="priority-{{ defect.id }}" name="priority" required>
                                     {% set current_priority = defect.priority or 'Medium' %}
-                                    <option value="Urgent" {{ 'selected' if current_priority == 'Urgent' else '' }}>Urgent</option>
-                                    <option value="High" {{ 'selected' if current_priority == 'High' else '' }}>High</option>
-                                    <option value="Medium" {{ 'selected' if current_priority == 'Medium' else '' }}>Medium</option>
-                                    <option value="Low" {{ 'selected' if current_priority == 'Low' else '' }}>Low</option>
+                                    <option value="Urgent" {{ 'selected' if current_priority=='Urgent' else '' }}>Urgent
+                                    </option>
+                                    <option value="High" {{ 'selected' if current_priority=='High' else '' }}>High
+                                    </option>
+                                    <option value="Medium" {{ 'selected' if current_priority=='Medium' else '' }}>Medium
+                                    </option>
+                                    <option value="Low" {{ 'selected' if current_priority=='Low' else '' }}>Low</option>
                                 </select>
                             </div>
 
                             <div class="form-group">
                                 <label for="notes-{{ defect.id }}">Add/Update Notes:</label>
-                                <textarea id="notes-{{ defect.id }}" name="notes" placeholder="Add progress notes, repair details, or status updates...">{{ defect.notes or '' }}</textarea>
+                                <textarea id="notes-{{ defect.id }}" name="notes"
+                                    placeholder="Add progress notes, repair details, or status updates...">{{ defect.notes or '' }}</textarea>
                             </div>
 
                             <button type="submit" class="btn"><i class="fas fa-save"></i> Update Defect</button>
@@ -482,7 +1124,7 @@
                 <span>${message}</span>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideIn 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
@@ -490,9 +1132,9 @@
         }
 
         // Show flash messages as toasts
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% with messages = get_flashed_messages(with_categories = true) %}
         {% if messages %}
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             {% for category, message in messages %}
             showToast('{{ message }}', '{{ category }}');
             {% endfor %}
@@ -513,10 +1155,10 @@
         }
 
         // Add click handlers to all defect images
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('.defect-image img');
             images.forEach(img => {
-                img.addEventListener('click', function(e) {
+                img.addEventListener('click', function (e) {
                     e.stopPropagation();
                     openLightbox(this.src);
                 });
@@ -525,7 +1167,7 @@
             // Show loading spinner on form submit
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
-                form.addEventListener('submit', function() {
+                form.addEventListener('submit', function () {
                     document.getElementById('spinner').classList.add('active');
                     document.getElementById('spinner-backdrop').classList.add('active');
                 });
@@ -533,7 +1175,7 @@
         });
 
         // Close lightbox with ESC key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeLightbox();
         });
 
@@ -626,7 +1268,7 @@
             const counts = dates.map(d => trendData[d]);
             trendChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: dates.map(d => new Date(d).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})), datasets: [{ label: 'Defects Created', data: counts, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.14)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7c3aed', pointBorderColor: '#0b1020', pointBorderWidth: 2 }] },
+                data: { labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })), datasets: [{ label: 'Defects Created', data: counts, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.14)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7c3aed', pointBorderColor: '#0b1020', pointBorderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: true, position: 'top', labels: { color: varThemeColor() } } }, scales: { y: { beginAtZero: true, grid: { color: '#1f2937' }, ticks: { color: varThemeColor() } }, x: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
             });
         }
@@ -668,5 +1310,17 @@
             loadHeatmap();
         });
     </script>
+    <script>
+        document.querySelectorAll('a[href]').forEach(link => {
+            const href = link.getAttribute('href') || '';
+            if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
+                link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
+            }
+        });
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => document.getElementById('ldms-loader').classList.add('active'));
+        });
+    </script>
 </body>
+
 </html>

@@ -19,8 +19,8 @@ COPY . /usr/src/app
 # Expose the port Flask will run on
 EXPOSE 5000
 
-# Set environment variables (FLASK_APP points to the 'app' variable inside the package)
-ENV FLASK_APP=app:app
+# Set environment variables (Flask auto-discovers create_app factory)
+ENV FLASK_APP=app
 ENV FLASK_ENV=development
 ENV PYTHONPATH=/usr/src/app
 

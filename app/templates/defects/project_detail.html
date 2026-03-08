@@ -1,71 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project {{ scan.name }}</title>
+    <title>LDMS — {{ scan.name }}</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        .metadata { background: #f4f4f4; padding: 10px; margin-bottom: 20px; }
-        .defects { margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0b1020 0%, #151d3b 50%, #0b1020 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Top bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .breadcrumb a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb .sep {
+            color: #475569;
+        }
+
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            text-decoration: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        /* Header card */
+        .header-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-card h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 0.25rem;
+        }
+
+        .header-card h1 i {
+            color: #60a5fa;
+            margin-right: 0.5rem;
+        }
+
+        .header-card .subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Metadata grid */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+        }
+
+        .meta-item .meta-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .meta-item .meta-value {
+            font-size: 1rem;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+
+        /* Table section */
+        .table-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .table-card h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 1rem;
+        }
+
+        .table-card h2 i {
+            color: #f59e0b;
+            margin-right: 0.5rem;
+        }
+
+        .badge-count {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            margin-left: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: #64748b;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        th:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        th:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        td {
+            color: #cbd5e1;
+        }
+
+        tr:hover td {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Severity colors */
+        .severity-low {
+            color: #4ade80;
+        }
+
+        .severity-medium {
+            color: #facc15;
+        }
+
+        .severity-high {
+            color: #fb923c;
+        }
+
+        .severity-critical {
+            color: #f87171;
+            font-weight: 700;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-reported {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .status-underreview {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-fixed {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #475569;
+        }
+
+        /* Action links */
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+        }
     </style>
 </head>
+
 <body>
-    <h1>Project: {{ scan.name }}</h1>
-    
-    {% if upload_metadata %}
-    <div class="metadata">
-        <h2>Project Details</h2>
-        <p><strong>Scan Date:</strong> {{ upload_metadata.scan_date }}</p>
-        <p><strong>Location:</strong> {{ upload_metadata.location }}</p>
-        <p><strong>Inspector:</strong> {{ upload_metadata.inspector }}</p>
-        {% if upload_metadata.notes %}
-        <p><strong>Notes:</strong> {{ upload_metadata.notes }}</p>
-        {% endif %}
-    </div>
-    {% endif %}
-    
-    <div class="defects">
-        <h2>Defects ({{ defects|length }})</h2>
-        {% if defects %}
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Element</th>
-                    <th>Location</th>
-                    <th>Type</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for defect in defects %}
-                <tr>
-                    <td>{{ defect.id }}</td>
-                    <td>{{ defect.element }}</td>
-                    <td>{{ defect.location }}</td>
-                    <td>{{ defect.defect_type }}</td>
-                    <td>{{ defect.severity }}</td>
-                    <td>{{ defect.status }}</td>
-                    <td>{{ defect.description }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>No defects found for this project.</p>
-        {% endif %}
-    </div>
-    
-    <div style="margin-top: 20px;">
-        <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}">Visualize 3D Model</a> |
-        <a href="{{ url_for('defects.list_projects') }}">Back to Projects</a>
+    <div class="container">
+        <!-- Top bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <a href="{{ url_for('defects.list_projects') }}"><i class="fas fa-folder-open"></i> Projects</a>
+                <span class="sep"><i class="fas fa-chevron-right"></i></span>
+                <span>{{ scan.name }}</span>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+                <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+
+        <!-- Header card -->
+        <div class="header-card">
+            <h1><i class="fas fa-cube"></i> {{ scan.name }}</h1>
+            <p class="subtitle">Project details and defect overview</p>
+
+            {% if upload_metadata %}
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-calendar"></i> Scan Date</div>
+                    <div class="meta-value">{{ upload_metadata.scan_date }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-map-marker-alt"></i> Location</div>
+                    <div class="meta-value">{{ upload_metadata.location }}</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-user-shield"></i> Inspector</div>
+                    <div class="meta-value">{{ upload_metadata.inspector }}</div>
+                </div>
+                {% if upload_metadata.notes %}
+                <div class="meta-item">
+                    <div class="meta-label"><i class="fas fa-sticky-note"></i> Notes</div>
+                    <div class="meta-value">{{ upload_metadata.notes }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Defects table -->
+        <div class="table-card">
+            <h2><i class="fas fa-bug"></i> Defects <span class="badge-count">{{ defects|length }}</span></h2>
+            {% if defects %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for defect in defects %}
+                    <tr>
+                        <td><strong>#{{ defect.id }}</strong></td>
+                        <td>{{ defect.location or 'Not specified' }}</td>
+                        <td>{{ defect.defect_type or 'Unknown' }}</td>
+                        <td><span class="severity-{{ defect.severity.lower() }}">{{ defect.severity }}</span></td>
+                        <td><span class="status-badge status-{{ defect.status.lower().replace(' ', '') }}">{{
+                                defect.status }}</span></td>
+                        <td>{{ defect.notes or '—' }}</td>
+                        <td>{{ defect.created_at.strftime('%Y-%m-%d') if defect.created_at else '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>No defects found for this project.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action buttons -->
+        <div class="actions">
+            <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}" class="btn btn-primary">
+                <i class="fas fa-cube"></i> View 3D Model
+            </a>
+            <a href="{{ url_for('defects.list_projects') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        </div>
     </div>
 </body>
+
 </html>

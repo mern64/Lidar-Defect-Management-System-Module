@@ -1,13 +1,18 @@
 from flask import Blueprint, jsonify, request, send_from_directory, abort, render_template, url_for, current_app
-from app.extensions import db
+from flask_login import login_required, current_user
+from app.extensions import db, csrf
 from app.models import Defect, Scan
+from app.utils import load_upload_metadata
 import os
-import json
 from datetime import datetime
 
 defects_bp = Blueprint('defects', __name__)
 
+# Exempt JSON API endpoints from CSRF since they are called via JavaScript fetch()
+# Forms that submit via HTML (with CSRF tokens) are NOT exempted
+
 @defects_bp.route('/projects', methods=['GET'])
+@login_required
 def list_projects():
     """List all scans/projects in the database"""
     scans = Scan.query.order_by(Scan.created_at.desc()).all()
@@ -17,18 +22,7 @@ def list_projects():
     for scan in scans:
         defect_count = Defect.query.filter_by(scan_id=scan.id).count()
         
-        # Try to load metadata specific to this scan. We store a
-        # per-scan snapshot at scan_<id>_metadata.json so that each
-        # project keeps the upload details from when it was created.
-        metadata = None
-        upload_root = os.path.join(current_app.instance_path, 'uploads', 'upload_data')
-        per_scan_path = os.path.join(upload_root, f'scan_{scan.id}_metadata.json')
-        if os.path.exists(per_scan_path):
-            try:
-                with open(per_scan_path, 'r') as f:
-                    metadata = json.load(f)
-            except Exception:
-                metadata = None
+        metadata = load_upload_metadata(scan.id)
         
         projects.append({
             'id': scan.id,
@@ -42,21 +36,13 @@ def list_projects():
     return render_template('defects/projects.html', projects=projects)
 
 @defects_bp.route('/scans/<int:scan_id>/visualize', methods=['GET'])
+@login_required
 def visualize_scan(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     model_url = url_for('defects.serve_model', scan_id=scan_id) if scan.model_path else None
     
-    # Try to load upload metadata specific to this scan
-    upload_metadata = None
-    upload_root = os.path.join(current_app.instance_path, 'uploads', 'upload_data')
-    per_scan_path = os.path.join(upload_root, f'scan_{scan_id}_metadata.json')
-    if os.path.exists(per_scan_path):
-        try:
-            with open(per_scan_path, 'r') as f:
-                upload_metadata = json.load(f)
-        except Exception as e:
-            print(f"Error loading upload metadata for scan {scan_id}: {e}")
+    upload_metadata = load_upload_metadata(scan_id)
     
     return render_template('defects/visualization.html', 
                           scan=scan, 
@@ -66,21 +52,14 @@ def visualize_scan(scan_id):
                           upload_metadata=upload_metadata)
 
 @defects_bp.route('/scans/<int:scan_id>/defects', methods=['GET'])
+@login_required
 def get_scan_defects(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     
     # Load per-scan upload metadata to get the scan date
-    upload_date = None
-    upload_root = os.path.join(current_app.instance_path, 'uploads', 'upload_data')
-    per_scan_path = os.path.join(upload_root, f'scan_{scan_id}_metadata.json')
-    if os.path.exists(per_scan_path):
-        try:
-            with open(per_scan_path, 'r') as f:
-                metadata = json.load(f)
-                upload_date = metadata.get('scan_date')
-        except Exception as e:
-            print(f"Error loading upload metadata for scan {scan_id}: {e}")
+    metadata = load_upload_metadata(scan_id)
+    upload_date = metadata.get('scan_date') if metadata else None
     
     defect_list = [{
         'defectId': d.id,
@@ -98,6 +77,7 @@ def get_scan_defects(scan_id):
     return jsonify(defect_list)
 
 @defects_bp.route('/defect/<int:defect_id>', methods=['GET'])
+@login_required
 def get_defect_details(defect_id):
     defect = Defect.query.get_or_404(defect_id)
     image_url = None
@@ -119,10 +99,13 @@ def get_defect_details(defect_id):
     })
 
 @defects_bp.route('/defect/<int:defect_id>/status', methods=['PUT'])
+@csrf.exempt
+@login_required
 def update_defect_status(defect_id):
     defect = Defect.query.get_or_404(defect_id)
     data = request.get_json()
-    if 'status' in data:
+    # Only developers can change the status
+    if 'status' in data and current_user.role == 'developer':
         defect.status = data['status']
     if 'notes' in data:
         defect.notes = data['notes']
@@ -136,6 +119,8 @@ def update_defect_status(defect_id):
     return jsonify({'message': 'Defect updated successfully', 'status': defect.status})
 
 @defects_bp.route('/defect/<int:defect_id>', methods=['DELETE'])
+@csrf.exempt
+@login_required
 def delete_defect(defect_id):
     defect = Defect.query.get_or_404(defect_id)
     db.session.delete(defect)
@@ -143,6 +128,8 @@ def delete_defect(defect_id):
     return jsonify({'message': 'Defect deleted successfully'})
 
 @defects_bp.route('/scans/<int:scan_id>/defects', methods=['POST'])
+@csrf.exempt
+@login_required
 def create_defect(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     data = request.get_json()
@@ -164,6 +151,7 @@ def create_defect(scan_id):
     return jsonify({'message': 'Defect created', 'defectId': defect.id}), 201
 
 @defects_bp.route('/scans/<int:scan_id>/model', methods=['GET'])
+@login_required
 def serve_model(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     if not scan.model_path:
@@ -174,6 +162,7 @@ def serve_model(scan_id):
     return response
 
 @defects_bp.route('/defects/image/<int:defect_id>', methods=['GET'])
+@login_required
 def serve_defect_image(defect_id):
     defect = Defect.query.get_or_404(defect_id)
     if not defect.image_path:
@@ -182,21 +171,13 @@ def serve_defect_image(defect_id):
     return send_from_directory(upload_dir, defect.image_path)
 
 @defects_bp.route('/project/<int:scan_id>', methods=['GET'])
+@login_required
 def view_project(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     model_url = url_for('defects.serve_model', scan_id=scan_id) if scan.model_path else None
     
-    # Try to load upload metadata specific to this scan
-    upload_metadata = None
-    upload_root = os.path.join(current_app.instance_path, 'uploads', 'upload_data')
-    per_scan_path = os.path.join(upload_root, f'scan_{scan_id}_metadata.json')
-    if os.path.exists(per_scan_path):
-        try:
-            with open(per_scan_path, 'r') as f:
-                upload_metadata = json.load(f)
-        except Exception as e:
-            print(f"Error loading upload metadata for scan {scan_id}: {e}")
+    upload_metadata = load_upload_metadata(scan_id)
     
     return render_template('defects/project_detail.html', 
                           scan=scan, 

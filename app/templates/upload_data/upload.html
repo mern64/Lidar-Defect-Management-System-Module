@@ -1,130 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Module 1 – Upload Scan Data (DM_01)</title>
+  <title>LDMS — Upload Scan Data</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: system-ui, sans-serif; margin:0; padding:2rem; background:#f3f4f6; }
-    .card { max-width:640px; margin:0 auto; padding:2rem; background:#fff; border-radius:12px; box-shadow:0 10px 25px rgba(15,23,42,0.1); }
-    h1 { margin-top:0; font-size:1.6rem; }
-    label { display:block; margin:1rem 0 0.25rem; font-weight:600; }
-    input[type=file], input[type=text], input[type=date], textarea, button { width:100%; border-radius:8px; border:1px solid #d1d5db; padding:0.75rem 0.9rem; font-size:1rem; box-sizing:border-box; }
-    textarea { min-height:140px; resize:vertical; }
-    button { margin-top:1rem; background:#2563eb; color:#fff; border:none; cursor:pointer; font-weight:600; }
-    .help { font-size:0.9rem; color:#4b5563; margin-top:0.25rem; }
-    .flash { padding:0.75rem 1rem; margin-bottom:1rem; border-radius:8px; font-size:0.95rem; }
-    .flash.error { background:#fee2e2; color:#991b1b; }
-    .flash.success { background:#dcfce7; color:#166534; }
-    
-    /* Back button */
-    .back-link { display: inline-flex; align-items: center; gap: 8px; color: #3b82f6; text-decoration: none; font-weight: 600; margin-bottom: 1.5rem; font-size: 0.95rem; }
-    .back-link:hover { color: #2563eb; }
-    
-    /* Address autocomplete styling */
-    .address-container { position: relative; }
-    .address-container input { padding-right: 40px; }
-    .address-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; pointer-events: none; }
-    .pac-container { border-radius: 8px; border: 1px solid #d1d5db; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: system-ui, sans-serif; margin-top: 4px; }
-    .pac-item { padding: 10px 12px; cursor: pointer; }
-    .pac-item:hover { background: #f3f4f6; }
-    .pac-item-query { font-size: 14px; }
-    .pac-matched { font-weight: 600; }
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.12), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1), transparent 30%),
+        linear-gradient(135deg, #0b1020 0%, #0f172a 50%, #0a101d 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .card {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2.5rem;
+      background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 i {
+      color: #22d3ee;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 1.25rem 0 0.4rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+
+    label i {
+      color: #7c3aed;
+      font-size: 0.85rem;
+    }
+
+    input[type=file],
+    input[type=text],
+    input[type=date],
+    textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: rgba(15, 23, 42, 0.6);
+      color: #e2e8f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #64748b;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button[type=submit] {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    button[type=submit]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+    }
+
+    .help {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .flash {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .flash.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .flash.success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #22d3ee;
+    }
+
+    .address-container {
+      position: relative;
+    }
+
+    .address-container input {
+      padding-right: 40px;
+    }
+
+    .address-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .pac-container {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #1e293b !important;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      margin-top: 4px;
+    }
+
+    .pac-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #cbd5e1 !important;
+      border-top-color: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    .pac-item:hover {
+      background: rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .pac-item-query {
+      font-size: 14px;
+      color: #e2e8f0 !important;
+    }
+
+    .pac-matched {
+      font-weight: 600;
+    }
+
+    .user-bar {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+    }
+
+    .user-bar a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s;
+    }
+
+    .user-bar a:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* File input styling */
+    input[type=file] {
+      cursor: pointer;
+    }
+
+    input[type=file]::file-selector-button {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-right: 0.75rem;
+    }
+
+    /* Loading overlay */
+    #ldms-loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(11, 16, 32, 0.8);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #ldms-loader.active {
+      display: flex;
+    }
+
+    .loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loader-text {
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
+
 <body>
+  <!-- Loading overlay -->
+  <div id="ldms-loader">
+    <div class="loader-spinner"></div>
+    <span class="loader-text"><i class="fas fa-cloud-upload-alt"></i> Processing...</span>
+  </div>
+
+  <div class="user-bar">
+    <a href="{{ url_for('auth.logout') }}">
+      <i class="fas fa-user"></i> {{ current_user.username }}
+      <i class="fas fa-sign-out-alt"></i>
+    </a>
+  </div>
+
   <main class="card">
     <a href="/projects" class="back-link">
       <i class="fas fa-arrow-left"></i> Back to Projects
     </a>
-    <h1>Upload Scan Data (DM_01)</h1>
+    <h1><i class="fas fa-cloud-upload-alt"></i> Upload Scan Data</h1>
     <p class="help">
-      Homeowner / Inspector can upload the 3D GLB model and the PDF data report.
-      After upload, the system stores the files and starts automated processing.
+      <i class="fas fa-info-circle"></i>
+      Upload the 3D GLB model and PDF data report. The system stores files and starts automated processing.
     </p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash {{ category }}"><i
+        class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i> {{ message }}</div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
-    <form method="post" action="{{ url_for('upload_data.upload_scan_data') }}" enctype="multipart/form-data">
-      <label for="project_name">Project Name</label>
+    <form method="post" action="{{ url_for('upload_data.upload_scan_data') }}" enctype="multipart/form-data"
+      id="uploadForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="project_name"><i class="fas fa-tag"></i> Project Name</label>
       <input id="project_name" name="project_name" type="text" placeholder="e.g. House Inspection 2025" required />
       <span class="help">A name to identify this scan project.</span>
 
-      <label for="glb_model">GLB 3D Model File</label>
+      <label for="glb_model"><i class="fas fa-cube"></i> GLB 3D Model File</label>
       <input id="glb_model" name="glb_model" type="file" accept=".glb" required />
       <span class="help">Allowed type: .glb</span>
 
-      <label for="pdf_report">PDF Data / Defect Report</label>
+      <label for="pdf_report"><i class="fas fa-file-pdf"></i> PDF Data / Defect Report</label>
       <input id="pdf_report" name="pdf_report" type="file" accept="application/pdf" required />
       <span class="help">Include the inspection or defect report in PDF format.</span>
 
-      <label for="scan_date">Inspection Date</label>
+      <label for="scan_date"><i class="fas fa-calendar-alt"></i> Inspection Date</label>
       <input id="scan_date" name="scan_date" type="date" required />
       <span class="help">Date when the scan/inspection was performed.</span>
 
-      <label for="address">Property Address</label>
+      <label for="address"><i class="fas fa-map-marker-alt"></i> Property Address</label>
       <div class="address-container">
-        <input id="address" name="address" type="text" placeholder="Start typing to search address..." autocomplete="off" />
+        <input id="address" name="address" type="text" placeholder="Start typing to search address..."
+          autocomplete="off" />
         <span class="address-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
         </span>
       </div>
-      <span class="help">Search and select address from Google Maps. If not provided, the system will attempt to extract location information from the GLB file metadata.</span>
-      <!-- Hidden fields to store lat/lng -->
+      <span class="help">Search and select from Google Maps, or enter manually.</span>
       <input type="hidden" id="latitude" name="latitude" />
       <input type="hidden" id="longitude" name="longitude" />
 
-      <label for="unit_no">Unit No.</label>
+      <label for="unit_no"><i class="fas fa-building"></i> Unit No.</label>
       <input id="unit_no" name="unit_no" type="text" placeholder="e.g. #12-345, Block A" required />
-      <span class="help">Unit number, block, or specific location within the property.</span>
+      <span class="help">Unit number, block, or specific location.</span>
 
-      <label for="notes">Additional Notes (optional)</label>
+      <label for="notes"><i class="fas fa-sticky-note"></i> Additional Notes (optional)</label>
       <textarea id="notes" name="notes" placeholder="Any additional details or comments..."></textarea>
 
-      <button type="submit">Upload & Start Processing</button>
+      <button type="submit"><i class="fas fa-rocket"></i> Upload & Start Processing</button>
     </form>
   </main>
 
   <!-- Google Maps Places API with proper async loading -->
   <script>
     let autocompleteInitialized = false;
-    
+
     function initAutocomplete() {
       try {
         const addressInput = document.getElementById('address');
-        
-        // Initialize Google Places Autocomplete
         const autocomplete = new google.maps.places.Autocomplete(addressInput, {
           types: ['address'],
           fields: ['formatted_address', 'geometry', 'name']
         });
-        
-        // When user selects an address from the dropdown
-        autocomplete.addListener('place_changed', function() {
+
+        autocomplete.addListener('place_changed', function () {
           const place = autocomplete.getPlace();
-          
           if (place.geometry) {
-            // Store latitude and longitude
             document.getElementById('latitude').value = place.geometry.location.lat();
             document.getElementById('longitude').value = place.geometry.location.lng();
-            
-            // Use formatted address
             addressInput.value = place.formatted_address || place.name;
           }
         });
-        
-        // Prevent form submission on Enter in address field
-        addressInput.addEventListener('keydown', function(e) {
+
+        addressInput.addEventListener('keydown', function (e) {
           if (e.key === 'Enter') {
             const pacContainer = document.querySelector('.pac-container');
             if (pacContainer && pacContainer.style.display !== 'none') {
@@ -132,54 +407,54 @@
             }
           }
         });
-        
+
         autocompleteInitialized = true;
-        console.log('Google Maps Autocomplete initialized successfully');
       } catch (error) {
         console.error('Error initializing Google Maps Autocomplete:', error);
         document.getElementById('address').placeholder = 'Enter address manually';
       }
     }
-    
-    // Handle Google Maps API errors
+
     function gm_authFailure() {
-      console.error('Google Maps authentication failed.');
       document.getElementById('address').placeholder = 'Enter address manually';
     }
-    
-    // Load Google Maps API dynamically with proper async loading
-    (function(g){
-      var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;
-      b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,
-      u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));
-      e.set("libraries","places");
-      e.set("callback",c+".maps."+q);
-      e.set("key","AIzaSyDfdb_IObBro3FDBEupx4WEgGQyLAlw79w");
-      a.src="https://maps.googleapis.com/maps/api/js?"+e;
-      d[q]=f;
-      a.onerror=()=>h=n(Error(p+" could not load."));
-      a.nonce=m.querySelector("script[nonce]")?.nonce||"";
-      m.head.append(a)}));
-      d[l]?console.warn(p+" only loads once."):(d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n)));
+
+    (function (g) {
+      var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
+      b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams,
+        u = () => h || (h = new Promise(async (f, n) => {
+          await (a = m.createElement("script"));
+          e.set("libraries", "places");
+          e.set("callback", c + ".maps." + q);
+          e.set("key", "AIzaSyDfdb_IObBro3FDBEupx4WEgGQyLAlw79w");
+          a.src = "https://maps.googleapis.com/maps/api/js?" + e;
+          d[q] = f;
+          a.onerror = () => h = n(Error(p + " could not load."));
+          a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+          m.head.append(a)
+        }));
+      d[l] ? console.warn(p + " only loads once.") : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
     })();
-    
-    // Initialize when DOM is ready
+
     google.maps.importLibrary("places").then(() => {
       initAutocomplete();
     }).catch((error) => {
-      console.error('Failed to load Google Maps:', error);
       document.getElementById('address').placeholder = 'Enter address manually';
     });
+
+    // Loading overlay on form submit
+    document.getElementById('uploadForm').addEventListener('submit', function () {
+      document.getElementById('ldms-loader').classList.add('active');
+    });
   </script>
-  
-  <!-- Fallback if Google Maps fails to load -->
+
   <script>
-    window.setTimeout(function() {
+    window.setTimeout(function () {
       if (!autocompleteInitialized) {
-        console.warn('Google Maps API not loaded. Address autocomplete disabled.');
         document.getElementById('address').placeholder = 'Enter address manually (e.g. 123 Main St, Singapore 123456)';
       }
     }, 8000);
   </script>
 </body>
+
 </html>

@@ -71,3 +71,6 @@ dist/
 *.cover
 .pytest_cache/
 nosetests.xml
+
+# Ignore environment variable files (contain secrets)
+.env

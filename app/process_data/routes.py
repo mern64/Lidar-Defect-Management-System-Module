@@ -17,6 +17,7 @@ from flask import (
     send_from_directory,
     url_for,
 )
+from flask_login import login_required
 
 from .glb_snapshot import SnapshotRecord, extract_snapshots
 
@@ -27,6 +28,7 @@ except ImportError:  # pragma: no cover
 
 from app.extensions import db
 from app.models import Scan, Defect
+from app.utils import upload_root as _upload_root, metadata_path as _metadata_path, scan_metadata_path as _scan_metadata_path
 
 
 process_data_bp = Blueprint("process_data", __name__)
@@ -47,24 +49,6 @@ class DefectRecord:
 
 def _processed_root() -> str:
     return os.path.join(current_app.instance_path, "processed", "module1")
-
-
-def _upload_root() -> str:
-    return os.path.join(current_app.instance_path, "uploads", "upload_data")
-
-
-def _metadata_path() -> str:
-    return os.path.join(_upload_root(), "latest_upload.json")
-
-
-def _scan_metadata_path(scan_id: int) -> str:
-    """Return the metadata path for a specific scan.
-
-    We store a snapshot of latest_upload.json per Scan so that
-    each project keeps its original upload details instead of
-    all projects sharing the global latest_upload.json.
-    """
-    return os.path.join(_upload_root(), f"scan_{scan_id}_metadata.json")
 
 
 def _glb_search_directories() -> List[str]:
@@ -351,6 +335,7 @@ def _render_error(message: str):
 
 
 @process_data_bp.route("/process-data", methods=["GET", "POST"])
+@login_required
 def process_defect_file():
     if request.method == "POST" and "save_to_db" in request.form:
         defects, source_path, source_kind = _load_defects()
@@ -459,6 +444,7 @@ def process_defect_file():
 
 
 @process_data_bp.route("/process-data.json", methods=["GET"])
+@login_required
 def process_defect_file_json():
     defects, source_path, source_kind = _load_defects()
     metadata = _load_latest_metadata()
@@ -485,6 +471,7 @@ def process_defect_file_json():
 
 
 @process_data_bp.route("/process-data/image/<image_id>", methods=["GET"])
+@login_required
 def serve_extracted_image(image_id: str):
     metadata = _load_latest_metadata()
     if not metadata:
@@ -506,6 +493,7 @@ def serve_extracted_image(image_id: str):
 
 
 @process_data_bp.route("/process-data/assign-image", methods=["POST"])
+@login_required
 def assign_image_to_defect():
     metadata = _load_latest_metadata()
     if not metadata:

@@ -2,48 +2,16 @@ import json
 import os
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
+from flask_login import login_required
 from app.extensions import db
 from app.models import Scan, Defect, DefectStatus, DefectPriority
+from app.utils import load_upload_metadata
 
 developer_bp = Blueprint("developer", __name__)
 
 
-def _load_latest_upload_metadata(scan_id: int | None = None):
-    """Load upload metadata for display.
-
-    If a scan_id is provided, we first try to load a per-scan
-    metadata snapshot (scan_<id>_metadata.json). This keeps each
-    project tied to the upload details from when it was created
-    instead of all scans sharing the same latest_upload.json.
-    """
-    upload_root = os.path.join(current_app.instance_path, "uploads", "upload_data")
-
-    # Prefer per-scan metadata if we know the scan id
-    if scan_id is not None:
-        per_scan_path = os.path.join(upload_root, f"scan_{scan_id}_metadata.json")
-        if os.path.exists(per_scan_path):
-            try:
-                with open(per_scan_path, "r", encoding="utf-8") as fh:
-                    return json.load(fh)
-            except (OSError, json.JSONDecodeError):
-                current_app.logger.warning(
-                    "Could not read per-scan upload metadata for scan %s", scan_id, exc_info=True
-                )
-
-    # Fallback to the legacy latest_upload.json (used primarily for
-    # scans created before per-scan snapshots existed).
-    metadata_path = os.path.join(upload_root, "latest_upload.json")
-    if not os.path.exists(metadata_path):
-        return None
-    try:
-        with open(metadata_path, "r", encoding="utf-8") as fh:
-            return json.load(fh)
-    except (OSError, json.JSONDecodeError):
-        current_app.logger.warning("Could not read upload metadata", exc_info=True)
-        return None
-
-
 @developer_bp.route("/developer", methods=["GET"])
+@login_required
 def dashboard():
     """Developer dashboard - view all projects and their defects"""
     sort = request.args.get("sort", "recent")
@@ -61,7 +29,7 @@ def dashboard():
     ).outerjoin(Defect).group_by(Scan.id).order_by(order_clause)
     
     # Apply date range filter
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     if date_range == "week":
         cutoff = datetime.now() - timedelta(days=7)
         query = query.filter(Scan.created_at >= cutoff)
@@ -93,7 +61,7 @@ def dashboard():
     total_fixed = sum(row.fixed_count for row in scans)
 
     # --- Dashboard "At a Glance" Metrics ---
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     
     # 1. Urgent Attention: High/Urgent priority that are NOT fixed
     urgent_attention = Defect.query.filter(
@@ -102,7 +70,7 @@ def dashboard():
     ).count()
 
     # 2. Stale Reviews: 'Under Review' status for > 7 days
-    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
     # Note: tracking strictly by 'updated_at' would be better if we had it on Defect, 
     # but we can approximate using created_at or join with ActivityLog. 
     # For now, let's use created_at for simplicity or assume if it's still Under Review it's stale.
@@ -114,7 +82,7 @@ def dashboard():
     ).count()
 
     # 3. Recent Activity: Defects created in last 24h
-    last_24h = datetime.utcnow() - timedelta(hours=24)
+    last_24h = datetime.now(timezone.utc) - timedelta(hours=24)
     new_defects_24h = Defect.query.filter(Defect.created_at >= last_24h).count()
 
     return render_template(
@@ -136,6 +104,7 @@ def dashboard():
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>", methods=["GET"])
+@login_required
 def view_scan(scan_id):
     """View detailed defects for a specific scan"""
     from sqlalchemy import or_
@@ -194,7 +163,7 @@ def view_scan(scan_id):
         query = query.order_by(Defect.created_at.desc())
 
     defects = query.all()
-    upload_metadata = _load_latest_upload_metadata(scan_id)
+    upload_metadata = load_upload_metadata(scan_id)
 
     return render_template(
         "developer/scan_detail.html", 
@@ -207,6 +176,7 @@ def view_scan(scan_id):
 
 
 @developer_bp.route("/developer/defect/<int:defect_id>/update", methods=["POST"])
+@login_required
 def update_defect_progress(defect_id):
     """Update defect status/progress"""
     from app.models import ActivityLog
@@ -268,6 +238,7 @@ def update_defect_progress(defect_id):
 
 
 @developer_bp.route("/developer/image/<path:image_path>", methods=["GET"])
+@login_required
 def serve_defect_image(image_path: str):
     """Serve defect images from the uploads directory"""
     from flask import send_from_directory, current_app, abort
@@ -307,6 +278,7 @@ def serve_defect_image(image_path: str):
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>/bulk-update", methods=["POST"])
+@login_required
 def bulk_update_defects(scan_id):
     """Bulk update multiple defects at once"""
     from app.models import ActivityLog
@@ -371,6 +343,7 @@ def bulk_update_defects(scan_id):
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>/export-csv", methods=["GET"])
+@login_required
 def export_scan_csv(scan_id):
     """Export scan defects to CSV"""
     from flask import Response
@@ -416,9 +389,10 @@ def export_scan_csv(scan_id):
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>/charts-data", methods=["GET"])
+@login_required
 def get_charts_data(scan_id):
     """Get data for charts (status, priority, trend)"""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
     
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
@@ -435,7 +409,7 @@ def get_charts_data(scan_id):
         priority_counts[priority] = priority_counts.get(priority, 0) + 1
     
     # Defect trend (by day for last 30 days)
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     trend_data = {}
     for i in range(30):
         date = today - timedelta(days=i)
@@ -454,6 +428,7 @@ def get_charts_data(scan_id):
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>/heatmap-data", methods=["GET"])
+@login_required
 def get_heatmap_data(scan_id):
     """Get heatmap data by location"""
     scan = Scan.query.get_or_404(scan_id)
@@ -482,6 +457,7 @@ def get_heatmap_data(scan_id):
 
 
 @developer_bp.route("/developer/recent-activity", methods=["GET"])
+@login_required
 def get_recent_activity():
     """Get recent activity across all scans"""
     from app.models import ActivityLog

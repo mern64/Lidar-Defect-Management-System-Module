@@ -1,8 +1,9 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import login_required
 from werkzeug.utils import secure_filename
 
 from .pdf_utils import extract_pdf_images
@@ -24,7 +25,31 @@ def _allowed_file(filename: str, allowed_exts) -> bool:
     _, ext = os.path.splitext(filename.lower())
     return ext in allowed_exts
 
+
+def _validate_file_magic(filepath: str, expected_magic: bytes) -> bool:
+    """Validate file content by checking magic bytes at the start of the file."""
+    try:
+        with open(filepath, 'rb') as f:
+            header = f.read(len(expected_magic))
+        return header == expected_magic
+    except (OSError, IOError):
+        return False
+
+@upload_data_bp.route("/inspector")
+@login_required
+def inspector_dashboard():
+    """Inspector landing page with options to upload or view projects."""
+    from app.models import Scan, Defect
+    total_projects = Scan.query.count()
+    total_defects = Defect.query.count()
+    return render_template(
+        "upload_data/inspector_dashboard.html",
+        total_projects=total_projects,
+        total_defects=total_defects,
+    )
+
 @upload_data_bp.route("/upload-data", methods=["GET", "POST"])
+@login_required
 def upload_scan_data():
     """
     Use Case DM_01: Upload Scan Data
@@ -66,7 +91,7 @@ def upload_scan_data():
         upload_root = os.path.join(current_app.instance_path, "uploads", "upload_data")
         os.makedirs(upload_root, exist_ok=True)
 
-        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         upload_id = f"upload_{timestamp}"
         image_dir = os.path.join(upload_root, f"{upload_id}_images")
 
@@ -78,6 +103,19 @@ def upload_scan_data():
 
         glb_file.save(glb_path)
         pdf_file.save(pdf_path)
+
+        # Validate file content (magic bytes) to prevent renamed files
+        if not _validate_file_magic(glb_path, b'glTF'):
+            os.remove(glb_path)
+            os.remove(pdf_path)
+            flash("Invalid GLB file content. The file does not appear to be a valid 3D model.", "error")
+            return redirect(request.url)
+
+        if not _validate_file_magic(pdf_path, b'%PDF'):
+            os.remove(glb_path)
+            os.remove(pdf_path)
+            flash("Invalid PDF file content. The file does not appear to be a valid PDF document.", "error")
+            return redirect(request.url)
 
         extracted_images = extract_pdf_images(pdf_path, image_dir)
         _persist_latest_upload_metadata(

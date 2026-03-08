@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Dashboard - LIDAR Defect Viewer</title>
+    <title>LDMS — Developer Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
@@ -32,22 +34,24 @@
             --warning: #d97706;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
             font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.15), transparent 35%),
-                        radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
-                        linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
+                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
+                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
             color: var(--ink);
             min-height: 100vh;
         }
 
         body.light-mode {
             background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
-                        radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
-                        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
 
         .bento-grid {
@@ -64,15 +68,15 @@
             position: relative;
             padding: 1.5rem;
             border-radius: 18px;
-            background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
             border: 1px solid var(--edge);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
             overflow: hidden;
         }
 
         body.light-mode .bento-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82));
-            box-shadow: 0 18px 40px rgba(15,23,42,0.12);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
         }
 
         .bento-card::after {
@@ -80,19 +84,52 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124,58,237,0.14), transparent 55%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.14), transparent 55%);
         }
 
         body.light-mode .bento-card::after {
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124,58,237,0.08), transparent 55%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.08), transparent 55%);
         }
 
-        .bento-card h1, .bento-card h2, .bento-card h3 { margin: 0; color: var(--ink); }
-        .subtitle { color: var(--muted); margin: 0.35rem 0 1.2rem; font-size: 0.98rem; max-width: 780px; }
+        .bento-card h1,
+        .bento-card h2,
+        .bento-card h3 {
+            margin: 0;
+            color: var(--ink);
+        }
 
-        .hero { display: grid; gap: 1rem; }
-        .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
-        .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgba(124,58,237,0.14); color: var(--ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.78rem; }
+        .subtitle {
+            color: var(--muted);
+            margin: 0.35rem 0 1.2rem;
+            font-size: 0.98rem;
+            max-width: 780px;
+        }
+
+        .hero {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.14);
+            color: var(--ink);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 0.78rem;
+        }
 
         .theme-toggle {
             display: inline-flex;
@@ -101,68 +138,193 @@
             padding: 0.45rem 0.9rem;
             border-radius: 999px;
             border: 1px solid var(--edge);
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--ink);
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .theme-toggle:hover { transform: translateY(-1px); border-color: rgba(124,58,237,0.45); box-shadow: 0 10px 18px rgba(0,0,0,0.25); }
-        body.light-mode .theme-toggle { background: rgba(255,255,255,0.85); box-shadow: 0 10px 18px rgba(15,23,42,0.08); }
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+        }
 
-        h1 { font-size: 2.05rem; line-height: 1.2; display: flex; align-items: center; gap: 12px; }
-        h1 i { color: var(--accent-2); }
+        body.light-mode .theme-toggle {
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+        }
 
-        .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: flex-end; }
-        .action-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-        .search-box { position: relative; width: 100%; flex: 1 1 260px; }
+        h1 {
+            font-size: 2.05rem;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 i {
+            color: var(--accent-2);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            align-items: flex-end;
+        }
+
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            flex: 1 1 260px;
+        }
+
         .search-box input {
             width: 100%;
             padding: 0.75rem 0.9rem 0.75rem 2.75rem;
             border-radius: 12px;
             border: 1px solid var(--edge);
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-size: 0.95rem;
         }
-        .search-box i { position: absolute; left: 0.95rem; top: 50%; transform: translateY(-50%); color: var(--muted); }
 
-        .sort-box { flex: 2 1 380px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem; align-items: center; }
-        .sort-select, .sort-box label { width: 100%; }
+        .search-box i {
+            position: absolute;
+            left: 0.95rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        .sort-box {
+            flex: 2 1 380px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.65rem;
+            align-items: center;
+        }
+
+        .sort-select,
+        .sort-box label {
+            width: 100%;
+        }
+
         .sort-select {
             padding: 0.65rem 0.75rem;
             border-radius: 10px;
             border: 1px solid var(--edge);
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-weight: 600;
         }
-        .sort-select option { color: #0f172a; }
-        .meta-label { font-size: 0.78rem; letter-spacing: 0.02em; color: var(--muted); text-transform: uppercase; font-weight: 700; }
 
-        .hero-metrics { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-        .metric-chip { padding: 0.55rem 0.85rem; border-radius: 12px; background: rgba(34,211,238,0.12); color: var(--ink); font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(34,211,238,0.25); }
+        .sort-select option {
+            color: #0f172a;
+        }
 
-        .stats-card { display: grid; gap: 1rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .meta-label {
+            font-size: 0.78rem;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .hero-metrics {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .metric-chip {
+            padding: 0.55rem 0.85rem;
+            border-radius: 12px;
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        .stats-card {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
         .stat-card {
             padding: 1.1rem 1rem;
             border-radius: 14px;
-            background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
             border: 1px solid var(--edge);
         }
-        .stat-card h3 { display: flex; align-items: center; gap: 8px; font-size: 0.98rem; color: var(--ink); margin: 0; }
-        .stat-card h3 i { color: var(--accent-2); }
-        .stat-number { font-size: 2.4rem; font-weight: 700; color: var(--ink); margin: 0.15rem 0 0.35rem; }
-        .stat-card p { margin: 0; color: var(--muted); }
 
-        .projects-header { display: flex; justify-content: space-between; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
-        .pill { padding: 0.35rem 0.65rem; border-radius: 10px; background: rgba(255,255,255,0.06); color: var(--muted); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+        .stat-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.98rem;
+            color: var(--ink);
+            margin: 0;
+        }
 
-        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+        .stat-card h3 i {
+            color: var(--accent-2);
+        }
+
+        .stat-number {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0.15rem 0 0.35rem;
+        }
+
+        .stat-card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .projects-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .pill {
+            padding: 0.35rem 0.65rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
         .project-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
             border: 1px solid var(--edge);
             border-radius: 14px;
             padding: 1.1rem;
@@ -171,68 +333,282 @@
             text-decoration: none;
             color: inherit;
         }
-        .project-card:hover { transform: translateY(-3px); border-color: rgba(124,58,237,0.4); box-shadow: 0 12px 25px rgba(0,0,0,0.35); }
 
-        .project-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.9rem; }
-        .project-title { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: 0; display: flex; align-items: center; gap: 8px; }
-        .project-title i { color: var(--accent); }
-        .project-id { font-size: 0.78rem; color: var(--ink); background: rgba(255,255,255,0.06); padding: 0.3rem 0.6rem; border-radius: 8px; border: 1px solid var(--edge); }
+        .project-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+        }
 
-        .project-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.65rem; margin-bottom: 0.85rem; }
-        .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
-        .meta-value { font-size: 0.95rem; color: var(--ink); font-weight: 600; }
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.9rem;
+        }
 
-        .status-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.35rem; }
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; border: 1px solid var(--edge); }
-        .status-reported { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border-color: rgba(245,158,11,0.35); }
-        .status-review { background: rgba(59, 130, 246, 0.16); color: #bfdbfe; border-color: rgba(59,130,246,0.35); }
-        .status-fixed { background: rgba(16, 185, 129, 0.16); color: #bbf7d0; border-color: rgba(16,185,129,0.35); }
+        .project-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        .progress-container { margin-top: 0.7rem; }
-        .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 0.25rem; }
-        .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #22d3ee, #7c3aed); border-radius: 6px; transition: width 0.3s; }
-        .progress-fill.complete { background: linear-gradient(90deg, #10b981, #0ea472); }
+        .project-title i {
+            color: var(--accent);
+        }
 
-        .project-actions { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px dashed rgba(255,255,255,0.08); }
-        .btn { padding: 0.6rem 1.05rem; border-radius: 10px; border: 1px solid rgba(34,211,238,0.4); cursor: pointer; font-size: 0.95rem; font-weight: 700; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #22d3ee, #7c3aed); color: #0b1020; }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(34,211,238,0.28); }
+        .project-id {
+            font-size: 0.78rem;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--edge);
+        }
 
-        .empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--muted); border: 1px dashed var(--edge); background: rgba(255,255,255,0.02); border-radius: 14px; }
-        .empty-state i { font-size: 3rem; color: var(--muted); opacity: 0.7; margin-bottom: 1rem; }
-        .empty-state h3 { font-size: 1.15rem; color: var(--ink); margin-bottom: 0.5rem; }
+        .project-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.65rem;
+            margin-bottom: 0.85rem;
+        }
 
-        .activity-section h2 { color: var(--ink); }
-        .activity-title { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
-        .activity-feed { max-height: 400px; overflow-y: auto; }
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
 
-        .span-2 { grid-column: span 2; }
-        @media (max-width: 900px) { .span-2 { grid-column: span 1; } }
+        .meta-value {
+            font-size: 0.95rem;
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 0.35rem;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--edge);
+        }
+
+        .status-reported {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .status-review {
+            background: rgba(59, 130, 246, 0.16);
+            color: #bfdbfe;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .status-fixed {
+            background: rgba(16, 185, 129, 0.16);
+            color: #bbf7d0;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        .progress-container {
+            margin-top: 0.7rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #7c3aed);
+            border-radius: 6px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.complete {
+            background: linear-gradient(90deg, #10b981, #0ea472);
+        }
+
+        .project-actions {
+            margin-top: 1rem;
+            padding-top: 0.9rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        .btn {
+            padding: 0.6rem 1.05rem;
+            border-radius: 10px;
+            border: 1px solid rgba(34, 211, 238, 0.4);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #22d3ee, #7c3aed);
+            color: #0b1020;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.28);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3.5rem 2rem;
+            color: var(--muted);
+            border: 1px dashed var(--edge);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--muted);
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.15rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-section h2 {
+            color: var(--ink);
+        }
+
+        .activity-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 900px) {
+            .span-2 {
+                grid-column: span 1;
+            }
+        }
+
+        /* Loading overlay */
+        #ldms-loader {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(11, 16, 32, 0.8);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #ldms-loader.active {
+            display: flex;
+        }
+
+        .loader-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: ldms-spin 0.8s linear infinite;
+        }
+
+        .loader-text {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @keyframes ldms-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body>
+    <div id="ldms-loader">
+        <div class="loader-spinner"></div>
+        <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+    </div>
     <main class="bento-grid">
         <section class="bento-card hero span-2">
             <div class="hero-top">
-                <div class="breadcrumbs" style="color: var(--muted); display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                <div class="breadcrumbs"
+                    style="color: var(--muted); display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
                     <i class="fas fa-home" style="color: var(--accent-2);"></i>
                     <span>Developer Dashboard</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end;">
+                <div
+                    style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end;">
                     <span class="eyebrow"><i class="fas fa-bolt"></i> Live status</span>
                     <button id="themeToggle" class="theme-toggle" type="button">
                         <i class="fas fa-moon"></i>
                         <span>Dark</span>
                     </button>
+                    <a href="{{ url_for('auth.logout') }}" class="theme-toggle"
+                        style="text-decoration: none; background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); color: #fca5a5;">
+                        <i class="fas fa-user"></i>
+                        <span>{{ current_user.username }}</span>
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 </div>
             </div>
 
             <div>
-                <h1><i class="fas fa-code"></i> Claim Dashboard</h1>
-                <p class="subtitle">Monitor every scan, filter by status, and glide through project progress with a bento-inspired overview.</p>
+                <h1><i class="fas fa-code"></i> Developer Dashboard</h1>
+                <p class="subtitle">Monitor every scan, filter by status, and glide through project progress with a
+                    bento-inspired overview.</p>
                 <div class="hero-metrics">
                     <span class="metric-chip"><i class="fas fa-building"></i> {{ scans|length }} projects</span>
-                    <span class="metric-chip" style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.25); color: var(--ink);"><i class="fas fa-check-circle"></i> {{ total_fixed }} fixed</span>
+                    <span class="metric-chip"
+                        style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.25); color: var(--ink);"><i
+                            class="fas fa-check-circle"></i> {{ total_fixed }} fixed</span>
                 </div>
             </div>
 
@@ -245,26 +621,31 @@
                     <div>
                         <label for="date_range" class="meta-label">Date Range</label>
                         <select id="date_range" name="date_range" class="sort-select" onchange="this.form.submit()">
-                            <option value="all" {% if date_range == 'all' %}selected{% endif %}>All Time</option>
-                            <option value="week" {% if date_range == 'week' %}selected{% endif %}>Last 7 Days</option>
-                            <option value="month" {% if date_range == 'month' %}selected{% endif %}>Last 30 Days</option>
-                            <option value="3months" {% if date_range == '3months' %}selected{% endif %}>Last 3 Months</option>
+                            <option value="all" {% if date_range=='all' %}selected{% endif %}>All Time</option>
+                            <option value="week" {% if date_range=='week' %}selected{% endif %}>Last 7 Days</option>
+                            <option value="month" {% if date_range=='month' %}selected{% endif %}>Last 30 Days</option>
+                            <option value="3months" {% if date_range=='3months' %}selected{% endif %}>Last 3 Months
+                            </option>
                         </select>
                     </div>
                     <div>
                         <label for="status_filter" class="meta-label">Filter</label>
-                        <select id="status_filter" name="status_filter" class="sort-select" onchange="this.form.submit()">
-                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Projects</option>
-                            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
-                            <option value="complete" {% if status_filter == 'complete' %}selected{% endif %}>Complete</option>
-                            <option value="started" {% if status_filter == 'started' %}selected{% endif %}>Just Started</option>
+                        <select id="status_filter" name="status_filter" class="sort-select"
+                            onchange="this.form.submit()">
+                            <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Projects</option>
+                            <option value="in_progress" {% if status_filter=='in_progress' %}selected{% endif %}>In
+                                Progress</option>
+                            <option value="complete" {% if status_filter=='complete' %}selected{% endif %}>Complete
+                            </option>
+                            <option value="started" {% if status_filter=='started' %}selected{% endif %}>Just Started
+                            </option>
                         </select>
                     </div>
                     <div>
                         <label for="sort" class="meta-label">Sort</label>
                         <select id="sort" name="sort" class="sort-select" onchange="this.form.submit()">
-                            <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Newest first</option>
-                            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+                            <option value="recent" {% if sort=='recent' %}selected{% endif %}>Newest first</option>
+                            <option value="oldest" {% if sort=='oldest' %}selected{% endif %}>Oldest first</option>
                         </select>
                     </div>
                 </form>
@@ -281,19 +662,22 @@
             </div>
             <div class="stats-grid">
                 <!-- Actionable Metrics -->
-                <div class="stat-card" style="border-color: rgba(239,68,68,0.35); background: linear-gradient(160deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));">
+                <div class="stat-card"
+                    style="border-color: rgba(239,68,68,0.35); background: linear-gradient(160deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));">
                     <h3 style="color: #fca5a5;"><i class="fas fa-fire" style="color: #ef4444;"></i> Urgent Items</h3>
                     <div class="stat-number" style="color: #fecdd3;">{{ metrics.urgent_attention }}</div>
                     <p style="color: rgba(254,205,211,0.7);">High priority needing fix</p>
                 </div>
 
-                <div class="stat-card" style="border-color: rgba(245,158,11,0.35); background: linear-gradient(160deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04));">
+                <div class="stat-card"
+                    style="border-color: rgba(245,158,11,0.35); background: linear-gradient(160deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04));">
                     <h3 style="color: #fcd34d;"><i class="fas fa-clock" style="color: #f59e0b;"></i> Stale Reviews</h3>
                     <div class="stat-number" style="color: #fde68a;">{{ metrics.stale_reviews }}</div>
                     <p style="color: rgba(253,230,138,0.7);">Pending > 7 days</p>
                 </div>
 
-                <div class="stat-card" style="border-color: rgba(59,130,246,0.35); background: linear-gradient(160deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04));">
+                <div class="stat-card"
+                    style="border-color: rgba(59,130,246,0.35); background: linear-gradient(160deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04));">
                     <h3 style="color: #bfdbfe;"><i class="fas fa-bolt" style="color: #3b82f6;"></i> New (24h)</h3>
                     <div class="stat-number" style="color: #dbeafe;">{{ metrics.new_24h }}</div>
                     <p style="color: rgba(219,234,254,0.7);">Defects reported today</p>
@@ -331,7 +715,8 @@
                     <div class="project-meta">
                         <div class="meta-item">
                             <div class="meta-label">Created</div>
-                            <div class="meta-value">{{ scan.created_at.strftime('%Y-%m-%d') if scan.created_at else 'Unknown' }}</div>
+                            <div class="meta-value">{{ scan.created_at.strftime('%Y-%m-%d') if scan.created_at else
+                                'Unknown' }}</div>
                         </div>
                         <div class="meta-item">
                             <div class="meta-label">Total Defects</div>
@@ -339,19 +724,20 @@
                         </div>
                         <div class="meta-item">
                             <div class="meta-label">Model File</div>
-                            <div class="meta-value">{{ scan.model_path.split('/')[-1] if scan.model_path else 'None' }}</div>
+                            <div class="meta-value">{{ scan.model_path.split('/')[-1] if scan.model_path else 'None' }}
+                            </div>
                         </div>
                         <div class="meta-item">
                             <div class="meta-label">Status</div>
                             <div class="meta-value">
                                 {% if fixed == defect_count and defect_count > 0 %}
-                                    Complete
+                                Complete
                                 {% elif review > 0 %}
-                                    In Progress
+                                In Progress
                                 {% elif reported > 0 %}
-                                    Started
+                                Started
                                 {% else %}
-                                    No Defects
+                                No Defects
                                 {% endif %}
                             </div>
                         </div>
@@ -377,7 +763,8 @@
                             <span>{{ progress_percent }}%</span>
                         </div>
                         <div class="progress-bar">
-                            <div class="progress-fill {% if progress_percent == 100 %}complete{% endif %}" style="width: {{ progress_percent }}%"></div>
+                            <div class="progress-fill {% if progress_percent == 100 %}complete{% endif %}"
+                                style="width: {{ progress_percent }}%"></div>
                         </div>
                     </div>
                     {% endif %}
@@ -440,7 +827,7 @@
             applyTheme(current === 'dark' ? 'light' : 'dark');
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             applyTheme(localStorage.getItem('dashboard-theme') || 'dark');
             const toggle = document.getElementById('themeToggle');
             if (toggle) {
@@ -449,9 +836,9 @@
         });
 
         // Show flash messages as toasts
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% with messages = get_flashed_messages(with_categories = true) %}
         {% if messages %}
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             {% for category, message in messages %}
             showToast('{{ message }}', '{{ category }}');
             {% endfor %}
@@ -484,7 +871,7 @@
                 <span>${message}</span>
             `;
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'slideIn 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
@@ -515,7 +902,7 @@
                         feed.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2rem;"><p>No recent activity</p></div>';
                         return;
                     }
-                    
+
                     let html = '<div style="border-left: 2px solid rgba(255,255,255,0.1); padding: 1rem 0;">';
                     activities.forEach((activity, index) => {
                         const iconMap = {
@@ -527,7 +914,7 @@
                         };
                         const icon = iconMap[activity.action] || 'fa-edit';
                         const timeStr = new Date(activity.timestamp + 'Z').toLocaleString();
-                        
+
                         html += `
                             <div style="display: flex; gap: 1rem; margin-bottom: 1rem; position: relative; padding-left: 1.7rem;">
                                 <div style="position: absolute; left: 0; top: 10px; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: #22d3ee; border: 2px solid var(--bg);"></div>
@@ -561,5 +948,14 @@
         // Refresh activity every 30 seconds
         setInterval(loadActivityFeed, 30000);
     </script>
+    <script>
+        document.querySelectorAll('a[href]').forEach(link => {
+            const href = link.getAttribute('href') || '';
+            if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
+                link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
+            }
+        });
+    </script>
 </body>
+
 </html>

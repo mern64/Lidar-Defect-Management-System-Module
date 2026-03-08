@@ -1,6 +1,37 @@
 from app.extensions import db
-from datetime import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timezone
 import enum
+
+
+class User(UserMixin, db.Model):
+    """Application user for authentication and access control."""
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    role = db.Column(db.String(20), default='inspector')  # 'inspector' or 'developer'
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @property
+    def is_inspector(self):
+        return self.role == 'inspector'
+
+    @property
+    def is_developer(self):
+        return self.role == 'developer'
+
+    @property
+    def is_admin(self):
+        return self.role == 'developer'  # developers have admin access
+
 
 class DefectStatus(str, enum.Enum):
     REPORTED = 'Reported'
@@ -58,7 +89,7 @@ class ActivityLog(db.Model):
     action = db.Column(db.String(255), nullable=False)  # "updated status", "assigned to", "updated priority"
     old_value = db.Column(db.String(255))  # Previous value
     new_value = db.Column(db.String(255))  # New value
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     scan = db.relationship('Scan', backref='activities')
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
