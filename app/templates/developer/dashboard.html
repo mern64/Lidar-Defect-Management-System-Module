@@ -41,7 +41,7 @@
         body {
             margin: 0;
             font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.15), transparent 35%),
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
                 linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
             color: var(--ink);
@@ -49,7 +49,7 @@
         }
 
         body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
                 linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
@@ -84,11 +84,11 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.14), transparent 55%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
         }
 
         body.light-mode .bento-card::after {
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.08), transparent 55%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.08), transparent 55%);
         }
 
         .bento-card h1,
@@ -123,7 +123,7 @@
             gap: 8px;
             padding: 0.35rem 0.75rem;
             border-radius: 999px;
-            background: rgba(124, 58, 237, 0.14);
+            background: rgba(59, 130, 246, 0.14);
             color: var(--ink);
             font-weight: 600;
             text-transform: uppercase;
@@ -147,7 +147,7 @@
 
         .theme-toggle:hover {
             transform: translateY(-1px);
-            border-color: rgba(124, 58, 237, 0.45);
+            border-color: rgba(59, 130, 246, 0.45);
             box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
         }
 
@@ -344,7 +344,7 @@
 
         .project-card:hover {
             transform: translateY(-3px);
-            border-color: rgba(124, 58, 237, 0.4);
+            border-color: rgba(59, 130, 246, 0.4);
             box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
         }
 
@@ -458,7 +458,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #22d3ee, #7c3aed);
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
             border-radius: 6px;
             transition: width 0.3s;
         }
@@ -476,7 +476,7 @@
         .btn {
             padding: 0.6rem 1.05rem;
             border-radius: 10px;
-            border: 1px solid rgba(34, 211, 238, 0.4);
+            border: 1px solid rgba(99, 102, 241, 0.4);
             cursor: pointer;
             font-size: 0.95rem;
             font-weight: 700;
@@ -485,13 +485,13 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            background: linear-gradient(135deg, #22d3ee, #7c3aed);
-            color: #0b1020;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
         }
 
         .btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.28);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
 
         .empty-state {
@@ -607,6 +607,9 @@
         body.light-mode .stat-new-h { color: #1e3a8a !important; }
         body.light-mode .stat-new-num { color: #1e40af !important; }
         body.light-mode .stat-new-p { color: #1d4ed8 !important; }
+        body.light-mode .stat-fixed-h { color: #065f46 !important; }
+        body.light-mode .stat-fixed-num { color: #047857 !important; }
+        body.light-mode .stat-fixed-p { color: #059669 !important; }
         /* Dark-only stat defaults */
         body:not(.light-mode) .stat-urgent-h { color: #fca5a5; }
         body:not(.light-mode) .stat-urgent-num { color: #fecdd3; }
@@ -617,6 +620,9 @@
         body:not(.light-mode) .stat-new-h { color: #bfdbfe; }
         body:not(.light-mode) .stat-new-num { color: #dbeafe; }
         body:not(.light-mode) .stat-new-p { color: rgba(219,234,254,0.7); }
+        body:not(.light-mode) .stat-fixed-h { color: #6ee7b7; }
+        body:not(.light-mode) .stat-fixed-num { color: #a7f3d0; }
+        body:not(.light-mode) .stat-fixed-p { color: rgba(167,243,208,0.7); }
         /* Pill and project-id in light mode */
         body.light-mode .pill { color: #475569; background: rgba(0,0,0,0.05); }
         body.light-mode .project-id { background: rgba(0,0,0,0.05); color: #334155; }
@@ -624,6 +630,17 @@
         /* Logout link better contrast in light mode */
         body.light-mode a[style*='fca5a5'] { color: #b91c1c !important; background: rgba(239,68,68,0.12) !important; }
 
+
+        body.light-mode #ldms-loader {
+            background: rgba(248, 250, 252, 0.85);
+        }
+        body.light-mode .loader-spinner {
+            border-color: rgba(0, 0, 0, 0.1);
+            border-top-color: #3b82f6;
+        }
+        body.light-mode .loader-text {
+            color: #334155;
+        }
     </style>
 </head>
 
@@ -740,10 +757,11 @@
                 </div>
 
                 <!-- General Stats -->
-                <div class="stat-card">
-                    <h3><i class="fas fa-check-circle"></i> Total Fixed</h3>
-                    <div class="stat-number">{{ total_fixed }}</div>
-                    <p>Defects marked as resolved</p>
+                <div class="stat-card stat-fixed"
+                    style="background: linear-gradient(160deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04)); border-color: rgba(16,185,129,0.25);">
+                    <h3 class="stat-fixed-h"><i class="fas fa-check-circle" style="color: #10b981;"></i> Total Fixed</h3>
+                    <div class="stat-number stat-fixed-num">{{ total_fixed }}</div>
+                    <p class="stat-fixed-p">Defects marked as resolved</p>
                 </div>
             </div>
         </section>
@@ -904,15 +922,16 @@
 
         // Toast notification function
         function showToast(message, type = 'success') {
+            const isLight = document.body.classList.contains('light-mode');
             const toast = document.createElement('div');
             toast.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: #0b1020;
-                color: var(--ink);
+                background: ${isLight ? '#ffffff' : '#0b1020'};
+                color: ${isLight ? '#0f172a' : 'var(--ink)'};
                 border-radius: 10px;
-                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+                box-shadow: ${isLight ? '0 4px 20px rgba(0,0,0,0.12)' : '0 16px 36px rgba(0,0,0,0.35)'};
                 padding: 1rem 1.4rem;
                 display: flex;
                 align-items: center;
@@ -920,7 +939,7 @@
                 max-width: 420px;
                 z-index: 10000;
                 animation: slideIn 0.3s ease-out;
-                border-left: 4px solid ${type === 'success' ? '#10b981' : '#ef4444'};
+                border-left: 4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
             `;
             toast.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="color: ${type === 'success' ? '#10b981' : '#ef4444'}; font-size: 1.2rem;"></i>

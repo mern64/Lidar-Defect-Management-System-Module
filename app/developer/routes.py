@@ -342,45 +342,8 @@ def bulk_update_defects(scan_id):
     return redirect(url_for('developer.view_scan', scan_id=scan_id))
 
 
-@developer_bp.route("/developer/scan/<int:scan_id>/export-csv", methods=["GET"])
-@login_required
-def export_scan_csv(scan_id):
-    """Export scan defects to CSV"""
-    from flask import Response
-    import csv
-    from io import StringIO
-    
-    scan = Scan.query.get_or_404(scan_id)
-    defects = Defect.query.filter_by(scan_id=scan_id).order_by(Defect.created_at.desc()).all()
-    
-    # Create CSV
-    output = StringIO()
-    writer = csv.writer(output)
-    
-    # Header
-    writer.writerow(['ID', 'Element', 'Location', 'Type', 'Severity', 'Priority', 'Status', 'Description', 'Notes', 'Created'])
-    
-    # Data rows
-    for d in defects:
-        writer.writerow([
-            d.id,
-            d.element or '',
-            d.location or '',
-            d.defect_type or '',
-            d.severity or '',
-            d.priority or 'Medium',
-            d.status or '',
-            d.description or '',
-            d.notes or '',
-            d.created_at.strftime('%Y-%m-%d %H:%M') if d.created_at else ''
-        ])
-    
-    output.seek(0)
-    return Response(
-        output.getvalue(),
-        mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment; filename={scan.name}_defects.csv'}
-    )
+
+
 
 
 # ===== PHASE 3: Analytics, Charts, Assignments, Activity =====
@@ -391,38 +354,33 @@ def export_scan_csv(scan_id):
 @developer_bp.route("/developer/scan/<int:scan_id>/charts-data", methods=["GET"])
 @login_required
 def get_charts_data(scan_id):
-    """Get data for charts (status, priority, trend)"""
-    from datetime import datetime, timedelta, timezone
-    
+    """Get data for charts (status, priority, severity)"""
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
-    
+
     # Status distribution
     status_counts = {}
     for d in defects:
         status_counts[d.status] = status_counts.get(d.status, 0) + 1
-    
+
     # Priority distribution
     priority_counts = {}
     for d in defects:
         priority = d.priority or 'Medium'
         priority_counts[priority] = priority_counts.get(priority, 0) + 1
-    
-    # Defect trend (by day for last 30 days)
-    today = datetime.now(timezone.utc).date()
-    trend_data = {}
-    for i in range(30):
-        date = today - timedelta(days=i)
-        count = len([d for d in defects if d.created_at and d.created_at.date() == date])
-        trend_data[str(date)] = count
-    
-    # Sort trend data by date
-    sorted_trend = dict(sorted(trend_data.items()))
-    
+
+    # Severity distribution (ordered Critical → Low)
+    severity_order = ['Critical', 'High', 'Medium', 'Low']
+    severity_counts = {}
+    for d in defects:
+        severity = d.severity or 'Medium'
+        severity_counts[severity] = severity_counts.get(severity, 0) + 1
+    ordered_severity = {k: severity_counts[k] for k in severity_order if k in severity_counts}
+
     return jsonify({
         'status': status_counts,
         'priority': priority_counts,
-        'trend': sorted_trend,
+        'severity': ordered_severity,
         'total': len(defects)
     })
 

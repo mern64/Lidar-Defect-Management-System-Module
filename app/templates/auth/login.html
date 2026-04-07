@@ -23,7 +23,7 @@
             justify-content: center;
         }
         body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
                 linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
@@ -47,7 +47,7 @@
             width: 60px;
             height: 60px;
             border-radius: 14px;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -97,7 +97,7 @@
         .btn-login {
             width: 100%;
             padding: 0.85rem;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -188,6 +188,16 @@
                 transform: rotate(360deg);
             }
         }
+        body.light-mode #ldms-loader {
+            background: rgba(248, 250, 252, 0.85);
+        }
+        body.light-mode .loader-spinner {
+            border-color: rgba(0, 0, 0, 0.1);
+            border-top-color: #3b82f6;
+        }
+        body.light-mode .loader-text {
+            color: #334155;
+        }
     
         body.light-mode h1, body.light-mode h2, body.light-mode h3, 
         body.light-mode h4, body.light-mode h5, body.light-mode h6,
@@ -224,7 +234,7 @@
     </div>
     <div class="login-card">
         <div class="login-header">
-            <div class="icon"><i class="fas fa-shield-halved"></i></div>
+            <div class="icon"><i class="fas fa-hard-hat"></i></div>
             <h1>LDMS Login</h1>
             <p>LIDAR Defect Management System</p>
         </div>

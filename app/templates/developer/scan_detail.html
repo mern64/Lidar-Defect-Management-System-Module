@@ -43,7 +43,7 @@
         body {
             margin: 0;
             font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.14), transparent 36%),
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.14), transparent 36%),
                 radial-gradient(circle at 85% 10%, rgba(34, 211, 238, 0.1), transparent 32%),
                 linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
             color: var(--ink);
@@ -51,7 +51,7 @@
             padding: 1.5rem 1rem 3rem;
         }
         body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
                 radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
                 linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
@@ -80,7 +80,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.12), transparent 60%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.12), transparent 60%);
             pointer-events: none;
         }
         body.light-mode .bento-card {
@@ -88,7 +88,7 @@
             box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
         }
         body.light-mode .bento-card::after {
-            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.08), transparent 60%);
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.08), transparent 60%);
         }
 
 
@@ -219,7 +219,7 @@
         .btn {
             padding: 0.6rem 1.05rem;
             border-radius: 10px;
-            border: 1px solid rgba(34, 211, 238, 0.35);
+            border: 1px solid rgba(99, 102, 241, 0.35);
             cursor: pointer;
             font-size: 0.95rem;
             font-weight: 700;
@@ -228,8 +228,8 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            background: linear-gradient(135deg, #22d3ee, #7c3aed);
-            color: #0b1020;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
         }
 
         .btn.secondary {
@@ -240,7 +240,7 @@
 
         .btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(34, 211, 238, 0.25);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
 
         .bulk-card {
@@ -427,7 +427,7 @@
 
         .defect-card:hover {
             transform: translateY(-3px);
-            border-color: rgba(124, 58, 237, 0.35);
+            border-color: rgba(59, 130, 246, 0.35);
             box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
         }
 
@@ -951,6 +951,17 @@
         body.light-mode .heat-row > div:first-child { color: #0f172a !important; }
         body.light-mode .heat-row > div:nth-child(2) { color: #334155 !important; }
 
+
+        body.light-mode #ldms-loader {
+            background: rgba(248, 250, 252, 0.85);
+        }
+        body.light-mode .loader-spinner {
+            border-color: rgba(0, 0, 0, 0.1);
+            border-top-color: #3b82f6;
+        }
+        body.light-mode .loader-text {
+            color: #334155;
+        }
     </style>
 </head>
 
@@ -1009,12 +1020,7 @@
                 <span class="chip chip-reported"><i
                         class="fas fa-flag"></i> {{ reported_count }} reported</span>
             </div>
-            <div class="actions">
-                <a href="{{ url_for('developer.export_scan_csv', scan_id=scan.id) }}" class="btn secondary"><i
-                        class="fas fa-download"></i> Export CSV</a>
-                <button onclick="window.print()" class="btn secondary"><i class="fas fa-print"></i> Print
-                    Report</button>
-            </div>
+
         </section>
 
         <section class="bento-card span-2 house-card">
@@ -1148,8 +1154,8 @@
                     <canvas id="priorityChart" width="200" height="160"></canvas>
                 </div>
                 <div class="chart-box">
-                    <h3>Defects Over Time (30 Days)</h3>
-                    <canvas id="trendChart" width="200" height="160"></canvas>
+                    <h3>Severity Breakdown</h3>
+                    <canvas id="severityChart" width="200" height="160"></canvas>
                 </div>
             </div>
         </section>
@@ -1410,7 +1416,7 @@
         }
 
         // Charts, heatmap
-        let statusChart, priorityChart, trendChart;
+        let statusChart, priorityChart, severityChart;
 
         function loadChartsData() {
             fetch('{{ url_for("developer.get_charts_data", scan_id=scan.id) }}')
@@ -1418,7 +1424,7 @@
                 .then(data => {
                     renderStatusChart(data.status);
                     renderPriorityChart(data.priority);
-                    renderTrendChart(data.trend);
+                    renderSeverityChart(data.severity);
                 })
                 .catch(error => console.error('Error loading charts:', error));
         }
@@ -1444,15 +1450,29 @@
             });
         }
 
-        function renderTrendChart(trendData) {
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            if (trendChart) trendChart.destroy();
-            const dates = Object.keys(trendData).sort();
-            const counts = dates.map(d => trendData[d]);
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })), datasets: [{ label: 'Defects Created', data: counts, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.14)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7c3aed', pointBorderColor: document.body.classList.contains('light-mode') ? '#fff' : '#0b1020', pointBorderWidth: 2 }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: true, position: 'top', labels: { color: varThemeColor() } } }, scales: { y: { beginAtZero: true, grid: { color: varGridColor() }, ticks: { color: varThemeColor() } }, x: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
+        function renderSeverityChart(severityData) {
+            const ctx = document.getElementById('severityChart').getContext('2d');
+            if (severityChart) severityChart.destroy();
+            const severityColors = { 'Critical': '#dc2626', 'High': '#f97316', 'Medium': '#3b82f6', 'Low': '#10b981' };
+            const orderedKeys = ['Critical', 'High', 'Medium', 'Low'].filter(k => severityData[k] !== undefined);
+            const values = orderedKeys.map(k => severityData[k]);
+            const colors = orderedKeys.map(k => severityColors[k] || '#6b7280');
+            severityChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: orderedKeys, datasets: [{ label: 'Defects', data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x} defect${ctx.parsed.x !== 1 ? 's' : ''}` } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: varGridColor() }, ticks: { color: varThemeColor(), precision: 0 } },
+                        y: { grid: { display: false }, ticks: { color: varThemeColor(), font: { weight: '600' } } }
+                    }
+                }
             });
         }
 
