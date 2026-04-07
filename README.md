@@ -1,169 +1,305 @@
-# Flask Docker Application with Multiple Modules
+# Lidar Defect Management System (LDMS)
 
-This project demonstrates a **Flask web application** structured with **3 modules** using **Flask blueprints**, a **Docker setup** for easy containerization, and **data volume mounting** for persistent data storage.
+A **Flask web application** for managing building defects detected from **LiDAR / Point Cloud Data (PCD)** scans. The system enables inspectors to upload 3D scan data, process it to identify defects, and allows developers to review, prioritise, and track those defects through their lifecycle.
+
+> **Tech Stack**: Python · Flask · PostgreSQL · Docker · Gunicorn
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [System Architecture](#system-architecture)
+3. [Project Structure](#project-structure)
+4. [Module Breakdown](#module-breakdown)
+5. [Database Schema](#database-schema)
+6. [User Roles](#user-roles)
+7. [Tech Stack & Dependencies](#tech-stack--dependencies)
+8. [Quick Start](#quick-start)
+9. [Deployment](#deployment)
+
+---
+
+## Overview
+
+The LDMS application bridges the gap between raw LiDAR scan data and actionable defect management. The workflow is:
+
+```
+Inspector uploads PCD/GLB scan
+        ↓
+System processes scan & detects defect points
+        ↓
+Defects are logged with coordinates, element, type, severity & priority
+        ↓
+Developer reviews defects via dashboard
+        ↓
+Defects are updated (status, notes, priority) and tracked via activity logs
+        ↓
+Reports generated as PDF
+```
+
+---
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Web Browser                        │
+│              (Inspector / Developer)                 │
+└─────────────────┬───────────────────────────────────┘
+                  │ HTTP
+┌─────────────────▼───────────────────────────────────┐
+│              Flask Application (Gunicorn)            │
+│                                                      │
+│  ┌──────────┐ ┌───────────┐ ┌──────────┐ ┌──────┐  │
+│  │   auth   │ │upload_data│ │ process  │ │defect│  │
+│  │blueprint │ │ blueprint │ │  _data   │ │  s   │  │
+│  └──────────┘ └───────────┘ │blueprint │ │  bp  │  │
+│                              └──────────┘ └──────┘  │
+│                    ┌──────────────┐                  │
+│                    │  developer   │                  │
+│                    │  blueprint   │                  │
+│                    └──────────────┘                  │
+└─────────────────────────────┬───────────────────────┘
+                              │ SQLAlchemy ORM
+┌─────────────────────────────▼───────────────────────┐
+│                  PostgreSQL Database                 │
+│        (users · scans · defects · activity_logs)    │
+└─────────────────────────────────────────────────────┘
+```
+
+---
 
 ## Project Structure
 
-The project is organized as follows:
-
 ```
-flask-docker-app/
+pcd/
 │
-├── app/                # Main Flask application
-│   ├── __init__.py     # Initializes Flask app and registers blueprints
-│   ├── config.py       # Configuration settings for the app
-│   ├── extensions.py   # Flask extensions (e.g. DB, Cache, etc.)
+├── app/                            # Core Flask application package
+│   ├── __init__.py                 # App factory (create_app), blueprint registration, CLI commands
+│   ├── config.py                   # Configuration class (SECRET_KEY, DATABASE_URL, etc.)
+│   ├── extensions.py               # Flask extension instances (db, login_manager, csrf)
+│   ├── models.py                   # SQLAlchemy database models
+│   ├── utils.py                    # Shared utility functions
 │   │
-│   ├── module1/        # Module 1 blueprint (module1 routes and views)
+│   ├── auth/                       # Authentication module (Blueprint)
 │   │   ├── __init__.py
-│   │   └── routes.py   # Routes for module 1
+│   │   └── routes.py               # Login, logout, register routes
 │   │
-│   ├── module2/        # Module 2 blueprint (module2 routes and views)
-│   │   ├── __init__.py
-│   │   └── routes.py   # Routes for module 2
+│   ├── upload_data/                # Inspector upload module (Blueprint)
+│   │   ├── routes.py               # Upload scan files, inspector dashboard
+│   │   └── pdf_utils.py            # PDF report generation utilities
 │   │
-│   ├── module3/        # Module 3 blueprint (module3 routes and views)
-│   │   ├── __init__.py
-│   │   └── routes.py   # Routes for module 3
+│   ├── process_data/               # 3D data processing module (Blueprint)
+│   │   ├── routes.py               # PCD/GLB processing, defect detection endpoints
+│   │   └── glb_snapshot.py         # Renders snapshots from GLB 3D models
 │   │
-│   ├── templates/      # HTML templates (Jinja2)
-│   └── static/         # Static assets (CSS, JS, Images)
+│   ├── defects/                    # Defect management module (Blueprint)
+│   │   └── routes.py               # CRUD operations for defects, status updates
+│   │
+│   ├── developer/                  # Developer dashboard module (Blueprint)
+│   │   └── routes.py               # Developer views, analytics, defect tracking
+│   │
+│   ├── templates/                  # Jinja2 HTML templates
+│   │   ├── auth/                   # Login page templates
+│   │   ├── upload_data/            # Inspector dashboard & upload templates
+│   │   ├── process_data/           # 3D viewer and processing templates
+│   │   ├── defects/                # Defect list and detail templates
+│   │   ├── developer/              # Developer dashboard templates
+│   │   └── errors/                 # 404 and 500 error pages
+│   │
+│   └── static/                     # Static assets
+│       ├── css/                    # Stylesheets
+│       ├── js/                     # JavaScript (3D viewer, UI interactions)
+│       └── img/                    # Images and icons
 │
-├── data/               # Folder for persistent data (e.g., files, datasets)
-│   └── example.json    # Example data file used by the app
+├── instance/                       # Instance-specific files (excluded from git)
+│   └── ldms.db                     # SQLite fallback (only if DATABASE_URL not set)
 │
-├── tests/              # Optional folder for unit tests
-│   └── test_basic.py   # Example test file
-│
-├── Dockerfile          # Dockerfile to build the image for Flask app
-├── docker-compose.yml  # Docker Compose configuration for running the app
-├── requirements.txt    # Python dependencies for the app
-└── README.md           # Project description and instructions
+├── Dockerfile                      # Docker image definition (python:3.11-slim + pip)
+├── docker-compose.yml              # Multi-container setup: Flask app + PostgreSQL
+├── requirements.txt                # Python package dependencies
+├── environment.yml                 # Conda environment definition (legacy/reference)
+├── .env.example                    # Environment variable template (copy to .env)
+├── .gitignore                      # Git exclusions (.env, instance/, __pycache__, etc.)
+├── DEPLOYMENT.md                   # Full deployment guide
+└── README.md                       # This file
 ```
-
-## Core Concepts
-
-### Flask Modules (Blueprints)
-
-The app is divided into **three modules** (`module1`, `module2`, `module3`), each defined as a **Flask blueprint**. Blueprints allow for better organization and separation of concerns, making it easier to manage larger Flask applications.
-
-* **`module1/`**: Contains the routes for the first module. Can be accessed via `/module1`.
-* **`module2/`**: Contains the routes for the second module. Can be accessed via `/module2`.
-* **`module3/`**: Contains the routes for the third module. Can be accessed via `/module3`. It also includes an endpoint (`/data`) to fetch data from a file stored in the `data/` folder.
-
-### Docker Setup
-
-The project is set up to run inside a **Docker container**, which allows for consistent environments across different machines.
-
-* The `Dockerfile` specifies how to build the app's image.
-* **Docker Compose** (`docker-compose.yml`) helps to manage the services, including setting up the app container, mounting the code for live updates, and ensuring data persistence.
-
-### Mounted Data Folder
-
-The `data/` folder is **mounted from the host system** into the Docker container to persist data (e.g., uploaded files, JSON data, logs) across container restarts. This means that changes made to files inside the `data/` folder on your machine will be reflected inside the container.
 
 ---
 
-## Setting Up The Application
+## Module Breakdown
 
-### Prerequisites
+### `auth` — Authentication
+Handles user login and logout using **Flask-Login** with session management.
 
-Make sure you have the following installed:
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/login` | GET/POST | Login form, validates credentials |
+| `/logout` | GET | Logs out the current user |
 
-* **Docker**: For containerization and running the app
-* **Docker Compose**: To manage multi-container applications (included with Docker Desktop)
+---
 
-### Install Dependencies
+### `upload_data` — Inspector Dashboard & File Upload
+The **inspector-facing** module. Inspectors upload scan files and manage submissions.
 
-First, make sure you have the required Python dependencies by creating a virtual environment and installing them:
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/inspector` | GET | Inspector dashboard — lists all scans |
+| `/upload` | POST | Upload a new PCD/GLB scan file |
+| `/report/<scan_id>` | GET | Generate and download PDF report for a scan |
+
+Key file: `pdf_utils.py` — handles PDF report generation using scan and defect data.
+
+---
+
+### `process_data` — 3D Data Processing
+Processes uploaded scan files, extracts defect coordinates, and stores them in the database.
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/process/<scan_id>` | GET/POST | Run defect detection on an uploaded scan |
+| `/view/<scan_id>` | GET | 3D viewer for the GLB model |
+| `/snapshot/<scan_id>` | POST | Capture a 2D snapshot from the 3D model |
+
+Key file: `glb_snapshot.py` — renders GLB 3D model frames to generate snapshot images for defect records.
+
+---
+
+### `defects` — Defect CRUD
+Manages individual defect records — viewing, editing, and status changes.
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/defects` | GET | List all defects (filterable) |
+| `/defects/<id>` | GET | View a single defect detail |
+| `/defects/<id>/edit` | POST | Update defect fields (status, priority, notes) |
+| `/defects/<id>/delete` | POST | Delete a defect record |
+
+---
+
+### `developer` — Developer Dashboard & Analytics
+The **developer-facing** module. Provides an overview of all scans, defects, and activity logs.
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/developer` | GET | Developer dashboard — scans and defect summary |
+| `/developer/defects` | GET | Full defect table with filter/sort |
+| `/developer/activity` | GET | Activity log for all defect changes |
+
+---
+
+## Database Schema
+
+The application uses **4 database tables** managed via SQLAlchemy ORM.
+
+```
+┌──────────────┐         ┌───────────────┐
+│    users     │         │     scans     │
+├──────────────┤         ├───────────────┤
+│ id (PK)      │         │ id (PK)       │
+│ username     │         │ name          │
+│ password_hash│         │ model_path    │
+│ role         │         │ created_at    │
+│ created_at   │         └───────┬───────┘
+└──────────────┘                 │ 1
+                                 │
+                              many│
+                         ┌───────▼───────┐
+                         │    defects    │
+                         ├───────────────┤
+                         │ id (PK)       │
+                         │ scan_id (FK)  │
+                         │ x, y, z       │  ← 3D coordinates
+                         │ element       │  ← Mesh/component name
+                         │ location      │  ← Room/area
+                         │ defect_type   │  ← crack, water damage, etc.
+                         │ severity      │  ← Low/Medium/High/Critical
+                         │ priority      │  ← Low/Medium/High/Urgent
+                         │ status        │  ← Reported/Under Review/Fixed
+                         │ description   │
+                         │ image_path    │  ← Snapshot image
+                         │ notes         │
+                         │ created_at    │
+                         └───────┬───────┘
+                                 │ 1
+                                 │
+                              many│
+                    ┌────────────▼────────────┐
+                    │      activity_logs       │
+                    ├─────────────────────────┤
+                    │ id (PK)                 │
+                    │ defect_id (FK)          │
+                    │ scan_id (FK)            │
+                    │ action                  │  ← e.g. "updated status"
+                    │ old_value               │
+                    │ new_value               │
+                    │ timestamp               │
+                    └─────────────────────────┘
+```
+
+---
+
+## User Roles
+
+The system has two roles, set when creating a user via CLI:
+
+| Role | Access | Description |
+|------|--------|-------------|
+| `inspector` | Upload, view reports | Field inspectors who upload scan data |
+| `developer` | Full access + dashboard | Engineers/admins who review and manage defects |
+
+Roles are enforced at the route level using `Flask-Login` and role-property checks.
+
+---
+
+## Tech Stack & Dependencies
+
+| Category | Technology |
+|----------|-----------|
+| **Web Framework** | Flask 3.x |
+| **ORM** | Flask-SQLAlchemy |
+| **Database** | PostgreSQL 16 (via Docker) |
+| **DB Driver** | psycopg2-binary |
+| **Authentication** | Flask-Login |
+| **Forms & CSRF** | Flask-WTF |
+| **3D File Handling** | pygltflib (GLB/glTF) |
+| **PDF Generation** | pypdf |
+| **Image Processing** | Pillow |
+| **WSGI Server** | Gunicorn |
+| **Containerisation** | Docker + Docker Compose |
+| **Migrations** | Flask-Migrate |
+
+---
+
+## Quick Start
 
 ```bash
-pip install -r requirements.txt
+# 1. Clone the repo
+git clone https://github.com/mern64/Lidar-Defect-Management-System-Module.git
+cd Lidar-Defect-Management-System-Module
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env — set SECRET_KEY and confirm DATABASE_URL
+
+# 3. Build and start
+docker compose up --build
+
+# 4. Create your first user (in a new terminal)
+docker exec -it flask_app flask create-user
+
+# 5. Open the app
+open http://localhost:5100
 ```
 
-### Running the App with Docker
-
-1. **Build and run the application** using Docker Compose:
-
-```bash
-docker-compose up --build
-```
-
-2. **Access the application** in your browser at `http://localhost:5000`.
-
-   * **Module 1**: `http://localhost:5000/module1`
-   * **Module 2**: `http://localhost:5000/module2`
-   * **Module 3**: `http://localhost:5000/module3`
-
-   You can also access the data from the `/data` endpoint in **Module 3** (`http://localhost:5000/module3/data`).
-
 ---
 
-## Directory Breakdown
+## Deployment
 
-* **`app/`**: This is the core application code.
-
-  * **`__init__.py`**: Initializes the Flask app and registers the blueprints.
-  * **`config.py`**: Configuration settings such as debug mode, secret keys, etc.
-  * **`module1/`, `module2/`, `module3/`**: Each module is organized as a separate Flask **blueprint**, containing routes and views.
-  * **`templates/`**: Jinja2 HTML templates.
-  * **`static/`**: Static assets like CSS, JavaScript, and images.
-
-* **`data/`**: This folder holds persistent data like JSON files, logs, etc. It is mounted from the host system into the Docker container.
-
-* **`tests/`**: (Optional) Unit tests for the application. These can be added as the app evolves.
-
-* **`Dockerfile`**: Defines the Docker image used to run the Flask app.
-
-* **`docker-compose.yml`**: Manages the Flask app container, volumes, and ports.
-
-* **`requirements.txt`**: Python package dependencies for the project.
-
----
-
-## Development Workflow
-
-### Hot Reloading
-
-During development, the Flask app will automatically reload when you make changes to the code. This is enabled by mounting the project directory as a volume in Docker.
-
-* Code changes will be reflected immediately without needing to rebuild the container.
-
-### Data Persistence
-
-The `data/` folder is **mounted as a volume** inside the container, which ensures that any data (such as uploaded files or logs) remains persistent even when the container is restarted or rebuilt.
-
----
-
-## Testing the App
-
-You can test individual modules by sending HTTP requests to the endpoints:
-
-* **Module 1**: `http://localhost:5000/module1`
-* **Module 2**: `http://localhost:5000/module2`
-* **Module 3**: `http://localhost:5000/module3`
-* **Module 3 Data**: `http://localhost:5000/module3/data`
-
-To add unit tests, create test files inside the `tests/` directory. You can use **pytest** or any other testing framework.
-
----
-
-## Running in Production
-
-For production environments, you can use a WSGI server like **Gunicorn** and deploy behind a reverse proxy like **Nginx**. A production-grade setup would require additional configurations for better performance, security, and scalability.
-
----
-
-## License
-
-MIT License
-
----
-
-## Conclusion
-
-This project is a **modular Flask web application** with a **Docker setup** for easy development and deployment. By organizing the application into **blueprints**, we ensure that the code remains scalable and easy to maintain. Additionally, by mounting the `data/` folder, we ensure that important data is persisted even across Docker container restarts.
-
-Feel free to modify and extend the project for your specific needs!
-
----
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the full guide, including:
+- PostgreSQL credential setup
+- Creating admin users
+- Database backup & restore
+- Pushing updates to GitHub
+- Troubleshooting common issues
