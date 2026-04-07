@@ -20,6 +20,19 @@
             --accent-2: #22d3ee;
         }
 
+        body.light-mode {
+            --bg: #f8fafc;
+            --panel: rgba(0, 0, 0, 0.03);
+            --ink: #0f172a;
+            --muted: #475569;
+            --edge: rgba(0, 0, 0, 0.1);
+            --accent: #7c3aed;
+            --accent-2: #0ea5e9;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -38,6 +51,20 @@
             justify-content: center;
             padding: 2rem;
         }
+        body.light-mode {
+            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
+            color: #0f172a;
+        }
+
+        body.light-mode .header h1 { color: #0f172a; }
+        body.light-mode .header p { color: #475569; }
+        body.light-mode .card h2 { color: #0f172a; }
+        body.light-mode .card p { color: #475569; }
+        body.light-mode .stat-chip .num { color: #0f172a; }
+
+
 
         .dashboard {
             max-width: 900px;
@@ -106,6 +133,16 @@
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
         }
+        body.light-mode .card {
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .stat-chip {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
 
         .card::after {
             content: '';
@@ -302,10 +339,45 @@
                 transform: rotate(360deg);
             }
         }
+    
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
+        body.light-mode h4, body.light-mode h5, body.light-mode h6,
+        body.light-mode .defect-title, body.light-mode .info-value, 
+        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
+            color: #0f172a !important;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea,
+        body.light-mode .coordinates, body.light-mode .defect-id {
+            color: #0f172a !important;
+            border-color: rgba(0,0,0,0.15) !important;
+        }
+        body.light-mode .form-group label {
+            color: #475569 !important;
+        }
+        /* Fix eyebrow badge (INSPECTOR PORTAL) in light mode */
+        body.light-mode .header .eyebrow {
+            color: #5b21b6 !important;
+        }
+        /* Fix stat chips in light mode */
+        body.light-mode .stat-chip {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
     </style>
 </head>
 
 <body>
+    <script>
+      (function() {
+        if (!localStorage.getItem('theme-set')) {
+          document.body.classList.add('light-mode');
+        } else if (localStorage.getItem('theme') === 'light') {
+          document.body.classList.add('light-mode');
+        }
+      })();
+    </script>
+
     <div id="ldms-loader">
         <div class="loader-spinner"></div>
         <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>

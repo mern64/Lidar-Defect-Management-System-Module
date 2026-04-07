@@ -23,6 +23,19 @@
             --danger: #ef4444;
         }
 
+        body.light-mode {
+            --bg: #f8fafc;
+            --panel: rgba(0, 0, 0, 0.03);
+            --ink: #0f172a;
+            --muted: #475569;
+            --edge: rgba(0, 0, 0, 0.1);
+            --accent: #7c3aed;
+            --accent-2: #0ea5e9;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -37,6 +50,12 @@
             min-height: 100vh;
             padding: 1.5rem 1rem 3rem;
         }
+        body.light-mode {
+            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
+        }
+
 
         .bento-grid {
             max-width: 1240px;
@@ -64,6 +83,14 @@
             background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.12), transparent 60%);
             pointer-events: none;
         }
+        body.light-mode .bento-card {
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+        }
+        body.light-mode .bento-card::after {
+            background: radial-gradient(120% 120% at 100% 0%, rgba(124, 58, 237, 0.08), transparent 60%);
+        }
+
 
         .span-2 {
             grid-column: span 2;
@@ -131,6 +158,11 @@
             text-transform: uppercase;
         }
 
+        body.light-mode .eyebrow {
+            color: #0369a1;
+            background: rgba(14, 165, 233, 0.12);
+        }
+
         h1 {
             margin: 0;
             font-size: 2rem;
@@ -138,6 +170,10 @@
             align-items: center;
             gap: 10px;
             color: #f8fafc;
+        }
+
+        body.light-mode h1 {
+            color: #0f172a;
         }
 
         h1 i {
@@ -163,6 +199,11 @@
             background: rgba(255, 255, 255, 0.05);
             font-weight: 700;
             color: #e2e8f0;
+        }
+
+        body.light-mode .chip {
+            color: #1e293b;
+            background: rgba(0, 0, 0, 0.04);
         }
 
         .chip i {
@@ -220,6 +261,12 @@
             border: 1px solid rgba(34, 211, 238, 0.6);
         }
 
+        body.light-mode .select-all-container {
+            background: #f1f5f9;
+            border-color: rgba(14, 165, 233, 0.5);
+            color: #0f172a;
+        }
+
         .defect-checkbox {
             width: 20px;
             height: 20px;
@@ -238,6 +285,12 @@
             border: 1px solid rgba(34, 211, 238, 0.6);
         }
 
+        body.light-mode .bulk-actions-bar {
+            background: #f1f5f9;
+            border-color: rgba(14, 165, 233, 0.5);
+            color: #0f172a;
+        }
+
         .bulk-actions-bar.active {
             display: flex;
         }
@@ -245,6 +298,10 @@
         .count {
             font-weight: 700;
             color: #e0f2fe;
+        }
+
+        body.light-mode .count {
+            color: #0f172a !important;
         }
 
         .bulk-actions-bar select {
@@ -260,6 +317,11 @@
         .locations-card h3 {
             margin: 0 0 0.4rem;
             color: #f8fafc;
+        }
+
+        body.light-mode .charts-card h3,
+        body.light-mode .locations-card h3 {
+            color: #0f172a;
         }
 
         .charts-grid {
@@ -333,6 +395,10 @@
             color: #f8fafc;
         }
 
+        body.light-mode .info-value {
+            color: #0f172a;
+        }
+
         .info-note {
             color: var(--muted);
             font-size: 0.9rem;
@@ -384,6 +450,10 @@
             font-weight: 700;
         }
 
+        body.light-mode .defect-title {
+            color: #0f172a;
+        }
+
         .defect-id {
             background: rgba(34, 211, 238, 0.12);
             color: #e0f2fe;
@@ -391,6 +461,11 @@
             border-radius: 8px;
             font-size: 0.82rem;
             border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        body.light-mode .defect-id {
+            color: #0369a1;
+            background: rgba(14, 165, 233, 0.12);
         }
 
         .status-badge {
@@ -420,6 +495,10 @@
             color: #bbf7d0;
             border-color: rgba(16, 185, 129, 0.35);
         }
+        body.light-mode .status-reported { color: #92400e; }
+        body.light-mode .status-underreview, body.light-mode .status-review { color: #1e40af; }
+        body.light-mode .status-fixed { color: #065f46; }
+
 
         .priority-badge {
             padding: 4px 8px;
@@ -455,6 +534,11 @@
             border-color: rgba(16, 185, 129, 0.35);
         }
 
+        body.light-mode .priority-urgent { color: #9f1239; }
+        body.light-mode .priority-high { color: #92400e; }
+        body.light-mode .priority-medium { color: #1e40af; }
+        body.light-mode .priority-low { color: #065f46; }
+
         .defect-content {
             padding: 1rem;
             display: grid;
@@ -487,6 +571,10 @@
             font-weight: 600;
         }
 
+        body.light-mode .field-value {
+            color: #0f172a;
+        }
+
         .coordinates {
             font-family: 'Courier New', monospace;
             background: rgba(255, 255, 255, 0.04);
@@ -494,6 +582,11 @@
             border-radius: 8px;
             border: 1px solid var(--edge);
             color: #e2e8f0;
+        }
+
+        body.light-mode .coordinates {
+            color: #0f172a;
+            background: rgba(0, 0, 0, 0.04);
         }
 
         .severity-high {
@@ -507,6 +600,10 @@
         .severity-low {
             color: #bbf7d0;
         }
+
+        body.light-mode .severity-high { color: #b91c1c; }
+        body.light-mode .severity-medium { color: #a16207; }
+        body.light-mode .severity-low { color: #15803d; }
 
         .defect-image {
             margin-top: 0.5rem;
@@ -547,6 +644,10 @@
             color: #e2e8f0;
         }
 
+        body.light-mode .form-group label {
+            color: #334155;
+        }
+
         .form-group select,
         .form-group textarea {
             width: 100%;
@@ -556,6 +657,13 @@
             background: rgba(255, 255, 255, 0.05);
             color: #f8fafc;
             font-weight: 600;
+        }
+
+        body.light-mode .form-group select,
+        body.light-mode .form-group textarea {
+            background: rgba(255, 255, 255, 0.85);
+            color: #0f172a;
+            border-color: rgba(0, 0, 0, 0.15);
         }
 
         .form-group textarea {
@@ -576,6 +684,10 @@
             font-size: 3.2rem;
             color: rgba(255, 255, 255, 0.35);
             margin-bottom: 0.8rem;
+        }
+
+        body.light-mode .empty-state i {
+            color: rgba(0, 0, 0, 0.3);
         }
 
         .empty-state h3 {
@@ -777,10 +889,82 @@
                 transform: rotate(360deg);
             }
         }
+    
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
+        body.light-mode h4, body.light-mode h5, body.light-mode h6,
+        body.light-mode .defect-title, body.light-mode .info-value, 
+        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
+            color: #0f172a !important;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea,
+        body.light-mode .coordinates, body.light-mode .defect-id {
+            color: #0f172a !important;
+            border-color: rgba(0,0,0,0.15) !important;
+        }
+        body.light-mode input { background: rgba(255,255,255,0.85) !important; }
+        body.light-mode select { background: rgba(255,255,255,0.85) !important; }
+        body.light-mode .form-group label {
+            color: #475569 !important;
+        }
+        /* Status count chips in light mode */
+        .chip-fixed {
+            background: rgba(16,185,129,0.14);
+            border-color: rgba(16,185,129,0.25);
+            color: #ccf4e0;
+        }
+        .chip-review {
+            background: rgba(59,130,246,0.14);
+            border-color: rgba(59,130,246,0.25);
+            color: #dbeafe;
+        }
+        .chip-reported {
+            background: rgba(245,158,11,0.16);
+            border-color: rgba(245,158,11,0.35);
+            color: #fcd34d;
+        }
+        body.light-mode .chip-fixed { color: #065f46 !important; }
+        body.light-mode .chip-review { color: #1e40af !important; }
+        body.light-mode .chip-reported { color: #92400e !important; }
+        /* House Details & Insights h2 in light mode */
+        body.light-mode .house-h2,
+        body.light-mode .insights-h2 { color: #0f172a; }
+        /* Search/sort inline inputs override */
+        body.light-mode .search-input {
+            background: rgba(255,255,255,0.85) !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .sort-select {
+            background: rgba(255,255,255,0.85) !important;
+            color: #0f172a !important;
+        }
+        /* Toast light mode */
+        body.light-mode .toast {
+            background: #fff !important;
+            color: #0f172a !important;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        body.light-mode .toast.success { border-left: 4px solid #22c55e; }
+        body.light-mode .toast.error { border-left: 4px solid #ef4444; }
+        body.light-mode .toast.info { border-left: 4px solid #3b82f6; }
+        /* Heatmap location text */
+        body.light-mode .heat-row > div:first-child { color: #0f172a !important; }
+        body.light-mode .heat-row > div:nth-child(2) { color: #334155 !important; }
+
     </style>
 </head>
 
 <body>
+    <script>
+      (function() {
+        if (!localStorage.getItem('theme-set')) {
+          document.body.classList.add('light-mode');
+        } else if (localStorage.getItem('theme') === 'light') {
+          document.body.classList.add('light-mode');
+        }
+      })();
+    </script>
+
     <div id="ldms-loader">
         <div class="loader-spinner"></div>
         <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
@@ -818,14 +1002,11 @@
                     scan.created_at else 'Unknown date' }}</span>
                 <span class="chip"><i class="fas fa-file"></i> {{ scan.model_path.split('/')[-1] if scan.model_path else
                     'No model file' }}</span>
-                <span class="chip"
-                    style="background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.25); color: #ccf4e0;"><i
+                <span class="chip chip-fixed"><i
                         class="fas fa-check-circle"></i> {{ fixed_count }} fixed</span>
-                <span class="chip"
-                    style="background: rgba(59,130,246,0.14); border-color: rgba(59,130,246,0.25); color: #dbeafe;"><i
+                <span class="chip chip-review"><i
                         class="fas fa-hourglass-half"></i> {{ review_count }} under review</span>
-                <span class="chip"
-                    style="background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.35); color: #fcd34d;"><i
+                <span class="chip chip-reported"><i
                         class="fas fa-flag"></i> {{ reported_count }} reported</span>
             </div>
             <div class="actions">
@@ -838,7 +1019,7 @@
 
         <section class="bento-card span-2 house-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
-                <h2 style="margin: 0; color: #f8fafc;">House Details</h2>
+                <h2 class="house-h2" style="margin: 0;">House Details</h2>
                 <span class="chip" style="background: rgba(255,255,255,0.05); color: var(--muted);">From latest
                     upload</span>
             </div>
@@ -873,7 +1054,7 @@
                 {% if meta.notes %}
                 <div class="info-item" style="grid-column: span 2;">
                     <div class="info-label">Notes</div>
-                    <div class="info-value" style="font-weight: 600; color: #cbd5f5;">{{ meta.notes }}</div>
+                    <div class="info-value">{{ meta.notes }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -892,10 +1073,12 @@
                         style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted);"></i>
                     <input type="text" name="search" value="{{ search_query or '' }}"
                         placeholder="Search defects by location, type, severity, or notes..."
+                        class="search-input"
                         style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.8rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-size: 1rem; outline: none; transition: border-color 0.2s;">
                 </div>
 
                 <select name="sort_by" onchange="this.form.submit()"
+                    class="sort-select"
                     style="padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,0.05); color: #f8fafc; font-weight: 600; cursor: pointer; outline: none;">
                     <option value="created_desc" {% if sort_by=='created_desc' %}selected{% endif %}>Newest First
                     </option>
@@ -952,7 +1135,7 @@
 
         <section class="bento-card span-2 charts-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h2 style="margin: 0; color: #f8fafc;">Insights</h2>
+                <h2 class="insights-h2" style="margin: 0;">Insights</h2>
                 <span class="chip" style="background: rgba(255,255,255,0.05); color: var(--muted);">Auto-updated</span>
             </div>
             <div class="charts-grid">
@@ -1245,7 +1428,7 @@
             if (statusChart) statusChart.destroy();
             statusChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: Object.keys(statusData), datasets: [{ data: Object.values(statusData), backgroundColor: ['#f97316', '#3b82f6', '#10b981'], borderColor: '#0b1020', borderWidth: 2 }] },
+                data: { labels: Object.keys(statusData), datasets: [{ data: Object.values(statusData), backgroundColor: ['#f97316', '#3b82f6', '#10b981'], borderColor: document.body.classList.contains('light-mode') ? '#fff' : '#0b1020', borderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { color: varThemeColor() } } } }
             });
         }
@@ -1257,7 +1440,7 @@
             priorityChart = new Chart(ctx, {
                 type: 'bar',
                 data: { labels: Object.keys(priorityData), datasets: [{ label: 'Count', data: Object.values(priorityData), backgroundColor: Object.keys(priorityData).map(p => priorityColors[p] || '#6b7280'), borderRadius: 6, borderSkipped: false }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#1f2937' } }, y: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: varGridColor() }, ticks: { color: varThemeColor() } }, y: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
             });
         }
 
@@ -1268,8 +1451,8 @@
             const counts = dates.map(d => trendData[d]);
             trendChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })), datasets: [{ label: 'Defects Created', data: counts, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.14)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7c3aed', pointBorderColor: '#0b1020', pointBorderWidth: 2 }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: true, position: 'top', labels: { color: varThemeColor() } } }, scales: { y: { beginAtZero: true, grid: { color: '#1f2937' }, ticks: { color: varThemeColor() } }, x: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
+                data: { labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })), datasets: [{ label: 'Defects Created', data: counts, borderColor: '#22d3ee', backgroundColor: 'rgba(34,211,238,0.14)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#7c3aed', pointBorderColor: document.body.classList.contains('light-mode') ? '#fff' : '#0b1020', pointBorderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: true, position: 'top', labels: { color: varThemeColor() } } }, scales: { y: { beginAtZero: true, grid: { color: varGridColor() }, ticks: { color: varThemeColor() } }, x: { grid: { display: false }, ticks: { color: varThemeColor() } } } }
             });
         }
 
@@ -1291,8 +1474,8 @@
                         const intensity = maxWeight > 0 ? (data.priority_weights[idx] / maxWeight) * 100 : 0;
                         html += `
                             <div class="heat-row">
-                                <div style="flex: 0 0 160px; font-weight: 700; color: #f8fafc;">${location}</div>
-                                <div style="color: #cbd5e1; width: 60px; text-align: right;">${count}</div>
+                                <div style="flex: 0 0 160px; font-weight: 700; color: ${varThemeColor()};">${location}</div>
+                                <div style="color: ${varThemeColor()}; opacity: 0.75; width: 60px; text-align: right;">${count}</div>
                                 <div class="heat-bar"><span style="width: ${intensity}%;"></span></div>
                             </div>
                         `;
@@ -1303,7 +1486,13 @@
                 .catch(error => console.error('Error loading heatmap:', error));
         }
 
-        function varThemeColor() { return '#e2e8f0'; }
+        function varThemeColor() {
+            return document.body.classList.contains('light-mode') ? '#1e293b' : '#e2e8f0';
+        }
+
+        function varGridColor() {
+            return document.body.classList.contains('light-mode') ? 'rgba(0,0,0,0.08)' : '#1f2937';
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             loadChartsData();

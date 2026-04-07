@@ -25,6 +25,29 @@
       min-height: 100vh;
       padding: 2rem;
     }
+        body.light-mode {
+            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
+            color: #0f172a;
+        }
+        body.light-mode h1 { color: #0f172a; }
+        body.light-mode label { color: #334155; }
+        body.light-mode .card { background: rgba(255,255,255,0.92) !important; border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 30px rgba(15,23,42,0.1); }
+        body.light-mode input[type=text],
+        body.light-mode input[type=date],
+        body.light-mode input[type=file],
+        body.light-mode textarea {
+            background: rgba(255,255,255,0.9);
+            color: #0f172a;
+            border-color: rgba(0,0,0,0.15);
+        }
+        body.light-mode .help { color: #475569; }
+        body.light-mode .back-link { color: #475569; }
+        body.light-mode .flash.error { color: #991b1b; background: rgba(239,68,68,0.1); }
+        body.light-mode .flash.success { color: #166534; background: rgba(34,197,94,0.1); }
+
+
 
     .card {
       max-width: 640px;
@@ -295,10 +318,36 @@
         transform: rotate(360deg);
       }
     }
-  </style>
+  
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
+        body.light-mode h4, body.light-mode h5, body.light-mode h6,
+        body.light-mode .defect-title, body.light-mode .info-value, 
+        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
+            color: #0f172a !important;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea,
+        body.light-mode .coordinates, body.light-mode .defect-id {
+            color: #0f172a !important;
+            border-color: rgba(0,0,0,0.15) !important;
+        }
+        body.light-mode .form-group label {
+            color: #475569 !important;
+        }
+
+    </style>
 </head>
 
 <body>
+    <script>
+      (function() {
+        if (!localStorage.getItem('theme-set')) {
+          document.body.classList.add('light-mode');
+        } else if (localStorage.getItem('theme') === 'light') {
+          document.body.classList.add('light-mode');
+        }
+      })();
+    </script>
+
   <!-- Loading overlay -->
   <div id="ldms-loader">
     <div class="loader-spinner"></div>

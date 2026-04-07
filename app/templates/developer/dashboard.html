@@ -197,6 +197,10 @@
             font-size: 0.95rem;
         }
 
+        body.light-mode .search-box input {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
         .search-box i {
             position: absolute;
             left: 0.95rem;
@@ -225,6 +229,10 @@
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-weight: 600;
+        }
+
+        body.light-mode .sort-select {
+            background: rgba(255, 255, 255, 0.85);
         }
 
         .sort-select option {
@@ -408,21 +416,25 @@
 
         .status-reported {
             background: rgba(245, 158, 11, 0.18);
-            color: #fcd34d;
+            color: #92400e;
             border-color: rgba(245, 158, 11, 0.35);
         }
 
         .status-review {
             background: rgba(59, 130, 246, 0.16);
-            color: #bfdbfe;
+            color: #1e40af;
             border-color: rgba(59, 130, 246, 0.35);
         }
 
         .status-fixed {
             background: rgba(16, 185, 129, 0.16);
-            color: #bbf7d0;
+            color: #065f46;
             border-color: rgba(16, 185, 129, 0.35);
         }
+
+        body:not(.light-mode) .status-reported { color: #fcd34d; }
+        body:not(.light-mode) .status-review { color: #bfdbfe; }
+        body:not(.light-mode) .status-fixed { color: #bbf7d0; }
 
         .progress-container {
             margin-top: 0.7rem;
@@ -568,6 +580,50 @@
                 transform: rotate(360deg);
             }
         }
+    
+        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
+        body.light-mode h4, body.light-mode h5, body.light-mode h6,
+        body.light-mode .defect-title, body.light-mode .info-value, 
+        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
+            color: #0f172a !important;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea,
+        body.light-mode .coordinates, body.light-mode .defect-id {
+            color: #0f172a !important;
+            border-color: rgba(0,0,0,0.15) !important;
+        }
+        body.light-mode input { background: rgba(255,255,255,0.85) !important; }
+        body.light-mode select { background: rgba(255,255,255,0.85) !important; }
+        body.light-mode .form-group label {
+            color: #475569 !important;
+        }
+        /* Stat card text overrides for light mode */
+        body.light-mode .stat-urgent-h { color: #991b1b !important; }
+        body.light-mode .stat-urgent-num { color: #7f1d1d !important; }
+        body.light-mode .stat-urgent-p { color: #b91c1c !important; }
+        body.light-mode .stat-stale-h { color: #92400e !important; }
+        body.light-mode .stat-stale-num { color: #78350f !important; }
+        body.light-mode .stat-stale-p { color: #a16207 !important; }
+        body.light-mode .stat-new-h { color: #1e3a8a !important; }
+        body.light-mode .stat-new-num { color: #1e40af !important; }
+        body.light-mode .stat-new-p { color: #1d4ed8 !important; }
+        /* Dark-only stat defaults */
+        body:not(.light-mode) .stat-urgent-h { color: #fca5a5; }
+        body:not(.light-mode) .stat-urgent-num { color: #fecdd3; }
+        body:not(.light-mode) .stat-urgent-p { color: rgba(254,205,211,0.7); }
+        body:not(.light-mode) .stat-stale-h { color: #fcd34d; }
+        body:not(.light-mode) .stat-stale-num { color: #fde68a; }
+        body:not(.light-mode) .stat-stale-p { color: rgba(253,230,138,0.7); }
+        body:not(.light-mode) .stat-new-h { color: #bfdbfe; }
+        body:not(.light-mode) .stat-new-num { color: #dbeafe; }
+        body:not(.light-mode) .stat-new-p { color: rgba(219,234,254,0.7); }
+        /* Pill and project-id in light mode */
+        body.light-mode .pill { color: #475569; background: rgba(0,0,0,0.05); }
+        body.light-mode .project-id { background: rgba(0,0,0,0.05); color: #334155; }
+        body.light-mode .progress-bar { background: rgba(0,0,0,0.1); }
+        /* Logout link better contrast in light mode */
+        body.light-mode a[style*='fca5a5'] { color: #b91c1c !important; background: rgba(239,68,68,0.12) !important; }
+
     </style>
 </head>
 
@@ -662,25 +718,25 @@
             </div>
             <div class="stats-grid">
                 <!-- Actionable Metrics -->
-                <div class="stat-card"
+                <div class="stat-card stat-urgent"
                     style="border-color: rgba(239,68,68,0.35); background: linear-gradient(160deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));">
-                    <h3 style="color: #fca5a5;"><i class="fas fa-fire" style="color: #ef4444;"></i> Urgent Items</h3>
-                    <div class="stat-number" style="color: #fecdd3;">{{ metrics.urgent_attention }}</div>
-                    <p style="color: rgba(254,205,211,0.7);">High priority needing fix</p>
+                    <h3 class="stat-urgent-h"><i class="fas fa-fire" style="color: #ef4444;"></i> Urgent Items</h3>
+                    <div class="stat-number stat-urgent-num">{{ metrics.urgent_attention }}</div>
+                    <p class="stat-urgent-p">High priority needing fix</p>
                 </div>
 
-                <div class="stat-card"
+                <div class="stat-card stat-stale"
                     style="border-color: rgba(245,158,11,0.35); background: linear-gradient(160deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04));">
-                    <h3 style="color: #fcd34d;"><i class="fas fa-clock" style="color: #f59e0b;"></i> Stale Reviews</h3>
-                    <div class="stat-number" style="color: #fde68a;">{{ metrics.stale_reviews }}</div>
-                    <p style="color: rgba(253,230,138,0.7);">Pending > 7 days</p>
+                    <h3 class="stat-stale-h"><i class="fas fa-clock" style="color: #f59e0b;"></i> Stale Reviews</h3>
+                    <div class="stat-number stat-stale-num">{{ metrics.stale_reviews }}</div>
+                    <p class="stat-stale-p">Pending > 7 days</p>
                 </div>
 
-                <div class="stat-card"
+                <div class="stat-card stat-new"
                     style="border-color: rgba(59,130,246,0.35); background: linear-gradient(160deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04));">
-                    <h3 style="color: #bfdbfe;"><i class="fas fa-bolt" style="color: #3b82f6;"></i> New (24h)</h3>
-                    <div class="stat-number" style="color: #dbeafe;">{{ metrics.new_24h }}</div>
-                    <p style="color: rgba(219,234,254,0.7);">Defects reported today</p>
+                    <h3 class="stat-new-h"><i class="fas fa-bolt" style="color: #3b82f6;"></i> New (24h)</h3>
+                    <div class="stat-number stat-new-num">{{ metrics.new_24h }}</div>
+                    <p class="stat-new-p">Defects reported today</p>
                 </div>
 
                 <!-- General Stats -->
@@ -823,12 +879,12 @@
         }
 
         function toggleTheme() {
-            const current = localStorage.getItem('dashboard-theme') || 'dark';
+            const current = localStorage.getItem('dashboard-theme') || 'light';
             applyTheme(current === 'dark' ? 'light' : 'dark');
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            applyTheme(localStorage.getItem('dashboard-theme') || 'dark');
+            applyTheme(localStorage.getItem('dashboard-theme') || 'light');
             const toggle = document.getElementById('themeToggle');
             if (toggle) {
                 toggle.addEventListener('click', toggleTheme);
