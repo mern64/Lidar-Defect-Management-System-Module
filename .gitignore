@@ -74,3 +74,4 @@ nosetests.xml
 
 # Ignore environment variable files (contain secrets)
 .env
+.env

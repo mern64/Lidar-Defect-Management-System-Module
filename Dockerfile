@@ -1,28 +1,38 @@
-# Use Miniforge as the base image
-FROM condaforge/mambaforge:latest
+# ────────────────────────────────────────────────────
+# PCD — Flask Application Dockerfile
+# Base: Python 3.11 slim (lightweight, no Conda needed)
+# ────────────────────────────────────────────────────
 
-# Set the working directory inside the container
+FROM python:3.11-slim
+
+# System dependencies needed for psycopg2 & Pillow builds
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy the environment.yml to the container and create the conda environment
-COPY environment.yml .
+# Install Python dependencies first (Docker layer cache optimisation)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Create conda environment from environment.yml (environment.yml defines `name: pcd`)
-RUN conda env create -f environment.yml
+# Copy the rest of the project
+COPY . .
 
-# Use a bash shell for subsequent RUN/CMD
-SHELL ["/bin/bash", "-lc"]
-
-# Copy the entire project into the container
-COPY . /usr/src/app
-
-# Expose the port Flask will run on
+# Expose the Flask port
 EXPOSE 5000
 
-# Set environment variables (Flask auto-discovers create_app factory)
+# Environment variables
 ENV FLASK_APP=app
-ENV FLASK_ENV=development
+ENV FLASK_ENV=production
 ENV PYTHONPATH=/usr/src/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Default command: run Flask inside the conda environment named 'pcd'
-CMD ["conda", "run", "--no-capture-output", "-n", "pcd", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+# Entrypoint: run the app with Gunicorn (production WSGI server)
+# For development (reload), override in docker-compose.yml
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:create_app()"]
