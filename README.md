@@ -140,11 +140,10 @@ The **inspector-facing** module. Inspectors upload scan files and manage submiss
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/inspector` | GET | Inspector dashboard — lists all scans |
-| `/upload` | POST | Upload a new PCD/GLB scan file |
-| `/report/<scan_id>` | GET | Generate and download PDF report for a scan |
+| `/upload` | POST | Upload a new PCD/GLB scan file + PDF Report |
+| `/view/<id>` | GET | View the 3D model and extracted images |
 
-Key file: `pdf_utils.py` — handles PDF report generation using scan and defect data.
+Key file: `pdf_utils.py` — handles extraction of defect images from uploaded PDF inspection reports.
 
 ---
 

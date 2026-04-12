@@ -39,7 +39,8 @@ This document tracks the evolution of the **LiDAR Defect Management System (LDMS
     - **Developer**: Permissions to track progress, update repair notes, and change defect status.
 - **Permission Guarding**: Manual priority overrides are restricted for Developers to ensure repair teams focus on AI-driven risk targets; only Inspectors or the AI logic can influence priority rankings.
 
-## 📄 Reporting & Integrations
-- **PDF Report Engine**: Professional PDF generation containing scan metadata, defect snapshots, and repair logs.
+## 📄 Data Integration & Orchestration
+- **PDF Image Extraction Engine**: Professional extraction of embedded images from uploaded PDF inspection reports, ensuring defect records are visually linked to field notes.
 - **Email Notifications**: Integration for notifying team members of status changes (Reported -> Fixed).
 - **Dockerized Deployment**: Fully containerized stack for consistent development and production environments.
+
