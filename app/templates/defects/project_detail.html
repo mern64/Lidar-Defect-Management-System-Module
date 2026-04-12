@@ -450,6 +450,70 @@
         }
         body.light-mode .legend-dot { box-shadow: 0 0 0 2px rgba(255,255,255,0.6); }
 
+        /* Bento Grid Layout */
+        .bento-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .bento-card {
+            position: relative;
+            padding: 1.5rem;
+            border-radius: 20px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        body.light-mode .bento-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 1100px) {
+            .span-2, .span-3 {
+                grid-column: span 1;
+            }
+        }
+
+        .insights-h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin: 0;
+        }
+        body.light-mode .insights-h2 { color: #0f172a; }
+
+        .chip {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        body.light-mode .chip {
+            background: rgba(0, 0, 0, 0.05);
+            color: #475569;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
     </style>
 </head>
 
@@ -464,7 +528,8 @@
       })();
     </script>
 
-    <div class="container">
+
+    <div class="container" style="max-width: 1300px; padding: 2rem 1rem;">
         <!-- Top bar -->
         <div class="top-bar">
             <div class="breadcrumb">
@@ -477,67 +542,86 @@
             </a>
         </div>
 
-        <!-- Header card -->
-        <div class="header-card">
-            <h1><i class="fas fa-cube"></i> {{ scan.name }}</h1>
-            <p class="subtitle">Project details and defect overview</p>
+        <main class="bento-grid">
+            <!-- Hero Card -->
+            <section class="bento-card span-2 hero-card" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                    <div>
+                        <span class="chip" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); margin-bottom: 0.75rem;">Project Scan</span>
+                        <h1 style="font-size: 2.4rem; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.03em;">{{ scan.name }}</h1>
+                        <p style="color: #94a3b8; margin-top: 0.5rem; font-size: 1.1rem;">AI-powered spatial defect analysis and tracking.</p>
+                    </div>
+                </div>
 
-            {% if upload_metadata %}
-            <div class="meta-grid">
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-calendar"></i> Scan Date</div>
-                    <div class="meta-value">{{ upload_metadata.scan_date }}</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-map-marker-alt"></i> Location</div>
-                    <div class="meta-value">{{ upload_metadata.location }}</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-user-shield"></i> Inspector</div>
-                    <div class="meta-value">{{ upload_metadata.inspector }}</div>
-                </div>
-                {% if upload_metadata.notes %}
-                <div class="meta-item">
-                    <div class="meta-label"><i class="fas fa-sticky-note"></i> Notes</div>
-                    <div class="meta-value">{{ upload_metadata.notes }}</div>
+                {% if upload_metadata %}
+                <div class="meta-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem;">
+                    <div class="meta-item" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Scan Date</div>
+                        <div style="font-size: 1.1rem; color: #f1f5f9; font-weight: 600;">{{ upload_metadata.scan_date }}</div>
+                    </div>
+                    <div class="meta-item" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Location</div>
+                        <div style="font-size: 1.1rem; color: #f1f5f9; font-weight: 600;">{{ upload_metadata.location }}</div>
+                    </div>
+                    <div class="meta-item" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px;">
+                        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Inspector</div>
+                        <div style="font-size: 1.1rem; color: #f1f5f9; font-weight: 600;">{{ upload_metadata.inspector }}</div>
+                    </div>
                 </div>
                 {% endif %}
-            </div>
-            {% endif %}
-        </div>
+            </section>
 
-        {% if defects %}
-        <!-- Calculate defect severity counts directly in Jinja -->
-        {% set total_defects = defects|length %}
-        {% set _critical = namespace(count=0) %}
-        {% set _high = namespace(count=0) %}
-        {% set _medium = namespace(count=0) %}
-        {% set _low = namespace(count=0) %}
-        
-        {% for d in defects %}
-            {% if d.severity == 'Critical' %}{% set _critical.count = _critical.count + 1 %}{% endif %}
-            {% if d.severity == 'High' %}{% set _high.count = _high.count + 1 %}{% endif %}
-            {% if d.severity == 'Medium' %}{% set _medium.count = _medium.count + 1 %}{% endif %}
-            {% if d.severity == 'Low' %}{% set _low.count = _low.count + 1 %}{% endif %}
-        {% endfor %}
 
-        <div class="severity-breakdown">
-            <h2>Severity Breakdown</h2>
-            
-            <div class="severity-bar">
-                <div class="bar-segment critical" style="width: {{ (_critical.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Critical: {{ _critical.count }}"></div>
-                <div class="bar-segment high" style="width: {{ (_high.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="High: {{ _high.count }}"></div>
-                <div class="bar-segment medium" style="width: {{ (_medium.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Medium: {{ _medium.count }}"></div>
-                <div class="bar-segment low" style="width: {{ (_low.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Low: {{ _low.count }}"></div>
-            </div>
-            
-            <div class="severity-legend">
-                <div class="legend-item"><div class="legend-dot critical" style="background:#ef4444;"></div> Critical: <span class="count">{{ _critical.count }}</span></div>
-                <div class="legend-item"><div class="legend-dot high" style="background:#f97316;"></div> High: <span class="count">{{ _high.count }}</span></div>
-                <div class="legend-item"><div class="legend-dot medium" style="background:#eab308;"></div> Medium: <span class="count">{{ _medium.count }}</span></div>
-                <div class="legend-item"><div class="legend-dot low" style="background:#22c55e;"></div> Low: <span class="count">{{ _low.count }}</span></div>
-            </div>
-        </div>
+            <!-- Severity Card -->
+            <section class="bento-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="insights-h2">Severity</h2>
+                    <span class="chip" style="background: rgba(255,255,255,0.05);">Weighted Breakdown</span>
+                </div>
+                <div class="severity-bar" style="height: 12px; border-radius: 999px; overflow: hidden; display: flex; background: rgba(0,0,0,0.2); margin-bottom: 1.5rem;">
+                    <div class="bar-segment critical" style="width: {{ (_critical.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                    <div class="bar-segment high" style="width: {{ (_high.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                    <div class="bar-segment medium" style="width: {{ (_medium.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                    <div class="bar-segment low" style="width: {{ (_low.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                    <div class="legend-item"><div class="legend-dot critical" style="background:#ef4444;"></div> Critical: <strong style="color: #ffffff;">{{ _critical.count }}</strong></div>
+                    <div class="legend-item"><div class="legend-dot high" style="background:#f97316;"></div> High: <strong style="color: #ffffff;">{{ _high.count }}</strong></div>
+                    <div class="legend-item"><div class="legend-dot medium" style="background:#eab308;"></div> Medium: <strong style="color: #ffffff;">{{ _medium.count }}</strong></div>
+                    <div class="legend-item"><div class="legend-dot low" style="background:#22c55e;"></div> Low: <strong style="color: #ffffff;">{{ _low.count }}</strong></div>
+                </div>
+            </section>
+
+            <!-- Priority Card -->
+            {% set _urgent_p = namespace(count=0) %}{% set _high_p = namespace(count=0) %}{% set _medium_p = namespace(count=0) %}{% set _low_p = namespace(count=0) %}
+            {% for d in defects %}{% set p = d.priority or 'Medium' %}
+                {% if p == 'Urgent' %}{% set _urgent_p.count = _urgent_p.count + 1 %}{% endif %}
+                {% if p == 'High' %}{% set _high_p.count = _high_p.count + 1 %}{% endif %}
+                {% if p == 'Medium' %}{% set _medium_p.count = _medium_p.count + 1 %}{% endif %}
+                {% if p == 'Low' %}{% set _low_p.count = _low_p.count + 1 %}{% endif %}
+            {% endfor %}
+            <section class="bento-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="insights-h2">Priority</h2>
+                    <span class="chip" style="background: rgba(255,158,11,0.1); color: #f59e0b;">Action Required</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="width: 70px; font-size: 0.8rem; font-weight: 700; color: #ef4444;">URGENT</span>
+                        <div style="flex: 1; height: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; background: #ef4444; width: {{ (_urgent_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                        </div>
+                        <span style="width: 20px; text-align: right; color: #ffffff; font-weight: 800;">{{ _urgent_p.count }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="width: 70px; font-size: 0.8rem; font-weight: 700; color: #f59e0b;">HIGH</span>
+                        <div style="flex: 1; height: 8px; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; background: #f59e0b; width: {{ (_high_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div>
+                        </div>
+                        <span style="width: 20px; text-align: right; color: #ffffff; font-weight: 800;">{{ _high_p.count }}</span>
+                    </div>
+                </div>
+            </section>
         
         <style>
             .priority-list {
@@ -626,58 +710,107 @@
                     <div class="priority-count">{{ _low_p.count }}</div>
                 </div>
             </div>
-        </div>
-        {% endif %}
 
-        <!-- Defects table -->
-        <div class="table-card">
-            <h2><i class="fas fa-bug"></i> Defects <span class="badge-count">{{ defects|length }}</span></h2>
-            {% if defects %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Location</th>
-                        <th>Type</th>
-                        <th>Severity</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for defect in defects %}
-                    <tr>
-                        <td><strong>#{{ defect.id }}</strong></td>
-                        <td>{{ defect.location or 'Not specified' }}</td>
-                        <td>{{ defect.defect_type or 'Unknown' }}</td>
-                        <td><span class="severity-{{ defect.severity.lower() }}">{{ defect.severity }}</span></td>
-                        <td><span class="status-badge status-{{ defect.status.lower().replace(' ', '') }}">{{
-                                defect.status }}</span></td>
-                        <td>{{ defect.notes or '—' }}</td>
-                        <td>{{ defect.created_at.strftime('%Y-%m-%d') if defect.created_at else '—' }}</td>
-                    </tr>
+            <!-- AI Hotspots Card -->
+            <section class="bento-card span-2 hotspots-card" style="border-left: 5px solid #ef4444; background: linear-gradient(160deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 class="insights-h2" style="font-size: 1.6rem; color: #ffffff;"><i class="fas fa-microchip" style="color: #ef4444; margin-right: 0.75rem;"></i> AI Spatial Insights</h2>
+                    <span class="chip" style="background: #ef4444; color: white; border: none; font-weight: 900; padding: 6px 16px; letter-spacing: 0.05em;">ACTIVE ANALYSIS</span>
+                </div>
+                
+                {% if hotspots %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+                    {% for spot in hotspots %}
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.75rem; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
+                        <div style="position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #ef4444;"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+                            <div>
+                                <div style="color: #ef4444; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Verified Cluster</div>
+                                <h3 style="color: #000000; font-size: 1.6rem; font-weight: 900; margin: 0;">HOTSPOT #{{ spot.id }}</h3>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: #000000; font-weight: 900; font-size: 1.8rem; line-height: 1;">{{ spot.count }}</div>
+                                <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em;">DEFECTS</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                            {% for loc in spot.locations %}
+                            <span style="font-size: 1rem; color: #ffffff; background: rgba(59, 130, 246, 0.6); padding: 8px 16px; border-radius: 12px; font-weight: 900; border: 1px solid rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ loc }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
+                            <span style="font-size: 0.95rem; color: #94a3b8; font-weight: 600;"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> {{ spot.critical_count }} Critical issues</span>
+                            <span style="color: #ef4444; font-weight: 900; font-size: 0.9rem;">HIGH RISK ZONE</span>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-check-circle"></i>
-                <p>No defects found for this project.</p>
-            </div>
-            {% endif %}
-        </div>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 4rem 2rem; background: rgba(0,0,0,0.1); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-radar fa-spin-pulse" style="font-size: 3rem; color: #475569; margin-bottom: 1.5rem; opacity: 0.5;"></i>
+                    <h3 style="color: #94a3b8; font-size: 1.3rem;">No Critical Clusters Detected</h3>
+                    <p style="color: #64748b; margin-top: 0.5rem;">The AI analyzer is active and monitoring spatial defect density in real-time.</p>
+                </div>
+                {% endif %}
+            </section>
+        {% endif %}
+            <!-- Table Card -->
+            <section class="bento-card span-2 table-card" style="padding: 0;">
+                <div style="padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+                    <h2 class="insights-h2"><i class="fas fa-bug"></i> Defect Master Log</h2>
+                    <span class="chip">{{ defects|length }} Total Reports</span>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+                        <thead>
+                            <tr style="background: rgba(0,0,0,0.2);">
+                                <th style="padding: 1.25rem 2rem; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Ref ID</th>
+                                <th style="padding: 1.25rem 2rem; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Location</th>
+                                <th style="padding: 1.25rem 2rem; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Type</th>
+                                <th style="padding: 1.25rem 2rem; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Severity & Risk</th>
+                                <th style="padding: 1.25rem 2rem; text-align: left; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for defect in defects %}
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                <td style="padding: 1.25rem 2rem; color: #ffffff; font-weight: 800;">#{{ defect.id }}</td>
+                                <td style="padding: 1.25rem 2rem; color: #f1f5f9;">{{ defect.location or 'Not specified' }}</td>
+                                <td style="padding: 1.25rem 2rem; color: #f1f5f9;">{{ defect.defect_type or 'Unknown' }}</td>
+                                <td style="padding: 1.25rem 2rem;">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <span class="severity-{{ defect.severity.lower() }}" style="font-weight: 900; font-size: 0.9rem;">{{ defect.severity }}</span>
+                                        <div style="height: 4px; width: 60px; background: rgba(0,0,0,0.2); border-radius: 2px;">
+                                            <div style="height: 100%; width: {{ defect.risk_score or 0 }}%; background: {% if defect.severity == 'Critical' %}#ef4444{% elif defect.severity == 'High' %}#f97316{% elif defect.severity == 'Medium' %}#eab308{% else %}#22c55e{% endif %}; border-radius: 2px;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 1.25rem 2rem;">
+                                    <span class="status-badge status-{{ defect.status.lower().replace(' ', '') }}" style="font-size: 0.75rem; padding: 4px 10px; font-weight: 700;">
+                                        {{ defect.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-        <!-- Action buttons -->
-        <div class="actions">
-            <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}" class="btn btn-primary">
-                <i class="fas fa-cube"></i> View 3D Model
-            </a>
-            <a href="{{ url_for('defects.list_projects') }}" class="btn btn-outline">
-                <i class="fas fa-arrow-left"></i> Back to Projects
-            </a>
-        </div>
+                <!-- Action Footer inside card -->
+                <div style="padding: 1.5rem 2rem; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <a href="{{ url_for('defects.list_projects') }}" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <div style="display: flex; gap: 1rem;">
+                        <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 700;">
+                            <i class="fas fa-cube"></i> Launch AI 3D Model
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-</body>
-
 </html>

@@ -165,13 +165,67 @@ def view_scan(scan_id):
     defects = query.all()
     upload_metadata = load_upload_metadata(scan_id)
 
+    # ---------------------------------------------------------
+    # Hotspot Clustering (Machine Learning - DBSCAN)
+    # ---------------------------------------------------------
+    hotspots = []
+    if len(defects) >= 2:
+        try:
+            import numpy as np
+            from sklearn.cluster import DBSCAN
+
+            # Extract coordinates
+            coords = np.array([[d.x, d.y, d.z] for d in defects])
+
+            # Run DBSCAN (eps=5.0 distance units, min_samples=2 defects)
+            clustering = DBSCAN(eps=5.0, min_samples=2).fit(coords)
+            labels = clustering.labels_
+
+            # Group defects by cluster label (ignoring noise label -1)
+            unique_labels = set(labels)
+            for k in unique_labels:
+                if k == -1:
+                    continue  # Noise
+                
+                # Get indices of points in this cluster
+                class_member_mask = (labels == k)
+                cluster_defects = [defects[i] for i in range(len(defects)) if class_member_mask[i]]
+                
+                if cluster_defects:
+                    # Calculate centroid
+                    cx = sum(d.x for d in cluster_defects) / len(cluster_defects)
+                    cy = sum(d.y for d in cluster_defects) / len(cluster_defects)
+                    cz = sum(d.z for d in cluster_defects) / len(cluster_defects)
+                    
+                    # Count Critical defects in this hotspot
+                    critical_count = sum(1 for d in cluster_defects if d.severity == 'Critical')
+                    
+                    # Collect unique locations for this cluster
+                    cluster_locations = list(set(d.location for d in cluster_defects if d.location))
+
+                    hotspots.append({
+                        'id': int(k) + 1,
+                        'count': len(cluster_defects),
+                        'critical_count': critical_count,
+                        'centroid': (cx, cy, cz),
+                        'defect_ids': [d.id for d in cluster_defects],
+                        'types': list(set(d.defect_type for d in cluster_defects if d.defect_type)),
+                        'locations': cluster_locations
+                    })
+            
+            # Sort hottest spots first
+            hotspots.sort(key=lambda x: (x['critical_count'], x['count']), reverse=True)
+        except Exception as e:
+            current_app.logger.error("DBSCAN Clustering Failed: %s", e)
+
     return render_template(
         "developer/scan_detail.html", 
         scan=scan, 
         defects=defects, 
         upload_metadata=upload_metadata,
         search_query=search_query,
-        sort_by=sort_by
+        sort_by=sort_by,
+        hotspots=hotspots
     )
 
 
@@ -185,18 +239,13 @@ def update_defect_progress(defect_id):
     scan_id = defect.scan_id
     
     new_status = request.form.get("status")
-    new_priority = request.form.get("priority")
     new_notes = request.form.get("notes", "").strip()
 
     # Enum validation
     valid_statuses = [e.value for e in DefectStatus]
-    valid_priorities = [e.value for e in DefectPriority]
 
     if new_status and new_status not in valid_statuses:
         return jsonify({"success": False, "message": "Invalid status"}), 400
-    
-    if new_priority and new_priority not in valid_priorities:
-        return jsonify({"success": False, "message": "Invalid priority"}), 400
 
     # Log changes
     if new_status and new_status != defect.status:
@@ -209,21 +258,13 @@ def update_defect_progress(defect_id):
         )
         db.session.add(activity)
     
-    if new_priority and new_priority != defect.priority:
-        activity = ActivityLog(
-            defect_id=defect_id,
-            scan_id=scan_id,
-            action='priority updated',
-            old_value=defect.priority or DefectPriority.MEDIUM.value,
-            new_value=new_priority
-        )
-        db.session.add(activity)
-    
     # Update defect
     if new_status:
         defect.status = new_status
-    if new_priority:
-        defect.priority = new_priority
+    if new_notes:
+        defect.notes = new_notes
+        
+    defect.auto_calculate_priority()
     if new_notes:
         defect.notes = new_notes
 
@@ -301,21 +342,15 @@ def bulk_update_defects(scan_id):
     
     defect_ids = request.form.getlist("defect_ids[]")
     new_status = request.form.get("bulk_status")
-    new_priority = request.form.get("bulk_priority")
     
     if not defect_ids:
         flash("⚠ No defects selected", "error")
         return redirect(url_for('developer.view_scan', scan_id=scan_id))
     
     valid_statuses = [e.value for e in DefectStatus]
-    valid_priorities = [e.value for e in DefectPriority]
 
     if new_status and new_status not in valid_statuses:
         flash("⚠ Invalid status", "error")
-        return redirect(url_for('developer.view_scan', scan_id=scan_id))
-    
-    if new_priority and new_priority not in valid_priorities:
-        flash("⚠ Invalid priority", "error")
         return redirect(url_for('developer.view_scan', scan_id=scan_id))
     
     # Update all selected defects
@@ -334,21 +369,9 @@ def bulk_update_defects(scan_id):
                 )
                 db.session.add(activity)
             
-            # Log priority change
-            if new_priority and new_priority != defect.priority:
-                activity = ActivityLog(
-                    defect_id=defect.id,
-                    scan_id=scan_id,
-                    action='priority updated (bulk)',
-                    old_value=defect.priority or DefectPriority.MEDIUM.value,
-                    new_value=new_priority
-                )
-                db.session.add(activity)
-            
             if new_status:
                 defect.status = new_status
-            if new_priority:
-                defect.priority = new_priority
+            defect.auto_calculate_priority()
             updated_count += 1
     
     db.session.commit()
@@ -361,7 +384,7 @@ def bulk_update_defects(scan_id):
                 scan=scan,
                 defect_ids=[int(id) for id in defect_ids],
                 new_status=new_status,
-                new_priority=new_priority
+                new_priority=None
             )
         except Exception as e:
             current_app.logger.error('Failed to send bulk update email: %s', e)

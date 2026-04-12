@@ -20,22 +20,20 @@ A **Flask web application** for managing building defects detected from **LiDAR 
 
 ---
 
-## Overview
-
 The LDMS application bridges the gap between raw LiDAR scan data and actionable defect management. The workflow is:
 
 ```
-Inspector uploads PCD/GLB scan
+Inspector uploads 3D PCD/GLB scan
         ↓
-System processes scan & detects defect points
+AI Analysis (DBSCAN) extracts spatial clusters & defect points
         ↓
-Defects are logged with coordinates, element, type, severity & priority
+Defects logged with coordinates, room location, type, severity & AI priority
         ↓
-Developer reviews defects via dashboard
+Developer reviews via Premium Bento Grid Dashboard
         ↓
-Defects are updated (status, notes, priority) and tracked via activity logs
+Status updates (Reported/Review/Fixed) tracked via activity logs
         ↓
-Reports generated as PDF
+Analytics & PDF Reports generated for project close-out
 ```
 
 ---
@@ -113,16 +111,13 @@ pcd/
 │       ├── js/                     # JavaScript (3D viewer, UI interactions)
 │       └── img/                    # Images and icons
 │
-├── instance/                       # Instance-specific files (excluded from git)
-│   └── ldms.db                     # SQLite fallback (only if DATABASE_URL not set)
-│
-├── Dockerfile                      # Docker image definition (python:3.11-slim + pip)
-├── docker-compose.yml              # Multi-container setup: Flask app + PostgreSQL
-├── requirements.txt                # Python package dependencies
-├── environment.yml                 # Conda environment definition (legacy/reference)
-├── .env.example                    # Environment variable template (copy to .env)
-├── .gitignore                      # Git exclusions (.env, instance/, __pycache__, etc.)
-├── DEPLOYMENT.md                   # Full deployment guide
+├── instance/                       # Instance-specific files (SQLite, local uploads)
+├── scripts/                        # Utility & maintenance scripts (e.g., fix_db.py)
+├── Dockerfile                      # Production Docker container definition
+├── docker-compose.yml              # Local Dev/Prod orchestration
+├── requirements.txt                # Python dependencies
+├── .env.example                    # Environment template
+├── DEPLOYMENT.md                   # Full production guide
 └── README.md                       # This file
 ```
 
@@ -240,16 +235,16 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
 
 ---
 
-## User Roles
+## User Roles & Permissions
 
-The system has two roles, set when creating a user via CLI:
+| Role | Access | Responsibility |
+|------|--------|----------------|
+| `Inspector` | Upload, Run AI, Reports | Field personnel who capture scans and generate closing documents. |
+| `Developer` | Review, Status, Analytics | Maintenance team who fix defects and track resolution progress. |
 
-| Role | Access | Description |
-|------|--------|-------------|
-| `inspector` | Upload, view reports | Field inspectors who upload scan data |
-| `developer` | Full access + dashboard | Engineers/admins who review and manage defects |
+> [!NOTE]
+> **Data Integrity**: Developers can update defect **Status** and **Notes**, but **Priority** is automatically managed by the AI system (DBSCAN/Risk Score) or restricted to Inspectors to prevent unauthorized priority shifting.
 
-Roles are enforced at the route level using `Flask-Login` and role-property checks.
 
 ---
 

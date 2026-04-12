@@ -79,6 +79,40 @@ class Defect(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
     activities = db.relationship('ActivityLog', backref='defect', lazy=True)
 
+    @property
+    def risk_score(self):
+        """Calculate a risk score (0-100) based on severity and defect type."""
+        # Severity Factor (Max 50 points)
+        severity_points = 0
+        if self.severity == 'Critical': severity_points = 50
+        elif self.severity == 'High': severity_points = 35
+        elif self.severity == 'Medium': severity_points = 20
+        elif self.severity == 'Low': severity_points = 5
+
+        # Type Factor (Max 50 points)
+        type_points = 10  # default for unknown/cosmetic
+        dt = self.defect_type.lower() if self.defect_type else ''
+        if 'structural' in dt:
+            type_points = 50
+        elif 'water' in dt or 'electrical' in dt or 'crack' in dt:
+            type_points = 35
+        elif 'mechanical' in dt or 'plumbing' in dt:
+            type_points = 20
+        
+        return severity_points + type_points
+
+    def auto_calculate_priority(self):
+        """Update the priority column based on the risk score."""
+        score = self.risk_score
+        if score >= 80:
+            self.priority = 'Urgent'
+        elif score >= 60:
+            self.priority = 'High'
+        elif score >= 30:
+            self.priority = 'Medium'
+        else:
+            self.priority = 'Low'
+
 # Assignment model removed
 
 class ActivityLog(db.Model):
