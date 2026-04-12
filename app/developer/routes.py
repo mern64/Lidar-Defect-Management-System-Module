@@ -229,6 +229,20 @@ def update_defect_progress(defect_id):
 
     db.session.commit()
 
+    # Send email notification if status changed
+    if new_status and new_status != defect.status:
+        pass  # status was already changed above, compare with original
+    if new_status:
+        try:
+            from app.models import ActivityLog as _AL
+            # Check if we logged a status change
+            latest = _AL.query.filter_by(defect_id=defect_id, action='status updated').order_by(_AL.timestamp.desc()).first()
+            if latest and latest.old_value and latest.new_value and latest.old_value != latest.new_value:
+                from app.notifications import send_status_change_notification
+                send_status_change_notification(defect, latest.old_value, latest.new_value)
+        except Exception as e:
+            current_app.logger.error('Failed to send status change email: %s', e)
+
     # Return JSON for AJAX or redirect for regular form submission
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({"success": True, "message": f"Defect #{defect.id} updated successfully"})
@@ -338,6 +352,20 @@ def bulk_update_defects(scan_id):
             updated_count += 1
     
     db.session.commit()
+    
+    # Send bulk email notification
+    if updated_count > 0 and (new_status or new_priority):
+        try:
+            from app.notifications import send_bulk_update_notification
+            send_bulk_update_notification(
+                scan=scan,
+                defect_ids=[int(id) for id in defect_ids],
+                new_status=new_status,
+                new_priority=new_priority
+            )
+        except Exception as e:
+            current_app.logger.error('Failed to send bulk update email: %s', e)
+
     flash(f"✓ Successfully updated {updated_count} defect(s)", "success")
     return redirect(url_for('developer.view_scan', scan_id=scan_id))
 

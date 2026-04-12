@@ -384,6 +384,72 @@
             color: #475569 !important;
         }
 
+        /* Stacked Horizontal Bar */
+        .severity-breakdown {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+        body.light-mode .severity-breakdown {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+        }
+        .severity-breakdown h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .severity-bar {
+            display: flex;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        body.light-mode .severity-bar {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .bar-segment {
+            height: 100%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bar-segment.critical { background: #ef4444; }
+        .bar-segment.high { background: #f97316; }
+        .bar-segment.medium { background: #eab308; }
+        .bar-segment.low { background: #22c55e; }
+        
+        .severity-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        body.light-mode .legend-item { color: #475569; }
+        .legend-item .count {
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        body.light-mode .legend-item .count { color: #0f172a; }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+        }
+        body.light-mode .legend-dot { box-shadow: 0 0 0 2px rgba(255,255,255,0.6); }
+
     </style>
 </head>
 
@@ -439,6 +505,129 @@
             </div>
             {% endif %}
         </div>
+
+        {% if defects %}
+        <!-- Calculate defect severity counts directly in Jinja -->
+        {% set total_defects = defects|length %}
+        {% set _critical = namespace(count=0) %}
+        {% set _high = namespace(count=0) %}
+        {% set _medium = namespace(count=0) %}
+        {% set _low = namespace(count=0) %}
+        
+        {% for d in defects %}
+            {% if d.severity == 'Critical' %}{% set _critical.count = _critical.count + 1 %}{% endif %}
+            {% if d.severity == 'High' %}{% set _high.count = _high.count + 1 %}{% endif %}
+            {% if d.severity == 'Medium' %}{% set _medium.count = _medium.count + 1 %}{% endif %}
+            {% if d.severity == 'Low' %}{% set _low.count = _low.count + 1 %}{% endif %}
+        {% endfor %}
+
+        <div class="severity-breakdown">
+            <h2>Severity Breakdown</h2>
+            
+            <div class="severity-bar">
+                <div class="bar-segment critical" style="width: {{ (_critical.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Critical: {{ _critical.count }}"></div>
+                <div class="bar-segment high" style="width: {{ (_high.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="High: {{ _high.count }}"></div>
+                <div class="bar-segment medium" style="width: {{ (_medium.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Medium: {{ _medium.count }}"></div>
+                <div class="bar-segment low" style="width: {{ (_low.count / total_defects * 100) if total_defects > 0 else 0 }}%;" title="Low: {{ _low.count }}"></div>
+            </div>
+            
+            <div class="severity-legend">
+                <div class="legend-item"><div class="legend-dot critical" style="background:#ef4444;"></div> Critical: <span class="count">{{ _critical.count }}</span></div>
+                <div class="legend-item"><div class="legend-dot high" style="background:#f97316;"></div> High: <span class="count">{{ _high.count }}</span></div>
+                <div class="legend-item"><div class="legend-dot medium" style="background:#eab308;"></div> Medium: <span class="count">{{ _medium.count }}</span></div>
+                <div class="legend-item"><div class="legend-dot low" style="background:#22c55e;"></div> Low: <span class="count">{{ _low.count }}</span></div>
+            </div>
+        </div>
+        
+        <style>
+            .priority-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.85rem;
+            }
+            .priority-row {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            .priority-label {
+                width: 70px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            body.light-mode .priority-label { color: #475569; }
+            .priority-track {
+                flex: 1;
+                height: 8px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 999px;
+                overflow: hidden;
+            }
+            body.light-mode .priority-track { background: rgba(0, 0, 0, 0.05); }
+            .priority-fill {
+                height: 100%;
+                border-radius: 999px;
+                transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .priority-fill.urgent { background: #ef4444; }
+            .priority-fill.high { background: #f59e0b; }
+            .priority-fill.medium { background: #3b82f6; }
+            .priority-fill.low { background: #10b981; }
+            
+            .priority-count {
+                width: 24px;
+                text-align: right;
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: #f1f5f9;
+            }
+            body.light-mode .priority-count { color: #0f172a; }
+        </style>
+
+        <!-- Calculate defect priority counts directly in Jinja -->
+        {% set _urgent_p = namespace(count=0) %}
+        {% set _high_p = namespace(count=0) %}
+        {% set _medium_p = namespace(count=0) %}
+        {% set _low_p = namespace(count=0) %}
+        
+        {% for d in defects %}
+            {% set p = d.priority or 'Medium' %}
+            {% if p == 'Urgent' %}{% set _urgent_p.count = _urgent_p.count + 1 %}{% endif %}
+            {% if p == 'High' %}{% set _high_p.count = _high_p.count + 1 %}{% endif %}
+            {% if p == 'Medium' %}{% set _medium_p.count = _medium_p.count + 1 %}{% endif %}
+            {% if p == 'Low' %}{% set _low_p.count = _low_p.count + 1 %}{% endif %}
+        {% endfor %}
+
+        <div class="severity-breakdown">
+            <h2>Priority Breakdown</h2>
+            
+            <div class="priority-list">
+                <div class="priority-row">
+                    <div class="priority-label">Urgent</div>
+                    <div class="priority-track"><div class="priority-fill urgent" style="width: {{ (_urgent_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div></div>
+                    <div class="priority-count">{{ _urgent_p.count }}</div>
+                </div>
+                <div class="priority-row">
+                    <div class="priority-label" style="color:#f59e0b;">High</div>
+                    <div class="priority-track"><div class="priority-fill high" style="width: {{ (_high_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div></div>
+                    <div class="priority-count">{{ _high_p.count }}</div>
+                </div>
+                <div class="priority-row">
+                    <div class="priority-label" style="color:#3b82f6;">Medium</div>
+                    <div class="priority-track"><div class="priority-fill medium" style="width: {{ (_medium_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div></div>
+                    <div class="priority-count">{{ _medium_p.count }}</div>
+                </div>
+                <div class="priority-row">
+                    <div class="priority-label" style="color:#10b981;">Low</div>
+                    <div class="priority-track"><div class="priority-fill low" style="width: {{ (_low_p.count / total_defects * 100) if total_defects > 0 else 0 }}%;"></div></div>
+                    <div class="priority-count">{{ _low_p.count }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Defects table -->
         <div class="table-card">

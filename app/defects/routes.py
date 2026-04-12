@@ -104,6 +104,7 @@ def get_defect_details(defect_id):
 def update_defect_status(defect_id):
     defect = Defect.query.get_or_404(defect_id)
     data = request.get_json()
+    old_status = defect.status
     # Only developers can change the status
     if 'status' in data and current_user.role == 'developer':
         defect.status = data['status']
@@ -116,6 +117,15 @@ def update_defect_status(defect_id):
     if 'severity' in data:
         defect.severity = data['severity']
     db.session.commit()
+
+    # Send email notification if status changed
+    if old_status != defect.status:
+        try:
+            from app.notifications import send_status_change_notification
+            send_status_change_notification(defect, old_status, defect.status)
+        except Exception as e:
+            current_app.logger.error('Failed to send status change email: %s', e)
+
     return jsonify({'message': 'Defect updated successfully', 'status': defect.status})
 
 @defects_bp.route('/defect/<int:defect_id>', methods=['DELETE'])
@@ -148,6 +158,15 @@ def create_defect(scan_id):
     )
     db.session.add(defect)
     db.session.commit()
+
+    # Send email alert for critical defects
+    if defect.severity == 'Critical':
+        try:
+            from app.notifications import send_critical_defect_alert
+            send_critical_defect_alert(defect)
+        except Exception as e:
+            current_app.logger.error('Failed to send critical defect email: %s', e)
+
     return jsonify({'message': 'Defect created', 'defectId': defect.id}), 201
 
 @defects_bp.route('/scans/<int:scan_id>/model', methods=['GET'])

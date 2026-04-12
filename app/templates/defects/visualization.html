@@ -1276,6 +1276,9 @@
                 </div>
                 <div class="modal-body">
                     <img id="defectImage" class="defect-image" src="" alt="Defect Image" style="display: none;">
+
+                    <!-- AI Analyze button removed as requested -->
+
                     <div class="form-group">
                         <label>Location</label>
                         <select id="defectLocation">
@@ -2145,6 +2148,7 @@
 
             function openDefectModal(defectId) {
                 currentDefectId = defectId;
+
                 fetch(`/defect/${defectId}`)
                     .then(response => response.json())
                     .then(data => {

@@ -7,7 +7,7 @@ from flask_login import current_user
 load_dotenv()  # Load .env file before Config reads env vars
 
 from .config import Config
-from .extensions import db, login_manager, csrf
+from .extensions import db, login_manager, csrf, mail
 
 
 def create_app():
@@ -18,6 +18,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    mail.init_app(app)
 
     # Configure Flask-Login
     login_manager.login_view = 'auth.login'
@@ -71,7 +72,8 @@ def create_app():
     @click.option('--username', prompt=True, help='Username')
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='Password')
     @click.option('--role', type=click.Choice(['inspector', 'developer']), prompt=True, help='User role')
-    def create_user(username, password, role):
+    @click.option('--email', default='', help='Email address for notifications')
+    def create_user(username, password, role, email):
         """Create a new user (inspector or developer)."""
         from .models import User
 
@@ -79,7 +81,7 @@ def create_app():
             click.echo(f'Error: User "{username}" already exists.')
             return
 
-        user = User(username=username, role=role)
+        user = User(username=username, role=role, email=email or None)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -89,7 +91,8 @@ def create_app():
     @app.cli.command('create-admin')
     @click.option('--username', prompt=True, help='Admin username')
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='Admin password')
-    def create_admin(username, password):
+    @click.option('--email', default='', help='Email address for notifications')
+    def create_admin(username, password, email):
         """Create a developer/admin user for the application."""
         from .models import User
 
@@ -97,7 +100,7 @@ def create_app():
             click.echo(f'Error: User "{username}" already exists.')
             return
 
-        user = User(username=username, role='developer')
+        user = User(username=username, role='developer', email=email or None)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
