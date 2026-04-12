@@ -258,7 +258,7 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
 | **Authentication** | Flask-Login |
 | **Forms & CSRF** | Flask-WTF |
 | **3D File Handling** | pygltflib (GLB/glTF) |
-| **PDF Generation** | pypdf |
+| **PDF Data Extraction** | pypdf |
 | **Image Processing** | Pillow |
 | **WSGI Server** | Gunicorn |
 | **Containerisation** | Docker + Docker Compose |
