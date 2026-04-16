@@ -1,673 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LDMS — Processing Results</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Review extracted defects and link images before saving to the database">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --bg-from: #eef1f7;
+      --bg-to:   #e4e9f2;
+      --surface: #ffffff;
+      --ink:     #1a2035;
+      --ink-2:   #4b5675;
+      --muted:   #8993aa;
+      --accent:  #2563eb;
+      --accent-h:#1d4ed8;
+      --shadow-card:
+        rgba(37, 99, 235, 0.10) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.06) 0px 4px 16px 0px,
+        rgba(0, 0, 0, 0.06)    0px 1px 4px  0px;
+      --shadow-topbar:
+        rgba(37, 99, 235, 0.10) 0px 1px 0px 0px,
+        rgba(0, 0, 0, 0.05)    0px 1px 6px  0px;
+      --shadow-inset: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px inset;
     }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.12), transparent 35%),
-        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1), transparent 30%),
-        linear-gradient(135deg, #0b1020 0%, #0f172a 50%, #0a101d 100%);
-      color: #e2e8f0;
-      min-height: 100vh;
-      padding: 2rem;
-    }
-        body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
-                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
-            color: #0f172a;
-        }
-        body.light-mode .card {
-            background: linear-gradient(150deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
-            border-color: rgba(0,0,0,0.1);
-            box-shadow: 0 20px 50px rgba(15,23,42,0.12);
-        }
-        body.light-mode h2 { color: #1e293b !important; border-bottom-color: rgba(0,0,0,0.1); }
-        body.light-mode th { background: rgba(241,245,249,0.9); color: #475569; border-color: rgba(0,0,0,0.1); }
-        body.light-mode td { color: #1e293b; border-color: rgba(0,0,0,0.08); }
-        body.light-mode .sub { color: #475569; }
-        body.light-mode .image-note { color: #475569; }
-        body.light-mode .back-link { color: #475569; }
-        body.light-mode .upload-details {
-            background: rgba(59,130,246,0.06);
-            border-color: rgba(59,130,246,0.2);
-        }
-        body.light-mode .upload-details h3 { color: #1e40af; }
-        body.light-mode .detail-label { color: #475569; }
-        body.light-mode .detail-value { color: #0f172a; }
-        body.light-mode .detail-item {
-            background: rgba(241,245,249,0.92);
-            border-color: rgba(0,0,0,0.1);
-        }
-        body.light-mode .image-card {
-            background: rgba(241,245,249,0.85);
-            border-color: rgba(0,0,0,0.1);
-        }
-        body.light-mode .image-card.assigned {
-            background: rgba(59,130,246,0.08);
-            border-color: rgba(59,130,246,0.35);
-        }
-        body.light-mode .image-card select {
-            background: #fff;
-            color: #0f172a;
-            border-color: rgba(0,0,0,0.15);
-        }
-        body.light-mode .save-form {
-            background: rgba(34,197,94,0.06);
-            border-color: rgba(34,197,94,0.25);
-        }
-        body.light-mode .save-form label { color: #15803d; }
-        body.light-mode .save-form input[type=text] {
-            background: #fff;
-            color: #0f172a;
-            border-color: rgba(34,197,94,0.35);
-        }
-        body.light-mode .flash.success { color: #166534; background: rgba(34,197,94,0.1); }
-        body.light-mode .flash.error { color: #991b1b; background: rgba(239,68,68,0.1); }
-        body.light-mode .flash.info { color: #1e40af; background: rgba(59,130,246,0.1); }
-        body.light-mode .error { color: #991b1b; background: rgba(239,68,68,0.1); }
-
-
-    .card {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2.5rem;
-      background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(150deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      min-height: 100vh; color: var(--ink); display: flex; flex-direction: column;
     }
 
-    h1 {
-      margin-top: 0;
-      font-size: 1.6rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-topbar);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-
-    h1 i {
-      color: #22d3ee;
-    }
-
-    h2 {
-      margin-top: 2rem;
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #cbd5e1;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    h2 i {
-      color: #3b82f6;
-      font-size: 0.95rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th,
-    td {
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 0.6rem 0.75rem;
-      font-size: 0.88rem;
-      vertical-align: top;
-    }
-
-    th {
-      background: rgba(255, 255, 255, 0.05);
-      text-align: left;
-      color: #94a3b8;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-    }
-
-    td {
-      color: #cbd5e1;
-    }
-
-    .error {
-      padding: 0.75rem 1rem;
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .flash {
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      margin-top: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .flash.success {
-      background: rgba(34, 197, 94, 0.15);
-      color: #86efac;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .flash.error {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .flash.info {
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .sub {
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-
-    .upload-details {
-      background: rgba(59, 130, 246, 0.08);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 14px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .upload-details h3 {
-      margin: 0 0 1rem 0;
-      font-size: 1.05rem;
-      color: #93c5fd;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .detail-item {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 0.75rem;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .detail-label {
-      font-size: 0.72rem;
-      color: #64748b;
-      text-transform: uppercase;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      letter-spacing: 0.05em;
-    }
-
-    .detail-value {
-      font-size: 0.92rem;
-      color: #e2e8f0;
-      word-break: break-word;
-    }
-
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .image-card {
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 0.75rem;
-      background: rgba(255, 255, 255, 0.03);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      transition: border-color 0.2s;
-    }
-
-    .image-card.assigned {
-      border-color: rgba(59, 130, 246, 0.4);
-      background: rgba(59, 130, 246, 0.08);
-    }
-
-    .image-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .image-card form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .image-card label {
-      margin: 0;
-      font-size: 0.82rem;
-    }
-
-    .image-card select,
-    .image-card button {
-      width: 100%;
-      padding: 0.45rem 0.6rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-family: inherit;
-    }
-
-    .image-card select {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #e2e8f0;
-    }
-
-    .image-card button {
-      background: linear-gradient(135deg, #3b82f6, #6366f1);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.15s;
-    }
-
-    .image-card button:hover {
-      transform: translateY(-1px);
-    }
-
-    .image-card button.secondary {
-      background: transparent;
-      color: #94a3b8;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .image-card button.secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .image-note {
-      font-size: 0.82rem;
-      color: #64748b;
-    }
-
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
     .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      transition: color 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8125rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .topbar-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.875rem;
+      color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px;
+      white-space: nowrap; letter-spacing: -0.01em;
+    }
+    .topbar-icon {
+      width: 28px; height: 28px; background: var(--accent);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.75rem; box-shadow: rgba(37,99,235,0.35) 0px 2px 8px 0px;
+    }
+    .user-pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 0.35rem 0.85rem;
+      border-radius: 9999px; font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); background: #fff;
+      box-shadow: rgba(37,99,235,0.14) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px 0px;
+      text-decoration: none; transition: color 0.15s, box-shadow 0.15s;
+    }
+    .user-pill:hover { color: var(--accent); box-shadow: rgba(37,99,235,0.30) 0px 0px 0px 1px, rgba(37,99,235,0.08) 0px 4px 12px 0px; }
+
+    /* ── Main layout ── */
+    .page-content { max-width: 1100px; width: 100%; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+    .page-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--accent); background: rgba(37,99,235,0.08);
+      box-shadow: rgba(37,99,235,0.20) 0px 0px 0px 1px, rgba(37,99,235,0.06) 0px 2px 8px 0px;
+      border-radius: 9999px; padding: 0.3rem 0.75rem; margin-bottom: 0.9rem;
     }
 
-    .back-link:hover {
-      color: #22d3ee;
+    .page-heading { margin-bottom: 2.5rem; }
+    .page-heading h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.75rem; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 0.5rem;
     }
+    .page-heading p { font-size: 0.9375rem; color: var(--muted); line-height: 1.55; }
 
-    .save-form {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 14px;
-      padding: 1.25rem;
-      margin-top: 1.5rem;
+    .section-header {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.01em; margin-bottom: 1.25rem; margin-top: 2.5rem;
+      padding-bottom: 0.75rem;
+      box-shadow: rgba(37,99,235,0.12) 0px -1px 0px inset;
     }
+    .section-header i { color: var(--accent); font-size: 0.875rem; }
 
-    .save-form label {
-      font-weight: 600;
-      color: #86efac;
-      margin: 0;
+    /* Flash alerts */
+    .flash {
+      padding: 0.7rem 0.875rem; border-radius: 10px; margin-bottom: 1rem;
+      font-size: 0.8125rem; font-weight: 500; display: flex; align-items: flex-start; gap: 8px;
     }
+    .flash.success { background: rgba(5,150,105,0.07); color: #065f46; box-shadow: rgba(5,150,105,0.22) 0px 0px 0px 1px, rgba(5,150,105,0.06) 0px 2px 8px 0px; }
+    .flash.error   { background: rgba(220,38,38,0.07); color: #b91c1c; box-shadow: rgba(220,38,38,0.22) 0px 0px 0px 1px, rgba(220,38,38,0.06) 0px 2px 8px 0px; }
+    .flash.info    { background: rgba(37,99,235,0.07); color: #1e40af; box-shadow: rgba(37,99,235,0.20) 0px 0px 0px 1px, rgba(37,99,235,0.06) 0px 2px 8px 0px; }
+    .error-box     { padding: 0.75rem 0.875rem; border-radius: 10px; margin-bottom: 1.5rem;
+      font-size: 0.875rem; font-weight: 500; display: flex; align-items: flex-start; gap: 8px;
+      background: rgba(220,38,38,0.07); color: #b91c1c;
+      box-shadow: rgba(220,38,38,0.22) 0px 0px 0px 1px, rgba(220,38,38,0.06) 0px 4px 12px 0px; }
 
-    .save-form input[type=text] {
-      padding: 0.6rem 0.8rem;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      border-radius: 8px;
-      width: 350px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      background: rgba(15, 23, 42, 0.6);
-      color: #e2e8f0;
+    /* Upload details */
+    .upload-details {
+      background: var(--surface); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem;
+      box-shadow: var(--shadow-card);
     }
+    .upload-details h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9375rem; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.01em; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .upload-details h3 i { color: var(--accent); font-size: 0.8125rem; }
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .detail-item {
+      background: #f4f6fb; border-radius: 8px; padding: 0.75rem;
+      box-shadow: rgba(37,99,235,0.10) 0px 0px 0px 1px, rgba(0,0,0,0.03) 0px 2px 6px 0px;
+    }
+    .detail-label { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.3rem; }
+    .detail-value { font-size: 0.875rem; font-weight: 500; color: var(--ink); word-break: break-word; line-height: 1.4; }
 
-    .save-form input[type=text]:focus {
-      outline: none;
-      border-color: #22c55e;
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+    /* Table */
+    .table-wrap {
+      border-radius: 14px; overflow: hidden;
+      box-shadow: var(--shadow-card);
     }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #f4f6fb; text-align: left;
+      padding: 0.65rem 1rem; font-size: 0.6875rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+      box-shadow: rgba(37,99,235,0.10) 0px -1px 0px inset;
+    }
+    td {
+      padding: 0.65rem 1rem; font-size: 0.875rem; color: var(--ink-2);
+      vertical-align: middle; box-shadow: rgba(37,99,235,0.06) 0px -1px 0px inset;
+      background: #fff;
+    }
+    tbody tr:hover td { background: #f7f9fd; }
 
-    .save-form button {
-      padding: 0.6rem 1.5rem;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.95rem;
-      font-family: inherit;
-      transition: transform 0.15s, box-shadow 0.2s;
+    .assigned-img {
+      width: 120px; height: 80px; object-fit: cover; border-radius: 6px;
+      box-shadow: rgba(37,99,235,0.14) 0px 0px 0px 1px, rgba(0,0,0,0.06) 0px 2px 8px 0px;
     }
+    .unassigned-tag { font-size: 0.75rem; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
 
-    .save-form button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+    /* Image grid */
+    .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .image-card {
+      background: var(--surface); border-radius: 14px; padding: 0.875rem;
+      display: flex; flex-direction: column; gap: 0.625rem;
+      box-shadow: var(--shadow-card); transition: box-shadow 0.2s;
     }
+    .image-card.assigned {
+      box-shadow:
+        rgba(5,150,105,0.22) 0px 0px 0px 1px,
+        rgba(5,150,105,0.08) 0px 4px 16px 0px,
+        rgba(0, 0, 0, 0.04) 0px 1px 4px  0px;
+    }
+    .image-card img {
+      width: 100%; height: 160px; object-fit: cover; border-radius: 8px; background: #f4f6fb;
+      box-shadow: rgba(37,99,235,0.12) 0px 0px 0px 1px, rgba(0,0,0,0.05) 0px 2px 8px 0px;
+    }
+    .image-meta { font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .image-meta.linked { color: #065f46; font-weight: 500; }
+    .image-card form { display: flex; flex-direction: column; gap: 0.5rem; }
+    .image-card select {
+      width: 100%; padding: 0.5rem 0.625rem; border-radius: 8px; border: none;
+      font-size: 0.8125rem; font-family: 'Inter', sans-serif; color: var(--ink); background: #f4f6fb;
+      box-shadow: var(--shadow-inset), rgba(37,99,235,0.14) 0px 0px 0px 1px; outline: none; cursor: pointer;
+    }
+    .btn-assign {
+      width: 100%; padding: 0.5rem; background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      font-size: 0.8125rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
+      box-shadow: rgba(37,99,235,0.35) 0px 3px 10px 0px;
+      display: flex; align-items: center; justify-content: center; gap: 5px; transition: background 0.15s;
+    }
+    .btn-assign:hover { background: var(--accent-h); }
+    .btn-unassign {
+      width: 100%; padding: 0.5rem; background: transparent; color: var(--muted); border: none; border-radius: 8px;
+      font-size: 0.8125rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
+      box-shadow: rgba(37,99,235,0.14) 0px 0px 0px 1px;
+      display: flex; align-items: center; justify-content: center; gap: 5px; transition: color 0.15s, box-shadow 0.15s;
+    }
+    .btn-unassign:hover { color: #b91c1c; box-shadow: rgba(220,38,38,0.22) 0px 0px 0px 1px; }
 
-    .user-bar {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 9999;
-    }
+    .no-items { font-size: 0.9rem; color: var(--muted); padding: 1.25rem 0; display: flex; align-items: center; gap: 7px; }
 
-    .user-bar a {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.45rem 0.9rem;
-      border-radius: 999px;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      backdrop-filter: blur(8px);
-      transition: background 0.2s;
+    /* Save card */
+    .save-card {
+      background: var(--surface); border-radius: 14px; padding: 1.5rem; margin-top: 1rem;
+      box-shadow: var(--shadow-card);
     }
-
-    .user-bar a:hover {
-      background: rgba(239, 68, 68, 0.25);
+    .save-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+    .save-card label { font-size: 0.8125rem; font-weight: 600; color: var(--ink-2); flex-shrink: 0; }
+    .save-card input[type="text"] {
+      flex: 1 1 260px; padding: 0.65rem 0.875rem; border-radius: 10px; border: none;
+      font-size: 0.9375rem; font-family: 'Inter', sans-serif; color: var(--ink); background: #f4f6fb;
+      box-shadow: var(--shadow-inset), rgba(37,99,235,0.14) 0px 0px 0px 1px; outline: none; transition: box-shadow 0.15s;
     }
+    .save-card input[type="text"]:focus {
+      background: #fff;
+      box-shadow: var(--shadow-inset), rgba(37,99,235,0.45) 0px 0px 0px 2px, rgba(37,99,235,0.15) 0px 0px 0px 4px;
+    }
+    .btn-save {
+      padding: 0.65rem 1.25rem; background: var(--accent); color: #fff; border: none; border-radius: 10px;
+      font-size: 0.9375rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
+      box-shadow: rgba(37,99,235,0.42) 0px 4px 14px 0px;
+      display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+    .btn-save:hover { background: var(--accent-h); box-shadow: rgba(37,99,235,0.55) 0px 6px 20px 0px; }
 
     /* Loading overlay */
     #ldms-loader {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: rgba(11, 16, 32, 0.8);
-      backdrop-filter: blur(4px);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
+      display: none; position: fixed; inset: 0; z-index: 99999;
+      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
     }
-
-    #ldms-loader.active {
-      display: flex;
-    }
-
+    #ldms-loader.active { display: flex; }
     .loader-spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      width: 34px; height: 34px; border: 3px solid rgba(37,99,235,0.15);
+      border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite;
     }
+    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .loader-text {
-      color: #94a3b8;
-      font-weight: 600;
-      font-size: 0.9rem;
+    @media (max-width: 768px) {
+      .topbar { padding: 0 1rem; }
+      .page-content { padding: 2rem 1rem 4rem; }
+      .save-row { flex-direction: column; align-items: stretch; }
+      .save-card input[type="text"] { flex: 1 1 auto; width: 100%; }
     }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  
-        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
-        body.light-mode h4, body.light-mode h5, body.light-mode h6,
-        body.light-mode .defect-title, body.light-mode .info-value, 
-        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
-            color: #0f172a !important;
-        }
-        body.light-mode input, body.light-mode select, body.light-mode textarea,
-        body.light-mode .coordinates, body.light-mode .defect-id {
-            color: #0f172a !important;
-            border-color: rgba(0,0,0,0.15) !important;
-        }
-        body.light-mode .form-group label {
-            color: #475569 !important;
-        }
-
-
-        body.light-mode #ldms-loader {
-            background: rgba(248, 250, 252, 0.85);
-        }
-        body.light-mode .loader-spinner {
-            border-color: rgba(0, 0, 0, 0.1);
-            border-top-color: #3b82f6;
-        }
-        body.light-mode .loader-text {
-            color: #334155;
-        }
-    </style>
+  </style>
 </head>
-
 <body>
-    <script>
-      (function() {
-        if (!localStorage.getItem('theme-set')) {
-          document.body.classList.add('light-mode');
-        } else if (localStorage.getItem('theme') === 'light') {
-          document.body.classList.add('light-mode');
-        }
-      })();
-    </script>
+  <script>
+    (function() {
+      if (!localStorage.getItem('theme-set')) document.body.classList.add('light-mode');
+      else if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    })();
+  </script>
 
-  <!-- Loading overlay -->
   <div id="ldms-loader">
     <div class="loader-spinner"></div>
-    <span class="loader-text"><i class="fas fa-cog fa-spin"></i> Processing...</span>
+    <span class="loader-text">Processing…</span>
   </div>
 
-  <div class="user-bar">
-    <a href="{{ url_for('auth.logout') }}">
-      <i class="fas fa-user"></i> {{ current_user.username }}
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="/projects" class="back-link"><i class="fas fa-arrow-left"></i> Projects</a>
+    </div>
+    <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand">
+      <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
+      Lidar Defect Management System
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="user-pill">
+      <i class="fas fa-user"></i>
+      {{ current_user.username }}
       <i class="fas fa-sign-out-alt"></i>
     </a>
-  </div>
+  </header>
 
-  <main class="card">
-    <a href="/projects" class="back-link">
-      <i class="fas fa-arrow-left"></i> Back to Projects
-    </a>
-    <h1><i class="fas fa-microscope"></i> Processing Results</h1>
-    <p class="sub">
-      Review the extracted defect data and link images before saving to the database.
-    </p>
+  <main class="page-content">
+    <div class="page-heading">
+      <span class="page-label"><i class="fas fa-microscope"></i> Processing</span>
+      <h1>Processing Results</h1>
+      <p>Review the extracted defect data and link images before saving to the database.</p>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="flash {{ category }}"><i
-        class="fas fa-{{ 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-circle' }}"></i>
-      {{ message }}</div>
-    {% endfor %}
-    {% endif %}
+    {% if messages %}{% for category, message in messages %}
+    <div class="flash {{ category }}">
+      <i class="fas fa-{{ 'check-circle' if category == 'success' else 'info-circle' if category == 'info' else 'exclamation-circle' }}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}{% endif %}
     {% endwith %}
 
     {% if error %}
-    <div class="error"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
+    <div class="error-box"><i class="fas fa-exclamation-triangle"></i> {{ error }}</div>
     {% else %}
+
     {% if auto_assigned %}
-    <div class="flash info"><i class="fas fa-magic"></i> Images were automatically matched to defects based on filename
-      heuristics.</div>
+    <div class="flash info">
+      <i class="fas fa-wand-magic-sparkles"></i>
+      Images were automatically matched to defects based on filename heuristics.
+    </div>
     {% endif %}
 
-    <!-- Upload Details Section -->
     {% if upload_metadata %}
+    <h2 class="section-header"><i class="fas fa-clipboard-list"></i> Upload Details</h2>
     <div class="upload-details">
-      <h3><i class="fas fa-clipboard-list"></i> Upload Details</h3>
+      <h3><i class="fas fa-info-circle"></i> Project Information</h3>
       <div class="details-grid">
-        <div class="detail-item">
-          <div class="detail-label">Project Name</div>
-          <div class="detail-value">{{ upload_metadata.project_name or '–' }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Inspection Date</div>
-          <div class="detail-value">{{ upload_metadata.scan_date or '–' }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Unit No.</div>
-          <div class="detail-value">{{ upload_metadata.unit_no or '–' }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label">Address</div>
-          <div class="detail-value">{{ upload_metadata.address or '–' }}</div>
-        </div>
+        <div class="detail-item"><div class="detail-label">Project Name</div><div class="detail-value">{{ upload_metadata.project_name or '—' }}</div></div>
+        <div class="detail-item"><div class="detail-label">Inspection Date</div><div class="detail-value">{{ upload_metadata.scan_date or '—' }}</div></div>
+        <div class="detail-item"><div class="detail-label">Unit No.</div><div class="detail-value">{{ upload_metadata.unit_no or '—' }}</div></div>
+        <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">{{ upload_metadata.address or '—' }}</div></div>
         {% if upload_metadata.glb_path %}
-        <div class="detail-item">
-          <div class="detail-label">GLB Model</div>
-          <div class="detail-value">{{ upload_metadata.glb_path.split('/')[-1] }}</div>
-        </div>
+        <div class="detail-item"><div class="detail-label">GLB Model</div><div class="detail-value">{{ upload_metadata.glb_path.split('/')[-1] }}</div></div>
         {% endif %}
         {% if upload_metadata.notes %}
-        <div class="detail-item" style="grid-column: span 2;">
-          <div class="detail-label">Notes</div>
-          <div class="detail-value">{{ upload_metadata.notes }}</div>
-        </div>
+        <div class="detail-item" style="grid-column:span 2;"><div class="detail-label">Notes</div><div class="detail-value">{{ upload_metadata.notes }}</div></div>
         {% endif %}
       </div>
     </div>
     {% endif %}
 
-    <h2><i class="fas fa-bug"></i> Extracted Defects</h2>
+    <h2 class="section-header"><i class="fas fa-bug"></i> Extracted Defects</h2>
     {% if defects %}
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Description</th>
-          <th>X</th>
-          <th>Y</th>
-          <th>Z</th>
-          <th>Image</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for d in defects %}
-        <tr>
-          <td>{{ loop.index }}</td>
-          <td>{{ d.description }}</td>
-          <td>{{ "%.3f"|format(d.x) }}</td>
-          <td>{{ "%.3f"|format(d.y) }}</td>
-          <td>{{ "%.3f"|format(d.z) }}</td>
-          <td>
-            {% if defect_assignments.get(d.id) %}
-            {% set assigned_id = defect_assignments.get(d.id) %}
-            {% for img in image_entries %}
-            {% if img.id == assigned_id %}
-            <div>
-              <img src="{{ img.url }}" alt="Assigned image"
-                style="width:140px; height:90px; object-fit:cover; border:1px solid rgba(255,255,255,0.1); border-radius:8px;" />
-              <div class="image-note">Page {{ img.page or '–' }}</div>
-            </div>
-            {% endif %}
-            {% endfor %}
-            {% else %}
-            <span class="image-note"><i class="fas fa-unlink"></i> Unassigned</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Description</th><th>X</th><th>Y</th><th>Z</th><th>Image</th></tr></thead>
+        <tbody>
+          {% for d in defects %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ d.description }}</td>
+            <td>{{ "%.3f"|format(d.x) }}</td>
+            <td>{{ "%.3f"|format(d.y) }}</td>
+            <td>{{ "%.3f"|format(d.z) }}</td>
+            <td>
+              {% if defect_assignments.get(d.id) %}
+              {% set aid = defect_assignments.get(d.id) %}
+              {% for img in image_entries %}{% if img.id == aid %}
+              <div><img src="{{ img.url }}" alt="Assigned image" class="assigned-img">
+              <div class="image-meta" style="margin-top:4px;"><i class="fas fa-file-alt"></i> Page {{ img.page or '—' }}</div></div>
+              {% endif %}{% endfor %}
+              {% else %}
+              <span class="unassigned-tag"><i class="fas fa-unlink"></i> Unassigned</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% else %}
-    <p style="color:#64748b; padding:1rem 0;"><i class="fas fa-search"></i> No defects were found in the file.</p>
+    <p class="no-items"><i class="fas fa-search"></i> No defects were found in the file.</p>
     {% endif %}
 
-    <h2><i class="fas fa-images"></i> Defect Image Matching</h2>
+    <h2 class="section-header"><i class="fas fa-images"></i> Defect Image Matching</h2>
+    <p style="font-size:0.9375rem; color:var(--muted); margin-bottom:1.25rem;">
+      Link extracted PDF photos to the 3D defect markers so the viewer can show context.
+    </p>
+
     {% if image_entries %}
-    <p class="sub">Link extracted PDF photos to the 3D defect markers so the viewer can show context.</p>
     <div class="image-grid">
       {% for img in image_entries %}
       <div class="image-card {% if img.assigned_defect %}assigned{% endif %}">
-        <img src="{{ img.url }}" alt="Extracted defect image" />
-        <div class="image-note"><i class="fas fa-hashtag"></i> {{ img.id }} · Page {{ img.page or '–' }}</div>
+        <img src="{{ img.url }}" alt="Extracted defect image">
+        <div class="image-meta"><i class="fas fa-hashtag"></i> {{ img.id }} · Page {{ img.page or '—' }}</div>
         {% if img.assigned_defect %}
-        <div class="image-note"><i class="fas fa-link"></i> Assigned to defect {{ img.assigned_defect }}</div>
+        <div class="image-meta linked"><i class="fas fa-link"></i> Linked to defect {{ img.assigned_defect }}</div>
         <form method="post" action="{{ url_for('process_data.assign_image_to_defect') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="image_id" value="{{ img.id }}" />
-          <input type="hidden" name="action" value="unassign" />
-          <button type="submit" class="secondary"><i class="fas fa-unlink"></i> Unassign</button>
+          <input type="hidden" name="image_id" value="{{ img.id }}">
+          <input type="hidden" name="action" value="unassign">
+          <button type="submit" class="btn-unassign"><i class="fas fa-unlink"></i> Unassign</button>
         </form>
         {% elif defects %}
         <form method="post" action="{{ url_for('process_data.assign_image_to_defect') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="image_id" value="{{ img.id }}" />
-          <label for="select-{{ img.id }}" class="image-note">Select defect:</label>
+          <input type="hidden" name="image_id" value="{{ img.id }}">
           <select id="select-{{ img.id }}" name="defect_id" required>
             <option value="" disabled selected>Choose defect…</option>
-            {% for d in defects %}
-            <option value="{{ d.id }}">{{ loop.index }} – {{ d.description }}</option>
-            {% endfor %}
+            {% for d in defects %}<option value="{{ d.id }}">{{ loop.index }} – {{ d.description }}</option>{% endfor %}
           </select>
-          <button type="submit"><i class="fas fa-link"></i> Link to defect</button>
+          <button type="submit" class="btn-assign"><i class="fas fa-link"></i> Link to defect</button>
         </form>
         {% else %}
-        <span class="image-note"><i class="fas fa-info-circle"></i> Upload a GLB to extract defects before assigning
-          images.</span>
+        <span class="image-meta"><i class="fas fa-info-circle"></i> Upload a GLB to extract defects first</span>
         {% endif %}
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p style="color:#64748b; padding:1rem 0;"><i class="fas fa-image"></i> No images were extracted from the uploaded
-      PDF.</p>
+    <p class="no-items"><i class="fas fa-image"></i> No images were extracted from the uploaded PDF.</p>
     {% endif %}
 
     {% if defects %}
-    <h2><i class="fas fa-database"></i> Save to Database</h2>
-    <div class="save-form">
+    <h2 class="section-header"><i class="fas fa-database"></i> Save to Database</h2>
+    <div class="save-card">
       <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="scan_name"><i class="fas fa-tag"></i> Scan Name:</label><br>
-        <input type="text" id="scan_name" name="scan_name" value="{{ default_scan_name }}" required
-          style="margin-top:0.5rem;">
-        <button type="submit" name="save_to_db" value="yes" style="margin-left:1rem;"><i class="fas fa-save"></i> Save
-          Defects to Database</button>
+        <div class="save-row">
+          <label for="scan_name">Scan Name</label>
+          <input type="text" id="scan_name" name="scan_name" value="{{ default_scan_name }}" required>
+          <button type="submit" name="save_to_db" value="yes" class="btn-save">
+            <i class="fas fa-save"></i> Save Defects to Database
+          </button>
+        </div>
       </form>
     </div>
     {% endif %}
@@ -675,20 +408,12 @@
   </main>
 
   <script>
-    // Loading overlay on form submits and link clicks
-    document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', () => {
-        document.getElementById('ldms-loader').classList.add('active');
-      });
-    });
+    document.querySelectorAll('form').forEach(f => f.addEventListener('submit', () => document.getElementById('ldms-loader').classList.add('active')));
     document.querySelectorAll('a[href]').forEach(link => {
-      if (!link.getAttribute('href').startsWith('#') && !link.getAttribute('href').startsWith('javascript')) {
-        link.addEventListener('click', () => {
-          document.getElementById('ldms-loader').classList.add('active');
-        });
-      }
+      const href = link.getAttribute('href') || '';
+      if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
+        link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
     });
   </script>
 </body>
-
 </html>

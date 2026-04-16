@@ -1,451 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDMS — Inspector Dashboard</title>
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDMS — Inspector Dashboard</title>
+  <meta name="description" content="Inspector portal — upload scan data or view all projects">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-from: #eef1f7;
+      --bg-to:   #e4e9f2;
+      --surface: #ffffff;
+      --ink:     #1a2035;
+      --ink-2:   #4b5675;
+      --muted:   #8993aa;
+      --accent:  #2563eb;
+      --accent-h:#1d4ed8;
+      --shadow-card:
+        rgba(37, 99, 235, 0.10) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.06) 0px 4px 16px 0px,
+        rgba(0, 0, 0, 0.06)    0px 1px 4px  0px;
+      --shadow-topbar:
+        rgba(37, 99, 235, 0.10) 0px 1px 0px 0px,
+        rgba(0, 0, 0, 0.05)    0px 1px 6px  0px;
+      --shadow-inset: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px inset;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-        :root {
-            --bg: #0b1020;
-            --panel: rgba(255, 255, 255, 0.05);
-            --ink: #e2e8f0;
-            --muted: #94a3b8;
-            --edge: rgba(255, 255, 255, 0.08);
-            --accent: #7c3aed;
-            --accent-2: #22d3ee;
-        }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(150deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      min-height: 100vh;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+    }
 
-        body.light-mode {
-            --bg: #f8fafc;
-            --panel: rgba(0, 0, 0, 0.03);
-            --ink: #0f172a;
-            --muted: #475569;
-            --edge: rgba(0, 0, 0, 0.1);
-            --accent: #7c3aed;
-            --accent-2: #0ea5e9;
-            --success: #059669;
-            --warning: #d97706;
-            --danger: #dc2626;
-        }
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-topbar);
+      padding: 0 2rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    .topbar-brand {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+    }
 
-        body {
-            font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
-                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
-            color: var(--ink);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
-                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
-            color: #0f172a;
-        }
+    .topbar-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.85rem;
+      box-shadow: rgba(37, 99, 235, 0.35) 0px 2px 8px 0px;
+    }
 
-        body.light-mode .header h1 { color: #0f172a; }
-        body.light-mode .header p { color: #475569; }
-        body.light-mode .card h2 { color: #0f172a; }
-        body.light-mode .card p { color: #475569; }
-        body.light-mode .stat-chip .num { color: #0f172a; }
+    .topbar-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.875rem;
+      color: var(--ink); letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
 
+    .user-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0.35rem 0.85rem; border-radius: 9999px;
+      font-size: 0.8125rem; font-weight: 500;
+      color: var(--ink-2);
+      box-shadow:
+        rgba(37, 99, 235, 0.14) 0px 0px 0px 1px,
+        rgba(0, 0, 0, 0.04) 0px 2px 6px 0px;
+      background: #fff;
+      text-decoration: none;
+      transition: color 0.15s, box-shadow 0.15s;
+    }
+    .user-pill:hover {
+      color: var(--accent);
+      box-shadow:
+        rgba(37, 99, 235, 0.30) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.08) 0px 4px 12px 0px;
+    }
 
+    /* ── Main ── */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 5rem 2rem;
+    }
 
-        .dashboard {
-            max-width: 900px;
-            width: 100%;
-        }
+    .portal-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0.3rem 0.85rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(37, 99, 235, 0.08);
+      box-shadow:
+        rgba(37, 99, 235, 0.20) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.06) 0px 2px 8px 0px;
+      margin-bottom: 1.25rem;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
+    .hero-heading {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.25rem; font-weight: 700;
+      color: var(--ink); text-align: center;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 0.75rem;
+    }
 
-        .header .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.4rem 0.85rem;
-            border-radius: 999px;
-            background: rgba(59, 130, 246, 0.14);
-            color: #c4b5fd;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-        }
+    .hero-sub {
+      font-size: 1rem; color: var(--muted);
+      text-align: center; line-height: 1.55; margin-bottom: 2.5rem;
+      max-width: 420px;
+    }
 
-        .header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
+    .stats-row {
+      display: flex; gap: 0.75rem; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 3.5rem;
+    }
 
-        .header h1 i {
-            color: var(--accent-2);
-        }
+    .stat-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0.45rem 1rem; border-radius: 9999px;
+      font-size: 0.8125rem; font-weight: 500;
+      color: var(--ink-2); background: #fff;
+      box-shadow:
+        rgba(37, 99, 235, 0.14) 0px 0px 0px 1px,
+        rgba(0, 0, 0, 0.04) 0px 2px 8px 0px;
+    }
+    .stat-chip i { color: var(--accent); font-size: 0.75rem; }
+    .stat-chip .num { font-weight: 700; color: var(--ink); }
 
-        .header p {
-            color: var(--muted);
-            font-size: 1.05rem;
-        }
+    /* ── Action cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem; width: 100%; max-width: 680px;
+    }
 
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 1.5rem;
-        }
+    .action-card {
+      background: var(--surface);
+      border-radius: 16px; padding: 2rem;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; gap: 0;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .action-card:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        rgba(37, 99, 235, 0.18) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.12) 0px 8px 28px 0px,
+        rgba(0, 0, 0, 0.06)    0px 2px 6px  0px;
+    }
 
-        .card {
-            position: relative;
-            padding: 2.5rem 2rem;
-            border-radius: 20px;
-            background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-            border: 1px solid var(--edge);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-        }
-        body.light-mode .card {
-            background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
-            border-color: rgba(0, 0, 0, 0.1);
-        }
-        body.light-mode .stat-chip {
-            background: rgba(255, 255, 255, 0.8);
-            border-color: rgba(0, 0, 0, 0.1);
-        }
+    .card-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(37, 99, 235, 0.08);
+      box-shadow:
+        rgba(37, 99, 235, 0.20) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.08) 0px 2px 8px 0px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 1.15rem; margin-bottom: 1.25rem;
+    }
 
+    .card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.0625rem; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.01em; margin-bottom: 0.4rem;
+    }
 
-        .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
+    .card-desc {
+      font-size: 0.875rem; color: var(--muted);
+      line-height: 1.55; flex: 1; margin-bottom: 1.5rem;
+    }
 
-        .card-upload::after {
-            background: radial-gradient(120% 120% at 50% 0%, rgba(34, 211, 238, 0.15), transparent 55%);
-        }
+    .card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.875rem; font-weight: 600;
+      color: var(--accent);
+      transition: gap 0.15s;
+    }
+    .action-card:hover .card-cta { gap: 10px; }
 
-        .card-projects::after {
-            background: radial-gradient(120% 120% at 50% 0%, rgba(59, 130, 246, 0.15), transparent 55%);
-        }
+    /* ── Background watermark icon ── */
+    .bg-icon {
+      position: fixed;
+      bottom: -4rem;
+      right: -4rem;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
 
-        .card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-        }
+    .bg-icon i {
+      font-size: 22rem;
+      color: var(--accent);
+      opacity: 0.06;
+      display: block;
+      line-height: 1;
+    }
 
-        .card-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
+    /* Ensure content floats above */
+    .main { position: relative; z-index: 1; }
 
-        .card-upload .card-icon {
-            background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.08));
-            color: #22d3ee;
-            border: 1px solid rgba(34, 211, 238, 0.3);
-        }
+    /* Loading overlay */
+    #ldms-loader {
+      display: none; position: fixed; inset: 0; z-index: 99999;
+      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+    }
+    #ldms-loader.active { display: flex; }
+    .loader-spinner {
+      width: 34px; height: 34px;
+      border: 3px solid rgba(37, 99, 235, 0.15);
+      border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .card-projects .card-icon {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.08));
-            color: #a78bfa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .card h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .card p {
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .card-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.7rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            position: relative;
-            z-index: 1;
-            transition: all 0.2s;
-        }
-
-        .card-upload .card-btn {
-            background: linear-gradient(135deg, #22d3ee, #0891b2);
-            color: #0b1020;
-        }
-
-        .card-projects .card-btn {
-            background: linear-gradient(135deg, #a78bfa, #7c3aed);
-            color: #fff;
-        }
-
-        .card:hover .card-btn {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .user-bar {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 9999;
-        }
-
-        .user-bar a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            backdrop-filter: blur(8px);
-            transition: all 0.2s;
-        }
-
-        .user-bar a:hover {
-            background: rgba(239, 68, 68, 0.25);
-        }
-
-        .stats-row {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .stat-chip {
-            padding: 0.5rem 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--edge);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .stat-chip i {
-            color: var(--accent-2);
-        }
-
-        .stat-chip .num {
-            color: var(--ink);
-            font-weight: 700;
-        }
-
-        @media (max-width: 720px) {
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 1.6rem;
-            }
-        }
-
-        /* Loading overlay */
-        #ldms-loader {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(11, 16, 32, 0.8);
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        #ldms-loader.active {
-            display: flex;
-        }
-
-        .loader-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: ldms-spin 0.8s linear infinite;
-        }
-
-        .loader-text {
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        @keyframes ldms-spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    
-        body.light-mode h1, body.light-mode h2, body.light-mode h3, 
-        body.light-mode h4, body.light-mode h5, body.light-mode h6,
-        body.light-mode .defect-title, body.light-mode .info-value, 
-        body.light-mode .count, body.light-mode label, body.light-mode .field-value {
-            color: #0f172a !important;
-        }
-        body.light-mode input, body.light-mode select, body.light-mode textarea,
-        body.light-mode .coordinates, body.light-mode .defect-id {
-            color: #0f172a !important;
-            border-color: rgba(0,0,0,0.15) !important;
-        }
-        body.light-mode .form-group label {
-            color: #475569 !important;
-        }
-        /* Fix eyebrow badge (INSPECTOR PORTAL) in light mode */
-        body.light-mode .header .eyebrow {
-            color: #5b21b6 !important;
-        }
-        /* Fix stat chips in light mode */
-        body.light-mode .stat-chip {
-            background: rgba(255, 255, 255, 0.8);
-            border-color: rgba(0, 0, 0, 0.1);
-        }
-
-
-        body.light-mode #ldms-loader {
-            background: rgba(248, 250, 252, 0.85);
-        }
-        body.light-mode .loader-spinner {
-            border-color: rgba(0, 0, 0, 0.1);
-            border-top-color: #3b82f6;
-        }
-        body.light-mode .loader-text {
-            color: #334155;
-        }
-    </style>
+    @media (max-width: 640px) {
+      .hero-heading { font-size: 1.75rem; }
+      .main { padding: 3rem 1.25rem 4rem; }
+      .cards { grid-template-columns: 1fr; }
+      .bg-icon i { font-size: 12rem; bottom: -2rem; right: -2rem; }
+    }
+  </style>
 </head>
-
 <body>
-    <script>
-      (function() {
-        if (!localStorage.getItem('theme-set')) {
-          document.body.classList.add('light-mode');
-        } else if (localStorage.getItem('theme') === 'light') {
-          document.body.classList.add('light-mode');
-        }
-      })();
-    </script>
+  <script>
+    (function() {
+      if (!localStorage.getItem('theme-set')) document.body.classList.add('light-mode');
+      else if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    })();
+  </script>
 
-    <div id="ldms-loader">
-        <div class="loader-spinner"></div>
-        <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+  <div id="ldms-loader">
+    <div class="loader-spinner"></div>
+    <span class="loader-text">Loading…</span>
+  </div>
+
+  <!-- Decorative background icon -->
+  <div class="bg-icon" aria-hidden="true">
+    <i class="fas fa-helmet-safety"></i>
+  </div>
+
+  <header class="topbar">
+    <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand">
+      <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
+      <span class="topbar-name">Lidar Defect Management System</span>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="user-pill">
+      <i class="fas fa-user"></i>
+      {{ current_user.username }}
+      <i class="fas fa-sign-out-alt"></i>
+    </a>
+  </header>
+
+  <main class="main">
+    <span class="portal-label"><i class="fas fa-shield-halved"></i> Inspector Portal</span>
+    <h1 class="hero-heading">Inspector Dashboard</h1>
+    <p class="hero-sub">Welcome back, <strong>{{ current_user.username }}</strong>. Select an action to get started.</p>
+
+    <div class="stats-row">
+      <span class="stat-chip">
+        <i class="fas fa-folder-open"></i>
+        <span class="num">{{ total_projects }}</span> Projects
+      </span>
+      <span class="stat-chip">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span class="num">{{ total_defects }}</span> Total Defects
+      </span>
     </div>
-    <div class="user-bar">
-        <a href="{{ url_for('auth.logout') }}">
-            <i class="fas fa-user"></i> {{ current_user.username }}
-            <i class="fas fa-sign-out-alt"></i>
-        </a>
+
+    <div class="cards">
+      <a href="{{ url_for('upload_data.upload_scan_data') }}" class="action-card" id="upload-card">
+        <div class="card-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <div class="card-title">New Project</div>
+        <p class="card-desc">Upload a GLB 3D model and PDF report to start automated defect detection and 3D visualization.</p>
+        <span class="card-cta">Upload Scan Data <i class="fas fa-arrow-right"></i></span>
+      </a>
+      <a href="{{ url_for('defects.list_projects') }}" class="action-card" id="projects-card">
+        <div class="card-icon"><i class="fas fa-th-large"></i></div>
+        <div class="card-title">View Projects</div>
+        <p class="card-desc">Browse all uploaded scans, explore 3D models, and manage detected defects across every project.</p>
+        <span class="card-cta">View All Projects <i class="fas fa-arrow-right"></i></span>
+      </a>
     </div>
+  </main>
 
-    <div class="dashboard">
-        <div class="header">
-            <span class="eyebrow"><i class="fas fa-shield-halved"></i> Inspector Portal</span>
-            <h1><i class="fas fa-hard-hat"></i> Inspector Dashboard</h1>
-            <p>Welcome back, <strong>{{ current_user.username }}</strong>. Select an action below to get started.</p>
-        </div>
-
-        <div class="stats-row">
-            <span class="stat-chip">
-                <i class="fas fa-folder-open"></i>
-                <span class="num">{{ total_projects }}</span> Projects
-            </span>
-            <span class="stat-chip">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span class="num">{{ total_defects }}</span> Total Defects
-            </span>
-        </div>
-
-        <div class="cards">
-            <a href="{{ url_for('upload_data.upload_scan_data') }}" class="card card-upload">
-                <div class="card-icon">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </div>
-                <h2>New Project</h2>
-                <p>Upload a new scan (GLB model + PDF report) to start defect detection and 3D visualization.</p>
-                <span class="card-btn"><i class="fas fa-plus"></i> Upload Scan Data</span>
-            </a>
-
-            <a href="{{ url_for('defects.list_projects') }}" class="card card-projects">
-                <div class="card-icon">
-                    <i class="fas fa-th-large"></i>
-                </div>
-                <h2>View Projects</h2>
-                <p>Browse all uploaded scans, view 3D models, and manage detected defects across your projects.</p>
-                <span class="card-btn"><i class="fas fa-arrow-right"></i> View All Projects</span>
-            </a>
-        </div>
-    </div>
-    <script>
-        document.querySelectorAll('a[href]').forEach(link => {
-            const href = link.getAttribute('href') || '';
-            if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
-                link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
-            }
-        });
-    </script>
+  <script>
+    document.querySelectorAll('a[href]').forEach(link => {
+      const href = link.getAttribute('href') || '';
+      if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
+        link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
+    });
+  </script>
 </body>
-
 </html>
