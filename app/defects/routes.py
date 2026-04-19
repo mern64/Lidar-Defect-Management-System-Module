@@ -201,55 +201,10 @@ def view_project(scan_id):
     model_url = url_for('defects.serve_model', scan_id=scan_id) if scan.model_path else None
     
     upload_metadata = load_upload_metadata(scan_id)
-    
-    # Hotspot Clustering (Machine Learning - DBSCAN)
-    hotspots = []
-    if len(defects) >= 2:
-        try:
-            import numpy as np
-            from sklearn.cluster import DBSCAN
-
-            coords = np.array([[d.x, d.y, d.z] for d in defects])
-
-            # Increased sensitivity: eps=5.0, min_samples=2
-            clustering = DBSCAN(eps=5.0, min_samples=2).fit(coords)
-            labels = clustering.labels_
-
-            unique_labels = set(labels)
-            for k in unique_labels:
-                if k == -1: continue
-                
-                class_member_mask = (labels == k)
-                cluster_defects = [defects[i] for i in range(len(defects)) if class_member_mask[i]]
-                
-                if cluster_defects:
-                    cx = sum(d.x for d in cluster_defects) / len(cluster_defects)
-                    cy = sum(d.y for d in cluster_defects) / len(cluster_defects)
-                    cz = sum(d.z for d in cluster_defects) / len(cluster_defects)
-                    
-                    critical_count = sum(1 for d in cluster_defects if d.severity == 'Critical')
-                    
-                    # Collect unique locations for this cluster
-                    cluster_locations = list(set(d.location for d in cluster_defects if d.location))
-                    
-                    hotspots.append({
-                        'id': int(k) + 1,
-                        'count': len(cluster_defects),
-                        'critical_count': critical_count,
-                        'centroid': (cx, cy, cz),
-                        'defect_ids': [d.id for d in cluster_defects],
-                        'types': list(set(d.defect_type for d in cluster_defects if d.defect_type)),
-                        'locations': cluster_locations
-                    })
-            
-            hotspots.sort(key=lambda x: (x['critical_count'], x['count']), reverse=True)
-        except Exception as e:
-            current_app.logger.error("DBSCAN Clustering Failed: %s", e)
             
     return render_template('defects/project_detail.html', 
                           scan=scan, 
                           scan_id=scan_id, 
                           model_url=model_url, 
                           defects=defects,
-                          upload_metadata=upload_metadata,
-                          hotspots=hotspots)
+                          upload_metadata=upload_metadata)

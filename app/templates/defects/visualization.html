@@ -10,6 +10,9 @@
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -457,6 +460,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            z-index: 60;
         }
 
         .toolbar-group {
@@ -467,6 +471,7 @@
             border-radius: 8px;
             padding: 6px;
             border: 1px solid #334155;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
         }
 
         .toolbar-group-label {
@@ -509,6 +514,7 @@
             border-radius: 8px;
             padding: 6px;
             border: 1px solid #334155;
+            z-index: 60;
         }
 
         /* Model Stats */
@@ -522,6 +528,7 @@
             font-size: 12px;
             color: #94a3b8;
             border: 1px solid #334155;
+            z-index: 50;
         }
 
         .model-stats-row {
@@ -555,6 +562,7 @@
             font-size: 11px;
             color: #94a3b8;
             border: 1px solid #334155;
+            z-index: 50;
         }
 
         /* Sidebar */
@@ -869,6 +877,155 @@
             backdrop-filter: blur(4px);
         }
 
+        .image-viewer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.78);
+            z-index: 1200;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            backdrop-filter: blur(2px);
+        }
+
+        .image-viewer-overlay.active {
+            display: flex;
+        }
+
+        .image-viewer-shell {
+            position: relative;
+            width: min(1200px, 100%);
+            max-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-viewer-full {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: rgba(0, 0, 0, 0.55) 0px 16px 40px;
+            background: #0f0f0f;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(15, 15, 15, 0.9);
+            color: #f4f4f4;
+            cursor: pointer;
+        }
+
+        .image-viewer-close:hover {
+            background: rgba(37, 99, 235, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .tour-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 1300;
+            display: none;
+        }
+
+        .tour-backdrop.active {
+            display: block;
+        }
+
+        .tour-popover {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: min(430px, calc(100vw - 32px));
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+            border: 1px solid #dbe3ef;
+            z-index: 1301;
+            display: none;
+            overflow: hidden;
+        }
+
+        .tour-popover.active {
+            display: block;
+        }
+
+        .tour-head {
+            padding: 14px 16px 8px;
+            font-family: 'Cal Sans', 'Inter', sans-serif;
+            font-size: 18px;
+            color: #111827;
+            letter-spacing: 0.2px;
+        }
+
+        .tour-body {
+            padding: 0 16px 12px;
+            color: #334155;
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .tour-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px 14px;
+            border-top: 1px solid #dbe3ef;
+            background: #f8fbff;
+        }
+
+        .tour-step {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .tour-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tour-action {
+            border: none;
+            border-radius: 8px;
+            padding: 7px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tour-action.secondary {
+            background: #ffffff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .tour-action.primary {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: rgba(37, 99, 235, 0.35) 0px 3px 10px;
+        }
+
+        .tour-highlight {
+            position: relative;
+            z-index: 1302 !important;
+            box-shadow: rgba(37, 99, 235, 0.55) 0px 0px 0px 3px, rgba(37, 99, 235, 0.2) 0px 0px 0px 8px !important;
+            border-radius: 10px;
+        }
+
+        .tour-trigger {
+            font-size: 12px;
+        }
+
         .modal-overlay.active {
             display: flex;
         }
@@ -1092,32 +1249,1095 @@
                 transform: translateY(-10px);
             }
         }
+
+        /* Cal.com-inspired monochrome theme overrides */
+        :root {
+            --ldms-bg: #ffffff;
+            --ldms-bg-soft: #f5f5f5;
+            --ldms-text: #242424;
+            --ldms-text-strong: #111111;
+            --ldms-muted: #898989;
+            --ldms-accent: #2563eb;
+            --ldms-accent-strong: #1d4ed8;
+            --ldms-accent-ring: rgba(37, 99, 235, 0.20) 0px 0px 0px 1px;
+            --ldms-accent-soft-shadow: rgba(37, 99, 235, 0.06) 0px 4px 16px 0px;
+            --ldms-accent-strong-shadow: rgba(37, 99, 235, 0.40) 0px 3px 12px 0px;
+            --ldms-accent-strong-shadow-hover: rgba(37, 99, 235, 0.50) 0px 5px 16px 0px;
+            --ldms-border: rgba(34, 42, 53, 0.08);
+            --ldms-border-strong: rgba(34, 42, 53, 0.14);
+            --ldms-ring: rgba(34, 42, 53, 0.08) 0px 0px 0px 1px;
+            --ldms-shadow-sm: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(34, 42, 53, 0.05) 0px 4px 8px 0px;
+            --ldms-shadow-card: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.05) 0px 4px 8px 0px;
+            --ldms-dark-bg: #111111;
+            --ldms-dark-surface: #1a1a1a;
+            --ldms-dark-surface-soft: #202020;
+            --ldms-dark-text: #f2f2f2;
+            --ldms-dark-muted: #a3a3a3;
+            --ldms-dark-border: rgba(255, 255, 255, 0.14);
+            --ldms-dark-ring: rgba(255, 255, 255, 0.12) 0px 0px 0px 1px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--ldms-dark-bg);
+            color: var(--ldms-dark-text);
+        }
+
+        body.light-mode {
+            background: var(--ldms-bg-soft);
+            color: var(--ldms-text);
+        }
+
+        .nav-brand,
+        .sidebar-title h2,
+        .modal-header h3,
+        .project-info-value.highlight {
+            font-family: 'Cal Sans', 'Inter', sans-serif;
+            letter-spacing: 0.2px;
+        }
+
+        .navbar {
+            background: var(--ldms-dark-surface);
+            border-bottom: none;
+            box-shadow: var(--ldms-dark-ring), 0px 10px 24px rgba(0, 0, 0, 0.28);
+        }
+
+        .nav-brand {
+            color: var(--ldms-accent);
+        }
+
+        .nav-brand i {
+            color: var(--ldms-accent);
+        }
+
+        .nav-link {
+            color: var(--ldms-dark-muted);
+            border-radius: 9999px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--ldms-dark-text);
+        }
+
+        .nav-link.active {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-strong-shadow), rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
+        }
+
+        .crumb-separator {
+            color: #6e6e6e;
+            font-size: 0.8rem;
+        }
+
+        .nav-project-name {
+            color: var(--ldms-dark-muted);
+            cursor: default;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-strong-shadow), rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
+        }
+
+        .btn-primary:hover {
+            background: var(--ldms-accent-strong);
+            box-shadow: var(--ldms-accent-strong-shadow-hover), rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: #363636;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--ldms-dark-border);
+            color: var(--ldms-dark-text);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.26);
+        }
+
+        .btn-logout {
+            color: #f3f3f3;
+            border-color: rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+        }
+
+        .project-banner {
+            background: var(--ldms-dark-surface-soft);
+            border: none;
+            box-shadow: var(--ldms-dark-ring);
+        }
+
+        .project-info-label {
+            color: var(--ldms-dark-muted);
+        }
+
+        .project-info-value {
+            color: var(--ldms-dark-text);
+        }
+
+        .project-info-value.highlight {
+            color: #ffffff;
+        }
+
+        .viewer-container {
+            background: #171717;
+        }
+
+        .toolbar-group,
+        .view-presets,
+        .model-stats,
+        .camera-info {
+            border: none;
+            box-shadow: var(--ldms-dark-ring), rgba(0, 0, 0, 0.32) 0px 8px 20px;
+            background: rgba(17, 17, 17, 0.92);
+        }
+
+        .toolbar-btn {
+            color: #b8b8b8;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .toolbar-btn.active {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-ring), var(--ldms-accent-soft-shadow);
+        }
+
+        .defect-count {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-ring), var(--ldms-accent-soft-shadow);
+        }
+
+        .toolbar-group-label,
+        .stat-label,
+        .camera-info,
+        .model-stats {
+            color: var(--ldms-dark-muted);
+        }
+
+        .stat-value {
+            color: var(--ldms-dark-text);
+        }
+
+        .sidebar {
+            background: var(--ldms-dark-surface);
+            border-left: none;
+            box-shadow: var(--ldms-dark-ring);
+        }
+
+        #renderCanvas,
+        .sidebar-header,
+        .defect-list,
+        .defect-drawer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-header,
+        .sidebar-footer,
+        .defect-expanded {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-box input,
+        .filter-select {
+            background: #111111;
+            border-color: rgba(255, 255, 255, 0.14);
+            color: #f2f2f2;
+            border-radius: 8px;
+        }
+
+        .search-box input:focus,
+        .filter-select:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box input::placeholder,
+        .search-box i,
+        .defect-description,
+        .defect-coords,
+        .defect-meta-label,
+        .coord-label,
+        .empty-state,
+        .empty-state h3 {
+            color: var(--ldms-dark-muted);
+        }
+
+        .defect-list::-webkit-scrollbar-track {
+            background: #141414;
+        }
+
+        .defect-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .defect-card {
+            background: #141414;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            transform: none;
+        }
+
+        .defect-card:hover {
+            border-color: rgba(255, 255, 255, 0.24);
+            transform: translateX(1px);
+        }
+
+        .defect-card.selected,
+        .defect-card.expanded {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: #191919;
+        }
+
+        .defect-card.hovered {
+            border-color: rgba(255, 255, 255, 0.44);
+            background: #202020;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+            transform: translateX(2px);
+        }
+
+        .defect-title,
+        .defect-meta-value {
+            color: #f4f4f4;
+        }
+
+        .defect-index {
+            color: #9a9a9a;
+        }
+
+        .status-badge {
+            border-radius: 9999px;
+            border: 1px solid transparent;
+        }
+
+        .status-reported {
+            background: rgba(37, 99, 235, 0.16);
+            border-color: rgba(37, 99, 235, 0.3);
+            color: #9fc0ff;
+        }
+
+        .status-review {
+            background: rgba(139, 92, 246, 0.16);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #ceb8ff;
+        }
+
+        .status-fixed {
+            background: rgba(107, 114, 128, 0.18);
+            border-color: rgba(107, 114, 128, 0.32);
+            color: #d5d8df;
+        }
+
+        .defect-notes {
+            background: #101010;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #c8c8c8;
+            border-radius: 8px;
+        }
+
+        .modal {
+            border: none;
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        .toast {
+            border-radius: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .toast-success,
+        .toast-error,
+        .toast-info {
+            background: rgba(255, 255, 255, 0.95);
+            color: #242424;
+            border: 1px solid rgba(34, 42, 53, 0.12);
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        .status-readonly-note {
+            color: #94a3b8;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .defect-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .summary-chip {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 7px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .summary-chip-label {
+            color: var(--ldms-dark-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .summary-chip-value {
+            color: #f2f2f2;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .summary-chip-critical {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.32);
+        }
+
+        .summary-chip-critical .summary-chip-value {
+            color: #ffb4b4;
+        }
+
+        .summary-chip-review {
+            background: rgba(245, 158, 11, 0.18);
+            border-color: rgba(245, 158, 11, 0.34);
+        }
+
+        .summary-chip-review .summary-chip-value {
+            color: #ffd592;
+        }
+
+        .summary-chip-fixed {
+            background: rgba(34, 197, 94, 0.16);
+            border-color: rgba(34, 197, 94, 0.32);
+        }
+
+        .summary-chip-fixed .summary-chip-value {
+            color: #a4ebbf;
+        }
+
+        .defect-card {
+            display: grid;
+            gap: 8px;
+        }
+
+        .defect-row-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .defect-row-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            color: inherit;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .defect-field-label {
+            font-weight: 400;
+            color: var(--ldms-dark-muted);
+        }
+
+        .defect-field-value {
+            font-weight: 700;
+            color: inherit;
+        }
+
+        .defect-row-type {
+            color: #dbdbdb;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .defect-row-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .severity-pill {
+            padding: 4px 8px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #f3f3f3;
+        }
+
+        .severity-low {
+            background: rgba(34, 197, 94, 0.16);
+            border-color: rgba(34, 197, 94, 0.32);
+            color: #a4ebbf;
+        }
+
+        .severity-medium {
+            background: rgba(245, 158, 11, 0.16);
+            border-color: rgba(245, 158, 11, 0.32);
+            color: #ffd592;
+        }
+
+        .severity-high {
+            background: rgba(249, 115, 22, 0.16);
+            border-color: rgba(249, 115, 22, 0.32);
+            color: #ffc19a;
+        }
+
+        .severity-critical {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.32);
+            color: #ffb4b4;
+        }
+
+        .defect-row-location {
+            color: #d2d2d2;
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .defect-row-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--ldms-dark-muted);
+            font-size: 11px;
+        }
+
+        .defect-row-coords {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        .defect-row-date {
+            white-space: nowrap;
+        }
+
+        .defect-drawer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            background: #1a1a1a;
+            box-shadow: -12px 0 24px rgba(0, 0, 0, 0.3), var(--ldms-dark-ring);
+            transform: translateX(105%);
+            transition: transform 0.25s ease;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .defect-drawer.active {
+            transform: translateX(0);
+        }
+
+        .defect-drawer-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .defect-drawer-header h3 {
+            font-family: 'Cal Sans', 'Inter', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .drawer-close {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: transparent;
+            color: #d2d2d2;
+            cursor: pointer;
+        }
+
+        .drawer-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .defect-drawer-body {
+            padding: 14px 16px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drawer-image {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+        }
+
+        .drawer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .drawer-item {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .drawer-item-wide {
+            grid-column: 1 / -1;
+        }
+
+        .drawer-label {
+            color: var(--ldms-dark-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+        }
+
+        .drawer-value {
+            color: #f2f2f2;
+            font-size: 13px;
+            font-weight: 400;
+            word-break: break-word;
+        }
+
+        #drawerType,
+        #drawerLocation {
+            font-weight: 700;
+        }
+
+        .drawer-notes {
+            color: #d0d0d0;
+            font-style: italic;
+            white-space: pre-wrap;
+        }
+
+        .drawer-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .drawer-actions .btn {
+            white-space: nowrap;
+        }
+
+        body.light-mode .navbar {
+            background: var(--ldms-bg);
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        body.light-mode .nav-brand {
+            color: var(--ldms-accent);
+        }
+
+        body.light-mode .nav-brand i {
+            color: var(--ldms-accent);
+        }
+
+        body.light-mode .nav-link {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .nav-link:hover {
+            background: #f2f2f2;
+            color: var(--ldms-text-strong);
+        }
+
+        body.light-mode .nav-link.active {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-strong-shadow), rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
+        }
+
+        body.light-mode .crumb-separator,
+        body.light-mode .nav-project-name {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .btn-outline {
+            border-color: var(--ldms-border-strong);
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .btn-outline:hover {
+            background: #f2f2f2;
+            color: var(--ldms-text);
+            border-color: var(--ldms-border-strong);
+        }
+
+        body.light-mode .btn-logout {
+            color: #242424;
+            border-color: var(--ldms-border-strong);
+        }
+
+        body.light-mode .project-banner {
+            background: #ffffff;
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        body.light-mode .project-info-label,
+        body.light-mode .toolbar-group-label,
+        body.light-mode .stat-label,
+        body.light-mode .camera-info,
+        body.light-mode .model-stats,
+        body.light-mode .defect-description,
+        body.light-mode .defect-coords,
+        body.light-mode .defect-meta-label,
+        body.light-mode .coord-label,
+        body.light-mode .search-box i,
+        body.light-mode .search-box input::placeholder,
+        body.light-mode .empty-state,
+        body.light-mode .empty-state h3 {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .project-info-value,
+        body.light-mode .stat-value,
+        body.light-mode .defect-title,
+        body.light-mode .defect-meta-value {
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .project-info-value.highlight {
+            color: var(--ldms-text-strong);
+        }
+
+        body.light-mode .viewer-container {
+            background: #ececec;
+        }
+
+        body.light-mode .toolbar-group,
+        body.light-mode .view-presets,
+        body.light-mode .model-stats,
+        body.light-mode .camera-info {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        body.light-mode .toolbar-btn {
+            color: #555555;
+        }
+
+        body.light-mode .toolbar-btn:hover {
+            background: #f2f2f2;
+            color: #111111;
+        }
+
+        body.light-mode .toolbar-btn.active {
+            background: var(--ldms-accent);
+            color: #ffffff;
+            box-shadow: var(--ldms-accent-ring), var(--ldms-accent-soft-shadow);
+        }
+
+        body.light-mode .sidebar {
+            background: #ffffff;
+            box-shadow: var(--ldms-shadow-card);
+        }
+
+        body.light-mode .sidebar-header,
+        body.light-mode .sidebar-footer,
+        body.light-mode .defect-expanded {
+            border-color: var(--ldms-border);
+        }
+
+        body.light-mode .search-box input,
+        body.light-mode .filter-select {
+            background: #ffffff;
+            border-color: var(--ldms-border-strong);
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .defect-list::-webkit-scrollbar-track {
+            background: #f3f3f3;
+        }
+
+        body.light-mode .defect-list::-webkit-scrollbar-thumb {
+            background: #c8c8c8;
+        }
+
+        body.light-mode .defect-card {
+            background: #ffffff;
+            border-color: var(--ldms-border-strong);
+            box-shadow: var(--ldms-ring);
+        }
+
+        body.light-mode .defect-card:hover {
+            border-color: rgba(34, 42, 53, 0.22);
+        }
+
+        body.light-mode .defect-card.selected,
+        body.light-mode .defect-card.expanded {
+            border-color: rgba(34, 42, 53, 0.28);
+            background: #f7f7f7;
+        }
+
+        body.light-mode .defect-card.hovered {
+            border-color: rgba(34, 42, 53, 0.4);
+            background: #f0f0f0;
+            box-shadow: var(--ldms-shadow-sm);
+        }
+
+        body.light-mode .defect-index {
+            color: #888888;
+        }
+
+        body.light-mode .defect-notes {
+            background: #f8f8f8;
+            border-color: var(--ldms-border);
+            color: #666666;
+        }
+
+        body.light-mode .summary-chip {
+            background: #ffffff;
+            border-color: var(--ldms-border-strong);
+            box-shadow: var(--ldms-ring);
+        }
+
+        body.light-mode .summary-chip-label {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .summary-chip-value {
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .summary-chip-critical {
+            background: rgba(239, 68, 68, 0.10);
+            border-color: rgba(239, 68, 68, 0.28);
+        }
+
+        body.light-mode .summary-chip-critical .summary-chip-value {
+            color: #b91c1c;
+        }
+
+        body.light-mode .summary-chip-review {
+            background: rgba(245, 158, 11, 0.11);
+            border-color: rgba(245, 158, 11, 0.28);
+        }
+
+        body.light-mode .summary-chip-review .summary-chip-value {
+            color: #b45309;
+        }
+
+        body.light-mode .summary-chip-fixed {
+            background: rgba(34, 197, 94, 0.11);
+            border-color: rgba(34, 197, 94, 0.28);
+        }
+
+        body.light-mode .summary-chip-fixed .summary-chip-value {
+            color: #166534;
+        }
+
+        body.light-mode .defect-row-type {
+            color: #4a4a4a;
+        }
+
+        body.light-mode .defect-field-label {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .defect-row-location {
+            color: #4a4a4a;
+        }
+
+        body.light-mode .severity-pill {
+            border-color: var(--ldms-border-strong);
+            color: #2e2e2e;
+            background: #ffffff;
+        }
+
+        body.light-mode .severity-low {
+            background: rgba(34, 197, 94, 0.11);
+            border-color: rgba(34, 197, 94, 0.28);
+            color: #166534;
+        }
+
+        body.light-mode .severity-medium {
+            background: rgba(245, 158, 11, 0.11);
+            border-color: rgba(245, 158, 11, 0.28);
+            color: #b45309;
+        }
+
+        body.light-mode .severity-high {
+            background: rgba(249, 115, 22, 0.11);
+            border-color: rgba(249, 115, 22, 0.28);
+            color: #c2410c;
+        }
+
+        body.light-mode .severity-critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.28);
+            color: #b91c1c;
+        }
+
+        body.light-mode .status-reported {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.28);
+            color: #1d4ed8;
+        }
+
+        body.light-mode .status-review {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.28);
+            color: #6d28d9;
+        }
+
+        body.light-mode .status-fixed {
+            background: rgba(107, 114, 128, 0.12);
+            border-color: rgba(107, 114, 128, 0.24);
+            color: #374151;
+        }
+
+        body.light-mode .defect-row-meta {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .defect-drawer {
+            background: #ffffff;
+            box-shadow: -12px 0 20px rgba(34, 42, 53, 0.08), var(--ldms-shadow-card);
+        }
+
+        body.light-mode .defect-drawer-header {
+            border-color: var(--ldms-border);
+        }
+
+        body.light-mode .defect-drawer-header h3 {
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .drawer-close {
+            border-color: var(--ldms-border-strong);
+            color: var(--ldms-text);
+            background: #ffffff;
+        }
+
+        body.light-mode .drawer-close:hover {
+            background: #f3f3f3;
+        }
+
+        body.light-mode .drawer-image {
+            border-color: var(--ldms-border);
+        }
+
+        body.light-mode .drawer-item {
+            background: #ffffff;
+            border-color: var(--ldms-border-strong);
+            box-shadow: var(--ldms-ring);
+        }
+
+        body.light-mode .drawer-label {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .drawer-value {
+            color: var(--ldms-text);
+        }
+
+        body.light-mode .drawer-notes {
+            color: #626262;
+        }
+
+        @media (max-width: 1200px) {
+            .view-presets,
+            .camera-info {
+                right: 16px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .viewer-container {
+                min-height: 62vh;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 38vh;
+                border-left: none;
+                border-top: 1px solid var(--ldms-border);
+            }
+
+            .view-presets,
+            .camera-info {
+                right: 16px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .navbar {
+                padding: 10px 12px;
+            }
+
+            .nav-left {
+                gap: 10px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .project-info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .viewer-toolbar {
+                top: 10px;
+                left: 10px;
+                z-index: 70;
+            }
+
+            .view-presets {
+                top: 10px;
+                right: 10px;
+                gap: 4px;
+                padding: 4px;
+            }
+
+            .model-stats,
+            .camera-info {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+
+            .model-stats {
+                left: 10px;
+                bottom: 10px;
+            }
+
+            .camera-info {
+                right: 10px;
+                bottom: 10px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .viewer-toolbar {
+                left: 8px;
+                top: 8px;
+            }
+
+            .toolbar-btn {
+                padding: 8px 9px;
+                font-size: 13px;
+            }
+
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-right {
+                gap: 6px;
+            }
+
+            .defect-summary {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .drawer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-icon {
+                min-width: 32px;
+                padding: 7px 8px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="toast-container" id="toastContainer"></div>
+    <div class="image-viewer-overlay" id="imageViewer" onclick="closeImageViewer(event)">
+        <div class="image-viewer-shell" onclick="event.stopPropagation()">
+            <button class="image-viewer-close" onclick="closeImageViewer()" title="Close image viewer">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="imageViewerImg" class="image-viewer-full" src="" alt="Full image preview">
+        </div>
+    </div>
     <main class="card">
         <!-- Navigation Bar -->
-        <nav class="navbar">
+        <nav class="navbar" id="tour-viz-nav">
             <div class="nav-left">
                 <a href="/projects" class="nav-brand">
-                    <i class="fas fa-cube"></i>
+                    <i class="fas fa-hard-hat"></i>
                     LDMS
                 </a>
                 <div class="nav-links">
                     <a href="/projects" class="nav-link"><i class="fas fa-folder-open"></i> Projects</a>
-                    <span style="color:#475569;font-size:0.8rem;"><i class="fas fa-chevron-right"></i></span>
-                    <span class="nav-link" style="color:#94a3b8;cursor:default;">{{ upload_metadata.project_name if
+                    <span class="crumb-separator"><i class="fas fa-chevron-right"></i></span>
+                    <span class="nav-link nav-project-name">{{ upload_metadata.project_name if
                         upload_metadata and upload_metadata.project_name else scan.name }}</span>
-                    <span style="color:#475569;font-size:0.8rem;"><i class="fas fa-chevron-right"></i></span>
+                    <span class="crumb-separator"><i class="fas fa-chevron-right"></i></span>
                     <a href="/scans/{{ scan_id }}/visualize" class="nav-link active"><i class="fas fa-eye"></i>
                         3D Visualization</a>
                 </div>
             </div>
             <div class="nav-right">
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline"
-                    style="color:#fca5a5;border-color:rgba(239,68,68,0.3);font-size:12px;" title="Logout">
+                <button class="btn btn-outline tour-trigger" id="tourReplayVisualization" type="button">
+                    <i class="fas fa-compass"></i> Tutorial
+                </button>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-logout" title="Logout">
                     <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
                 </a>
                 <button class="btn btn-outline btn-icon" id="themeToggle" onclick="toggleTheme()"
@@ -1131,7 +2351,7 @@
         </nav>
 
         <!-- Project Info Banner -->
-        <div class="project-banner">
+        <div class="project-banner" id="tour-viz-project-banner">
             <div class="project-info-grid">
                 <div class="project-info-item">
                     <span class="project-info-label">Project Name</span>
@@ -1173,7 +2393,7 @@
                 <canvas id="renderCanvas"></canvas>
 
                 <!-- Left Toolbar (Camera Controls) -->
-                <div class="viewer-toolbar">
+                <div class="viewer-toolbar" id="tour-viz-toolbar">
                     <div class="toolbar-group">
                         <span class="toolbar-group-label">Zoom</span>
                         <button class="toolbar-btn" onclick="zoomIn()" title="Zoom In"><i
@@ -1230,7 +2450,7 @@
 
             <!-- Sidebar -->
             <div class="sidebar">
-                <div class="sidebar-header">
+                <div class="sidebar-header" id="tour-viz-sidebar-header">
                     <div class="sidebar-title">
                         <h2><i class="fas fa-exclamation-triangle"></i> Defects</h2>
                         <span class="defect-count" id="defectCount">0</span>
@@ -1256,6 +2476,8 @@
                             <option value="status">By Status</option>
                         </select>
                     </div>
+
+                    <div class="defect-summary" id="defectsSummary"></div>
                 </div>
 
                 <!-- Defect List -->
@@ -1264,6 +2486,56 @@
                         <div class="loading-spinner"></div>
                     </div>
                 </div>
+
+                <aside class="defect-drawer" id="defectDrawer" aria-hidden="true">
+                    <div class="defect-drawer-header">
+                        <h3 id="drawerTitle">Defect Details</h3>
+                        <button class="drawer-close" onclick="closeDefectDrawer()" title="Close details">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="defect-drawer-body">
+                        <img id="drawerImage" class="drawer-image" src="" alt="Defect image" style="display:none;">
+                        <div class="drawer-grid">
+                            <div class="drawer-item">
+                                <span class="drawer-label">Location</span>
+                                <span class="drawer-value" id="drawerLocation">-</span>
+                            </div>
+                            <div class="drawer-item">
+                                <span class="drawer-label">Type</span>
+                                <span class="drawer-value" id="drawerType">-</span>
+                            </div>
+                            <div class="drawer-item">
+                                <span class="drawer-label">Severity</span>
+                                <span class="drawer-value" id="drawerSeverity">-</span>
+                            </div>
+                            <div class="drawer-item">
+                                <span class="drawer-label">Status</span>
+                                <span class="drawer-value" id="drawerStatus">-</span>
+                            </div>
+                            <div class="drawer-item drawer-item-wide">
+                                <span class="drawer-label">Coordinates</span>
+                                <span class="drawer-value" id="drawerCoords">-</span>
+                            </div>
+                            <div class="drawer-item drawer-item-wide">
+                                <span class="drawer-label">Notes</span>
+                                <span class="drawer-value drawer-notes" id="drawerNotes">No notes added</span>
+                            </div>
+                        </div>
+
+                        <div class="drawer-actions">
+                            <button class="btn btn-small btn-outline" onclick="focusDefect(currentDrawerDefectId)">
+                                <i class="fas fa-crosshairs"></i> Focus in 3D
+                            </button>
+                            <button class="btn btn-small btn-primary" onclick="openDefectModal(currentDrawerDefectId)">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-small btn-danger" onclick="deleteDefect(currentDrawerDefectId)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </aside>
             </div>
         </div>
 
@@ -1338,7 +2610,7 @@
                         {% else %}
                         <input type="text" id="defectStatusDisplay" readonly style="opacity:0.7;cursor:not-allowed;">
                         <input type="hidden" id="defectStatus">
-                        <small style="color:#94a3b8;margin-top:4px;display:block;"><i class="fas fa-info-circle"></i>
+                        <small class="status-readonly-note"><i class="fas fa-info-circle"></i>
                             Only developers can change the status.</small>
                         {% endif %}
                     </div>
@@ -1355,6 +2627,20 @@
             </div>
         </div>
 
+        <div class="tour-backdrop" id="tourBackdropVisualization"></div>
+        <div class="tour-popover" id="tourPopoverVisualization" role="dialog" aria-live="polite">
+            <div class="tour-head" id="tourTitleVisualization"></div>
+            <div class="tour-body" id="tourBodyVisualization"></div>
+            <div class="tour-foot">
+                <span class="tour-step" id="tourStepVisualization"></span>
+                <div class="tour-actions">
+                    <button class="tour-action secondary" id="tourSkipVisualization" type="button">Skip</button>
+                    <button class="tour-action secondary" id="tourBackVisualization" type="button">Back</button>
+                    <button class="tour-action primary" id="tourNextVisualization" type="button">Next</button>
+                </div>
+            </div>
+        </div>
+
 
 
         <script>
@@ -1362,7 +2648,7 @@
             const canvas = document.getElementById('renderCanvas');
             const engine = new BABYLON.Engine(canvas, true);
             const scene = new BABYLON.Scene(engine);
-            scene.clearColor = new BABYLON.Color4(0.04, 0.06, 0.10, 1);
+            scene.clearColor = new BABYLON.Color4(0.09, 0.09, 0.09, 1);
 
             // Enable anti-aliasing for smoother rendering
             scene.getEngine().setHardwareScalingLevel(1 / window.devicePixelRatio);
@@ -1619,6 +2905,7 @@
             let modelBounds = { min: null, max: null, size: null };
             let hoveredMarker = null;
             let selectedMarker = null;
+            let currentDrawerDefectId = null;
 
             // Glow layer for highlighted markers
             const glowLayer = new BABYLON.GlowLayer("glowLayer", scene);
@@ -1706,11 +2993,40 @@
                     .then(defects => {
                         defectsData = defects;
                         filteredDefects = [...defects];
+                        renderDefectSummary(defects);
                         renderDefectList(filteredDefects);
                         renderDefectMarkers(defects);
                         document.getElementById('defectCount').textContent = defects.length;
                         document.getElementById('defectStat').textContent = defects.length;
                     });
+            }
+
+            function renderDefectSummary(defects) {
+                const summaryEl = document.getElementById('defectsSummary');
+                if (!summaryEl) return;
+
+                const criticalCount = defects.filter(d => d.severity === 'Critical').length;
+                const reviewCount = defects.filter(d => d.status === 'Under Review').length;
+                const fixedCount = defects.filter(d => d.status === 'Fixed').length;
+
+                summaryEl.innerHTML = `
+                <div class="summary-chip">
+                    <span class="summary-chip-label">Total</span>
+                    <span class="summary-chip-value">${defects.length}</span>
+                </div>
+                <div class="summary-chip summary-chip-critical">
+                    <span class="summary-chip-label">Critical</span>
+                    <span class="summary-chip-value">${criticalCount}</span>
+                </div>
+                <div class="summary-chip summary-chip-review">
+                    <span class="summary-chip-label">Review</span>
+                    <span class="summary-chip-value">${reviewCount}</span>
+                </div>
+                <div class="summary-chip summary-chip-fixed">
+                    <span class="summary-chip-label">Fixed</span>
+                    <span class="summary-chip-value">${fixedCount}</span>
+                </div>
+                `;
             }
 
             function renderDefectList(defects) {
@@ -1729,57 +3045,33 @@
 
                 listEl.innerHTML = defects.map((d, index) => `
                 <div class="defect-card" data-id="${d.defectId}" id="card-${d.defectId}" 
-                     onclick="toggleDefectCard(${d.defectId})"
+                     onclick="openDefectDrawer(${d.defectId})"
                      onmouseenter="highlightMarkerForDefect(${d.defectId}, true)"
                      onmouseleave="highlightMarkerForDefect(${d.defectId}, false)">
-                    <div class="defect-header">
-                        <span class="defect-title">
+                    <div class="defect-row-main">
+                        <div class="defect-row-title">
                             <i class="fas fa-exclamation-circle" style="color: ${getSeverityColorHex(d.severity)};"></i>
-                            Defect <span class="defect-index">#${d.defectId}</span>
-                        </span>
-                        <span class="status-badge ${getStatusClass(d.status)}">${d.status}</span>
-                    </div>
-                    <div class="defect-description"><strong>${d.location ? '📍 ' + d.location : 'No location'}</strong></div>
-                    <div class="defect-description">${d.defect_type || 'Unknown'}</div>
-                    <div class="defect-coords">
-                        <span class="coord-item"><span class="coord-label">X:</span> ${d.x.toFixed(2)}</span>
-                        <span class="coord-item"><span class="coord-label">Y:</span> ${d.y.toFixed(2)}</span>
-                        <span class="coord-item"><span class="coord-label">Z:</span> ${d.z.toFixed(2)}</span>
-                    </div>
-                    
-                    <!-- Expanded content -->
-                    <div class="defect-expanded" id="expanded-${d.defectId}">
-                        <div class="defect-meta-label">Image</div>
-                        <div id="defect-img-${d.defectId}" class="defect-meta-value">
-                            <span class="no-image">Loading...</span>
+                            <span>Defect <span class="defect-index">#${d.defectId}</span></span>
                         </div>
-                        
-                        <div class="defect-meta-label">Location</div>
-                        <div class="defect-meta-value">${d.location || 'Not specified'}</div>
-                        
-                        <div class="defect-meta-label">Type</div>
-                        <div class="defect-meta-value">${d.defect_type || 'Unknown'}</div>
-                        
-                        <div class="defect-meta-label">Severity</div>
-                        <div class="defect-meta-value" style="color: ${getSeverityColorHex(d.severity)};">${d.severity || 'Medium'}</div>
-                        
-                        <div class="defect-meta-label">Notes</div>
-                        <div id="defect-notes-${d.defectId}" class="defect-notes">Loading...</div>
-                        
-                        <div class="defect-meta-label">Created</div>
-                        <div class="defect-meta-value">${d.created_at || 'Unknown'}</div>
-                        
-                        <div class="defect-actions">
-                            <button class="btn btn-small btn-outline" onclick="event.stopPropagation(); focusDefect(${d.defectId})">
-                                <i class="fas fa-crosshairs"></i> Focus
-                            </button>
-                            <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openDefectModal(${d.defectId})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-small btn-danger" onclick="event.stopPropagation(); deleteDefect(${d.defectId})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="defect-row-status">
+                            <span class="severity-pill ${getSeverityClass(d.severity)}">${d.severity || 'Medium'}</span>
+                            <span class="status-badge ${getStatusClass(d.status)}">${d.status}</span>
                         </div>
+                    </div>
+
+                    <div class="defect-row-type"><span class="defect-field-label">Type:</span> <span class="defect-field-value">${d.defect_type || 'Unknown'}</span></div>
+
+                    <div class="defect-row-location">
+                        <span class="defect-field-label">Location:</span> <span class="defect-field-value">${d.location || 'Not specified'}</span>
+                    </div>
+
+                    <div class="defect-row-meta">
+                        <div class="defect-row-coords">
+                            <span>X ${d.x.toFixed(2)}</span>
+                            <span>Y ${d.y.toFixed(2)}</span>
+                            <span>Z ${d.z.toFixed(2)}</span>
+                        </div>
+                        <span class="defect-row-date">${d.created_at || 'Unknown'}</span>
                     </div>
                 </div>
             `).join('');
@@ -1791,6 +3083,16 @@
                     case 'Under Review': return 'status-review';
                     case 'Fixed': return 'status-fixed';
                     default: return 'status-reported';
+                }
+            }
+
+            function getSeverityClass(severity) {
+                switch (severity) {
+                    case 'Low': return 'severity-low';
+                    case 'Medium': return 'severity-medium';
+                    case 'High': return 'severity-high';
+                    case 'Critical': return 'severity-critical';
+                    default: return 'severity-medium';
                 }
             }
 
@@ -1840,8 +3142,11 @@
 
                 filteredDefects = defectsData.filter(d => {
                     const matchesSearch = !searchQuery ||
-                        (d.description && d.description.toLowerCase().includes(searchQuery)) ||
-                        d.defectId.toString().includes(searchQuery);
+                        d.defectId.toString().includes(searchQuery) ||
+                        (d.location && d.location.toLowerCase().includes(searchQuery)) ||
+                        (d.defect_type && d.defect_type.toLowerCase().includes(searchQuery)) ||
+                        (d.status && d.status.toLowerCase().includes(searchQuery)) ||
+                        (d.severity && d.severity.toLowerCase().includes(searchQuery));
                     const matchesStatus = !statusFilter || d.status === statusFilter;
                     return matchesSearch && matchesStatus;
                 });
@@ -1861,34 +3166,87 @@
                 }
 
                 renderDefectList(filteredDefects);
+                renderDefectSummary(filteredDefects);
+
+                if (currentDrawerDefectId !== null) {
+                    const stillVisible = filteredDefects.some(d => d.defectId === currentDrawerDefectId);
+                    if (!stillVisible) {
+                        closeDefectDrawer();
+                    }
+                }
             }
 
             function toggleDefectCard(defectId) {
-                const card = document.getElementById('card-' + defectId);
-                if (!card) return;
+                openDefectDrawer(defectId);
+            }
 
-                const wasExpanded = card.classList.contains('expanded');
+            function openDefectDrawer(defectId) {
+                if (!defectId) return;
+                currentDrawerDefectId = defectId;
 
-                // Collapse all cards first
-                document.querySelectorAll('.defect-card').forEach(c => {
-                    c.classList.remove('expanded');
-                });
+                const drawer = document.getElementById('defectDrawer');
+                if (!drawer) return;
 
-                // Reset all markers to normal size
-                markers.forEach(m => {
-                    m.scaling = new BABYLON.Vector3(1, 1, 1);
-                });
+                selectDefect(defectId);
+                drawer.classList.add('active');
+                drawer.setAttribute('aria-hidden', 'false');
 
-                if (!wasExpanded) {
-                    card.classList.add('expanded');
-                    loadDefectDetails(defectId);
+                fetch('/defect/' + defectId)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('drawerTitle').textContent = `Defect #${defectId}`;
+                        document.getElementById('drawerLocation').textContent = data.location || 'Not specified';
+                        document.getElementById('drawerType').textContent = data.defect_type || 'Unknown';
+                        document.getElementById('drawerSeverity').textContent = data.severity || 'Medium';
+                        document.getElementById('drawerStatus').textContent = data.status || 'Reported';
+                        document.getElementById('drawerCoords').textContent = `X ${data.x}, Y ${data.y}, Z ${data.z}`;
+                        document.getElementById('drawerNotes').textContent = data.notes || 'No notes added';
 
-                    // Highlight the marker
-                    const defectIndex = defectsData.findIndex(d => d.defectId === defectId);
-                    if (defectIndex >= 0 && defectIndex < markers.length) {
-                        markers[defectIndex].scaling = new BABYLON.Vector3(1.5, 1.5, 1.5);
-                    }
+                        const imgEl = document.getElementById('drawerImage');
+                        if (imgEl) {
+                            if (data.imageUrl) {
+                                imgEl.src = data.imageUrl;
+                                imgEl.style.display = 'block';
+                                imgEl.onclick = () => openImageViewer(data.imageUrl);
+                            } else {
+                                imgEl.style.display = 'none';
+                                imgEl.removeAttribute('src');
+                                imgEl.onclick = null;
+                            }
+                        }
+                    })
+                    .catch(() => showToast('Failed to load defect details', 'error'));
+            }
+
+            function closeDefectDrawer() {
+                const drawer = document.getElementById('defectDrawer');
+                if (!drawer) return;
+                drawer.classList.remove('active');
+                drawer.setAttribute('aria-hidden', 'true');
+                currentDrawerDefectId = null;
+            }
+
+            function openImageViewer(imageUrl) {
+                if (!imageUrl) return;
+                const viewer = document.getElementById('imageViewer');
+                const viewerImg = document.getElementById('imageViewerImg');
+                if (!viewer || !viewerImg) return;
+
+                viewerImg.src = imageUrl;
+                viewer.classList.add('active');
+            }
+
+            function closeImageViewer(event) {
+                if (event && event.target && event.target.id && event.target.id !== 'imageViewer') {
+                    return;
                 }
+
+                const viewer = document.getElementById('imageViewer');
+                const viewerImg = document.getElementById('imageViewerImg');
+                if (!viewer || !viewerImg) return;
+
+                viewer.classList.remove('active');
+                viewerImg.removeAttribute('src');
             }
 
             function loadDefectDetails(defectId) {
@@ -1899,7 +3257,7 @@
                         const imgContainer = document.getElementById('defect-img-' + defectId);
                         if (imgContainer) {
                             if (data.imageUrl) {
-                                imgContainer.innerHTML = '<img src="' + data.imageUrl + '" class="defect-thumbnail" onclick="event.stopPropagation(); window.open(\'' + data.imageUrl + '\', \'_blank\')" alt="Defect Image">';
+                                imgContainer.innerHTML = '<img src="' + data.imageUrl + '" class="defect-thumbnail" onclick="event.stopPropagation(); openImageViewer(\'' + data.imageUrl + '\')" alt="Defect Image">';
                             } else {
                                 imgContainer.innerHTML = '<span class="no-image">No image attached</span>';
                             }
@@ -2000,9 +3358,9 @@
                         const defectId = pickResult.pickedMesh.defectId;
                         const snapshotIndex = pickResult.pickedMesh.snapshotIndex;
                         if (defectId) {
-                            openDefectModal(defectId);
+                            openDefectDrawer(defectId);
                         } else if (snapshotIndex !== undefined && snapshotIndex < defectsData.length) {
-                            openDefectModal(defectsData[snapshotIndex].defectId);
+                            openDefectDrawer(defectsData[snapshotIndex].defectId);
                         }
                     }
                 }
@@ -2115,11 +3473,10 @@
                     glowLayer.removeIncludedOnlyMesh(selectedMarker);
                 }
 
-                document.querySelectorAll('.defect-card').forEach(c => c.classList.remove('selected', 'expanded'));
+                document.querySelectorAll('.defect-card').forEach(c => c.classList.remove('selected'));
                 const card = document.querySelector(`.defect-card[data-id="${defectId}"]`);
                 if (card) {
-                    card.classList.add('selected', 'expanded');
-                    loadDefectDetails(defectId);
+                    card.classList.add('selected');
                     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
 
@@ -2201,7 +3558,13 @@
                 if (confirm('Are you sure you want to delete this defect? This action cannot be undone.')) {
                     fetch(`/defect/${defectId}`, { method: 'DELETE' })
                         .then(response => response.json())
-                        .then(() => { loadDefects(); showToast('Defect deleted successfully', 'success'); })
+                        .then(() => {
+                            if (currentDrawerDefectId === defectId) {
+                                closeDefectDrawer();
+                            }
+                            loadDefects();
+                            showToast('Defect deleted successfully', 'success');
+                        })
                         .catch(() => showToast('Failed to delete defect', 'error'));
                 }
             }
@@ -2308,11 +3671,11 @@
                 if (isLight) {
                     themeIcon.className = 'fas fa-sun';
                     // Light mode 3D scene background
-                    scene.clearColor = new BABYLON.Color4(0.89, 0.91, 0.94, 1);
+                    scene.clearColor = new BABYLON.Color4(0.93, 0.93, 0.93, 1);
                 } else {
                     themeIcon.className = 'fas fa-moon';
                     // Dark mode 3D scene background
-                    scene.clearColor = new BABYLON.Color4(0.04, 0.06, 0.10, 1);
+                    scene.clearColor = new BABYLON.Color4(0.09, 0.09, 0.09, 1);
                 }
 
                 // Save preference
@@ -2326,10 +3689,169 @@
                     document.body.classList.add('light-mode');
                     document.getElementById('themeIcon').className = 'fas fa-sun';
                     if (typeof scene !== 'undefined') {
-                        scene.clearColor = new BABYLON.Color4(0.89, 0.91, 0.94, 1);
+                        scene.clearColor = new BABYLON.Color4(0.93, 0.93, 0.93, 1);
                     }
                 }
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        closeImageViewer();
+                    }
+                });
             });
+
+            (function() {
+                const JOURNEY_KEY = 'ldms_tour_journey_v1';
+                const params = new URLSearchParams(window.location.search);
+                const btnReplay = document.getElementById('tourReplayVisualization');
+
+                const steps = [
+                    {
+                        selector: '#tour-viz-nav',
+                        title: 'Visualization Workspace',
+                        body: 'This page combines 3D model inspection and defect management in one unified workspace.'
+                    },
+                    {
+                        selector: '#tour-viz-project-banner',
+                        title: 'Project Context',
+                        body: 'Project metadata is pinned at the top so you always know which scan and unit you are reviewing.'
+                    },
+                    {
+                        selector: '#tour-viz-toolbar',
+                        title: '3D Camera and Display Tools',
+                        body: 'Use zoom, fit, x-ray, wireframe, and preset views to inspect issues from multiple angles.'
+                    },
+                    {
+                        selector: '#tour-viz-sidebar-header',
+                        title: 'Defect Filters and Summary',
+                        body: 'Search by ID, filter by status, and monitor summary chips to prioritize critical issues.'
+                    },
+                    {
+                        selector: '#defectList',
+                        title: 'Defect Workflow',
+                        body: 'Select a defect to open details, focus in 3D, edit status, and update notes.'
+                    },
+                    {
+                        selector: '#tour-viz-nav',
+                        title: 'Continue to Developer Ops',
+                        body: 'Next, open the Developer Dashboard to review portfolio metrics and team activity at scale.'
+                    }
+                ];
+
+                const backdrop = document.getElementById('tourBackdropVisualization');
+                const popover = document.getElementById('tourPopoverVisualization');
+                const titleEl = document.getElementById('tourTitleVisualization');
+                const bodyEl = document.getElementById('tourBodyVisualization');
+                const stepEl = document.getElementById('tourStepVisualization');
+                const btnNext = document.getElementById('tourNextVisualization');
+                const btnBack = document.getElementById('tourBackVisualization');
+                const btnSkip = document.getElementById('tourSkipVisualization');
+
+                let activeIndex = 0;
+                let currentTarget = null;
+
+                function getJourney() {
+                    try {
+                        const parsed = JSON.parse(localStorage.getItem(JOURNEY_KEY) || '{}');
+                        return parsed && typeof parsed === 'object' ? parsed : {};
+                    } catch (error) {
+                        return {};
+                    }
+                }
+
+                function setJourneyStage(stage) {
+                    const next = getJourney();
+                    next.active = true;
+                    next.stage = stage;
+                    next.updatedAt = Date.now();
+                    localStorage.setItem(JOURNEY_KEY, JSON.stringify(next));
+                }
+
+                function clearJourney() {
+                    localStorage.removeItem(JOURNEY_KEY);
+                }
+
+                function clearHighlight() {
+                    if (currentTarget) currentTarget.classList.remove('tour-highlight');
+                    currentTarget = null;
+                }
+
+                function closeTour() {
+                    clearHighlight();
+                    backdrop.classList.remove('active');
+                    popover.classList.remove('active');
+                }
+
+                function continueToDeveloper() {
+                    setJourneyStage('developer');
+                    window.location.href = '{{ url_for("developer.dashboard") }}?tour=journey';
+                }
+
+                function showStep(index) {
+                    activeIndex = index;
+                    const step = steps[index];
+                    const target = document.querySelector(step.selector);
+                    clearHighlight();
+
+                    if (target) {
+                        currentTarget = target;
+                        currentTarget.classList.add('tour-highlight');
+                        currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+
+                    titleEl.textContent = step.title;
+                    bodyEl.textContent = step.body;
+                    stepEl.textContent = `Step ${index + 1} of ${steps.length}`;
+                    btnBack.style.display = index === 0 ? 'none' : 'inline-flex';
+                    btnNext.textContent = index === steps.length - 1 ? 'Continue' : 'Next';
+                    backdrop.classList.add('active');
+                    popover.classList.add('active');
+                }
+
+                function shouldAutoStart() {
+                    const journey = getJourney();
+                    return params.get('tour') === 'journey' || (journey.active && journey.stage === 'visualization');
+                }
+
+                btnNext.addEventListener('click', function() {
+                    if (activeIndex >= steps.length - 1) {
+                        closeTour();
+                        continueToDeveloper();
+                        return;
+                    }
+                    showStep(activeIndex + 1);
+                });
+
+                btnBack.addEventListener('click', function() {
+                    if (activeIndex > 0) showStep(activeIndex - 1);
+                });
+
+                btnSkip.addEventListener('click', function() {
+                    closeTour();
+                    clearJourney();
+                });
+
+                backdrop.addEventListener('click', function() {
+                    closeTour();
+                    clearJourney();
+                });
+
+                btnReplay.addEventListener('click', function() {
+                    showStep(0);
+                });
+
+                window.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        closeTour();
+                    }
+                });
+
+                window.addEventListener('load', function() {
+                    if (shouldAutoStart()) {
+                        setTimeout(function() { showStep(0); }, 450);
+                    }
+                });
+            })();
 
             // Update camera info
             scene.registerBeforeRender(() => {

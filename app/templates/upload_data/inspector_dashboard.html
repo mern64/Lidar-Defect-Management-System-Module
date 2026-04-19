@@ -90,6 +90,37 @@
         rgba(37, 99, 235, 0.08) 0px 4px 12px 0px;
     }
 
+    .topbar-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .tour-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(37, 99, 235, 0.08);
+      box-shadow: rgba(37, 99, 235, 0.20) 0px 0px 0px 1px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .tour-btn:hover { background: rgba(37, 99, 235, 0.14); }
+
+    .tour-btn-reset {
+      color: #475569;
+      background: rgba(148, 163, 184, 0.12);
+      box-shadow: rgba(148, 163, 184, 0.22) 0px 0px 0px 1px;
+    }
+
+    .tour-btn-reset:hover { background: rgba(148, 163, 184, 0.2); }
+
     /* ── Main ── */
     .main {
       flex: 1; display: flex; flex-direction: column;
@@ -199,7 +230,7 @@
       right: -4rem;
       pointer-events: none;
       z-index: 0;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .bg-icon i {
@@ -208,6 +239,95 @@
       opacity: 0.06;
       display: block;
       line-height: 1;
+    }
+
+    .tour-highlight {
+      position: relative;
+      z-index: 1202 !important;
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.95),
+        0 0 0 6px rgba(37, 99, 235, 0.48),
+        0 10px 26px rgba(15, 23, 42, 0.24);
+      border-radius: 12px;
+    }
+
+    .tour-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.26);
+      z-index: 1200;
+      display: none;
+      backdrop-filter: none;
+    }
+
+    .tour-backdrop.active { display: block; }
+
+    .tour-popover {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      width: min(460px, calc(100vw - 32px));
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1rem 1rem 0.9rem;
+      box-shadow: rgba(15, 23, 42, 0.24) 0px 10px 30px;
+      z-index: 1201;
+      display: none;
+    }
+
+    .tour-popover.active { display: block; }
+
+    .tour-head {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.45rem;
+    }
+
+    .tour-body {
+      font-size: 0.9rem;
+      color: var(--ink-2);
+      line-height: 1.5;
+      margin-bottom: 0.9rem;
+    }
+
+    .tour-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tour-step {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tour-actions {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .tour-action {
+      border: none;
+      border-radius: 8px;
+      padding: 0.42rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tour-action.secondary {
+      background: #eef2ff;
+      color: #334155;
+    }
+
+    .tour-action.primary {
+      background: var(--accent);
+      color: #fff;
     }
 
     /* Ensure content floats above */
@@ -233,7 +353,7 @@
       .hero-heading { font-size: 1.75rem; }
       .main { padding: 3rem 1.25rem 4rem; }
       .cards { grid-template-columns: 1fr; }
-      .bg-icon i { font-size: 12rem; bottom: -2rem; right: -2rem; }
+      .bg-icon i { font-size: 12rem; }
     }
   </style>
 </head>
@@ -252,27 +372,31 @@
 
   <!-- Decorative background icon -->
   <div class="bg-icon" aria-hidden="true">
-    <i class="fas fa-helmet-safety"></i>
+    <i class="fas fa-city"></i>
   </div>
 
-  <header class="topbar">
-    <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand">
+  <header class="topbar" id="tour-inspector-topbar">
+    <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand" id="tour-inspector-brand">
       <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
       <span class="topbar-name">Lidar Defect Management System</span>
     </a>
-    <a href="{{ url_for('auth.logout') }}" class="user-pill">
-      <i class="fas fa-user"></i>
-      {{ current_user.username }}
-      <i class="fas fa-sign-out-alt"></i>
-    </a>
+    <div class="topbar-right" id="tour-inspector-actions">
+      <button class="tour-btn" id="tourReplayInspector" type="button"><i class="fas fa-compass"></i> Tutorial</button>
+      <button class="tour-btn tour-btn-reset" id="tourResetInspector" type="button"><i class="fas fa-rotate-left"></i> Reset Tour</button>
+      <a href="{{ url_for('auth.logout') }}" class="user-pill">
+        <i class="fas fa-user"></i>
+        {{ current_user.username }}
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+    </div>
   </header>
 
   <main class="main">
     <span class="portal-label"><i class="fas fa-shield-halved"></i> Inspector Portal</span>
-    <h1 class="hero-heading">Inspector Dashboard</h1>
+    <h1 class="hero-heading" id="tour-inspector-hero">Inspector Dashboard</h1>
     <p class="hero-sub">Welcome back, <strong>{{ current_user.username }}</strong>. Select an action to get started.</p>
 
-    <div class="stats-row">
+    <div class="stats-row" id="tour-inspector-stats">
       <span class="stat-chip">
         <i class="fas fa-folder-open"></i>
         <span class="num">{{ total_projects }}</span> Projects
@@ -299,12 +423,178 @@
     </div>
   </main>
 
+  <div class="tour-backdrop" id="tourBackdropInspector"></div>
+  <div class="tour-popover" id="tourPopoverInspector" role="dialog" aria-live="polite">
+    <div class="tour-head" id="tourTitleInspector"></div>
+    <div class="tour-body" id="tourBodyInspector"></div>
+    <div class="tour-foot">
+      <span class="tour-step" id="tourStepInspector"></span>
+      <div class="tour-actions">
+        <button class="tour-action secondary" id="tourSkipInspector" type="button">Skip</button>
+        <button class="tour-action secondary" id="tourBackInspector" type="button">Back</button>
+        <button class="tour-action primary" id="tourNextInspector" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.querySelectorAll('a[href]').forEach(link => {
       const href = link.getAttribute('href') || '';
       if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
     });
+
+    (function() {
+      const KEY = 'ldms_tour_inspector_done';
+      const JOURNEY_KEY = 'ldms_tour_journey_v1';
+      const steps = [
+        {
+          selector: '#tour-inspector-topbar',
+          title: 'Inspector Home Overview',
+          body: 'This dashboard is your control center for starting new inspections and reviewing existing projects.'
+        },
+        {
+          selector: '#tour-inspector-brand',
+          title: 'Quick Return to Home',
+          body: 'Click the LDMS brand any time to return to this dashboard and reset your workflow focus.'
+        },
+        {
+          selector: '#tour-inspector-actions',
+          title: 'Tutorial and Session Actions',
+          body: 'Use Tutorial to replay guidance and Reset Tour to run the first-time experience again.'
+        },
+        {
+          selector: '#tour-inspector-hero',
+          title: 'Role Context',
+          body: 'This area confirms you are in the Inspector portal and helps orient first-time users quickly.'
+        },
+        {
+          selector: '#upload-card',
+          title: 'Create a New Project',
+          body: 'Upload your GLB model and inspection PDF here. This starts defect extraction and 3D visualization.'
+        },
+        {
+          selector: '#projects-card',
+          title: 'Open Existing Projects',
+          body: 'Review existing scans, continue inspections, and move directly into visualization for defect management.'
+        },
+        {
+          selector: '#tour-inspector-stats',
+          title: 'Track Portfolio Health',
+          body: 'These counters show how many projects and total defects are currently tracked in the system.'
+        },
+        {
+          selector: '#tour-inspector-actions',
+          title: 'You Are Ready',
+          body: 'Next step: open New Project for a fresh upload, or View Projects to continue current inspection work.'
+        }
+      ];
+
+      const backdrop = document.getElementById('tourBackdropInspector');
+      const popover = document.getElementById('tourPopoverInspector');
+      const titleEl = document.getElementById('tourTitleInspector');
+      const bodyEl = document.getElementById('tourBodyInspector');
+      const stepEl = document.getElementById('tourStepInspector');
+      const btnNext = document.getElementById('tourNextInspector');
+      const btnBack = document.getElementById('tourBackInspector');
+      const btnSkip = document.getElementById('tourSkipInspector');
+      const btnReplay = document.getElementById('tourReplayInspector');
+      const btnReset = document.getElementById('tourResetInspector');
+
+      let activeIndex = 0;
+      let currentTarget = null;
+
+      function setJourneyStage(stage) {
+        localStorage.setItem(JOURNEY_KEY, JSON.stringify({
+          active: true,
+          stage,
+          updatedAt: Date.now()
+        }));
+      }
+
+      function continueToProjects() {
+        setJourneyStage('projects');
+        window.location.href = '{{ url_for("defects.list_projects") }}?tour=journey';
+      }
+
+      function clearHighlight() {
+        if (currentTarget) currentTarget.classList.remove('tour-highlight');
+        currentTarget = null;
+      }
+
+      function closeTour(markDone) {
+        clearHighlight();
+        backdrop.classList.remove('active');
+        popover.classList.remove('active');
+        document.body.classList.remove('tour-active');
+        if (markDone) localStorage.setItem(KEY, '1');
+      }
+
+      function showStep(index) {
+        activeIndex = index;
+        const step = steps[index];
+        const target = document.querySelector(step.selector);
+        clearHighlight();
+
+        if (target) {
+          currentTarget = target;
+          currentTarget.classList.add('tour-highlight');
+          currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        titleEl.textContent = step.title;
+        bodyEl.textContent = step.body;
+        stepEl.textContent = `Step ${index + 1} of ${steps.length}`;
+        btnBack.style.display = index === 0 ? 'none' : 'inline-flex';
+        btnNext.textContent = index === steps.length - 1 ? 'Continue' : 'Next';
+        document.body.classList.add('tour-active');
+        backdrop.classList.add('active');
+        popover.classList.add('active');
+      }
+
+      function startTour(forceReplay) {
+        if (!forceReplay && localStorage.getItem(KEY) === '1') return;
+        showStep(0);
+      }
+
+      btnNext.addEventListener('click', function() {
+        if (activeIndex >= steps.length - 1) {
+          closeTour(true);
+          continueToProjects();
+          return;
+        }
+        showStep(activeIndex + 1);
+      });
+
+      btnBack.addEventListener('click', function() {
+        if (activeIndex > 0) showStep(activeIndex - 1);
+      });
+
+      btnSkip.addEventListener('click', function() {
+        closeTour(true);
+      });
+
+      backdrop.addEventListener('click', function() {
+        closeTour(true);
+      });
+
+      btnReplay.addEventListener('click', function() {
+        startTour(true);
+      });
+
+      btnReset.addEventListener('click', function() {
+        localStorage.removeItem(KEY);
+        startTour(true);
+      });
+
+      window.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeTour(true);
+      });
+
+      window.addEventListener('load', function() {
+        setTimeout(function() { startTour(false); }, 350);
+      });
+    })();
   </script>
 </body>
 </html>

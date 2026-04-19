@@ -277,6 +277,78 @@
     .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    .tour-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.48);
+      z-index: 1000;
+      display: none;
+    }
+    .tour-backdrop.active { display: block; }
+    .tour-popover {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: min(420px, calc(100vw - 32px));
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: rgba(37, 99, 235, 0.16) 0px 0px 0px 1px, rgba(0, 0, 0, 0.18) 0px 20px 40px;
+      z-index: 1001;
+      display: none;
+      overflow: hidden;
+    }
+    .tour-popover.active { display: block; }
+    .tour-head {
+      padding: 14px 16px 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .tour-body {
+      padding: 0 16px 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--ink-2);
+    }
+    .tour-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 16px 14px;
+      border-top: 1px solid rgba(37, 99, 235, 0.16);
+      background: rgba(37, 99, 235, 0.04);
+    }
+    .tour-step { font-size: 0.8rem; color: var(--muted); }
+    .tour-actions { display: flex; gap: 8px; }
+    .tour-action {
+      border: none;
+      border-radius: 8px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tour-action.secondary {
+      background: #ffffff;
+      color: var(--ink-2);
+      box-shadow: rgba(37, 99, 235, 0.18) 0px 0px 0px 1px;
+    }
+    .tour-action.secondary:hover { color: var(--ink); }
+    .tour-action.primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: rgba(37, 99, 235, 0.4) 0px 3px 10px;
+    }
+    .tour-action.primary:hover { background: var(--accent-h); }
+    .tour-highlight {
+      position: relative;
+      z-index: 1002;
+      box-shadow: rgba(37, 99, 235, 0.55) 0px 0px 0px 3px, rgba(37, 99, 235, 0.22) 0px 0px 0px 8px;
+      border-radius: 12px;
+    }
+
     @media (max-width: 768px) {
       .topbar { padding: 0 1rem; }
       .page-content { padding: 2rem 1rem 4rem; }
@@ -401,6 +473,20 @@
     {% endif %}
   </main>
 
+  <div class="tour-backdrop" id="tourBackdropProjects"></div>
+  <div class="tour-popover" id="tourPopoverProjects" role="dialog" aria-live="polite">
+    <div class="tour-head" id="tourTitleProjects"></div>
+    <div class="tour-body" id="tourBodyProjects"></div>
+    <div class="tour-foot">
+      <span class="tour-step" id="tourStepProjects"></span>
+      <div class="tour-actions">
+        <button class="tour-action secondary" id="tourSkipProjects" type="button">Skip</button>
+        <button class="tour-action secondary" id="tourBackProjects" type="button">Back</button>
+        <button class="tour-action primary" id="tourNextProjects" type="button">Next</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function filterProjects() {
       const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase();
@@ -428,6 +514,136 @@
       if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
     });
+
+    (function() {
+      const JOURNEY_KEY = 'ldms_tour_journey_v1';
+      const params = new URLSearchParams(window.location.search);
+      const firstProjectCard = document.querySelector('.project-card');
+      const hasProjects = !!firstProjectCard;
+
+      const steps = [
+        {
+          selector: '.page-header',
+          title: 'Project Portfolio',
+          body: 'This page groups all uploaded inspections so you can continue work from any project.'
+        },
+        {
+          selector: '.filters-bar',
+          title: 'Filter and Search',
+          body: 'Use search, date range, and sort controls to quickly find the right project.'
+        },
+        {
+          selector: hasProjects ? '.project-card' : '.empty-state',
+          title: hasProjects ? 'Open Visualization' : 'No Projects Available',
+          body: hasProjects
+            ? 'Select any project card to open its 3D visualization and defect workflow.'
+            : 'Upload a project first, then rerun the journey to continue to visualization.'
+        }
+      ];
+
+      const backdrop = document.getElementById('tourBackdropProjects');
+      const popover = document.getElementById('tourPopoverProjects');
+      const titleEl = document.getElementById('tourTitleProjects');
+      const bodyEl = document.getElementById('tourBodyProjects');
+      const stepEl = document.getElementById('tourStepProjects');
+      const btnNext = document.getElementById('tourNextProjects');
+      const btnBack = document.getElementById('tourBackProjects');
+      const btnSkip = document.getElementById('tourSkipProjects');
+
+      let activeIndex = 0;
+      let currentTarget = null;
+
+      function getJourney() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(JOURNEY_KEY) || '{}');
+          return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (error) {
+          return {};
+        }
+      }
+
+      function setJourneyStage(stage) {
+        const next = getJourney();
+        next.active = true;
+        next.stage = stage;
+        next.updatedAt = Date.now();
+        localStorage.setItem(JOURNEY_KEY, JSON.stringify(next));
+      }
+
+      function clearHighlight() {
+        if (currentTarget) currentTarget.classList.remove('tour-highlight');
+        currentTarget = null;
+      }
+
+      function closeTour() {
+        clearHighlight();
+        backdrop.classList.remove('active');
+        popover.classList.remove('active');
+      }
+
+      function continueToVisualization() {
+        if (!firstProjectCard) return;
+        const href = firstProjectCard.getAttribute('href');
+        if (!href) return;
+        setJourneyStage('visualization');
+        const joiner = href.includes('?') ? '&' : '?';
+        window.location.href = `${href}${joiner}tour=journey`;
+      }
+
+      function showStep(index) {
+        activeIndex = index;
+        const step = steps[index];
+        const target = document.querySelector(step.selector);
+        clearHighlight();
+
+        if (target) {
+          currentTarget = target;
+          currentTarget.classList.add('tour-highlight');
+          currentTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        titleEl.textContent = step.title;
+        bodyEl.textContent = step.body;
+        stepEl.textContent = `Step ${index + 1} of ${steps.length}`;
+        btnBack.style.display = index === 0 ? 'none' : 'inline-flex';
+
+        const last = index === steps.length - 1;
+        btnNext.textContent = last && hasProjects ? 'Continue' : (last ? 'Finish' : 'Next');
+
+        backdrop.classList.add('active');
+        popover.classList.add('active');
+      }
+
+      function shouldAutoStart() {
+        const journey = getJourney();
+        return params.get('tour') === 'journey' || (journey.active && journey.stage === 'projects');
+      }
+
+      btnNext.addEventListener('click', function() {
+        if (activeIndex >= steps.length - 1) {
+          closeTour();
+          if (hasProjects) continueToVisualization();
+          return;
+        }
+        showStep(activeIndex + 1);
+      });
+
+      btnBack.addEventListener('click', function() {
+        if (activeIndex > 0) showStep(activeIndex - 1);
+      });
+
+      btnSkip.addEventListener('click', closeTour);
+      backdrop.addEventListener('click', closeTour);
+      window.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeTour();
+      });
+
+      window.addEventListener('load', function() {
+        if (shouldAutoStart()) {
+          setTimeout(function() { showStep(0); }, 350);
+        }
+      });
+    })();
   </script>
 </body>
 </html>

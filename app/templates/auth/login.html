@@ -32,65 +32,181 @@
 
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.11) 0%, rgba(37, 99, 235, 0) 38%),
+        radial-gradient(circle at 80% 80%, rgba(29, 78, 216, 0.10) 0%, rgba(29, 78, 216, 0) 42%),
+        linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--ink);
+      padding: 1.25rem;
     }
 
     .login-wrap {
       width: 100%;
-      max-width: 420px;
-      padding: 1rem;
+      max-width: 1080px;
+    }
+
+    .login-shell {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .brand-panel {
+      border-radius: 18px;
+      padding: 2rem;
+      background:
+        linear-gradient(155deg, rgba(37, 99, 235, 0.92) 0%, rgba(29, 78, 216, 0.94) 45%, rgba(30, 64, 175, 0.95) 100%);
+      color: #f8fbff;
+      box-shadow:
+        rgba(37, 99, 235, 0.22) 0px 0px 0px 1px,
+        rgba(37, 99, 235, 0.35) 0px 24px 40px -16px,
+        rgba(255, 255, 255, 0.22) 0px 1px 0px inset;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -140px;
+      top: -120px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.16);
+      pointer-events: none;
     }
 
     .brand-bar {
-      text-align: center;
-      margin-bottom: 2rem;
+      text-align: left;
+      margin-bottom: 1.35rem;
+      position: relative;
+      z-index: 1;
     }
 
     .brand-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      background: var(--accent);
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.2);
       color: #fff;
-      font-size: 1.25rem;
-      margin-bottom: 0.85rem;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
       box-shadow:
-        rgba(37, 99, 235, 0.40) 0px 4px 14px 0px,
-        rgba(37, 99, 235, 0.20) 0px 0px 0px 1px;
+        rgba(255, 255, 255, 0.3) 0px 0px 0px 1px,
+        rgba(0, 0, 0, 0.15) 0px 4px 14px 0px;
     }
 
     .brand-name {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 2rem;
+      font-size: 2.9rem;
       font-weight: 800;
-      color: var(--ink);
+      color: #ffffff;
       letter-spacing: -0.04em;
       line-height: 1;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.55rem;
     }
 
     .brand-subtitle {
       font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
+      font-size: 0.86rem;
       font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.08em;
+      color: rgba(239, 246, 255, 0.86);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+    }
+
+    .brand-copy {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 1.35rem;
+    }
+
+    .brand-copy h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2rem;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.65rem;
+    }
+
+    .brand-copy p {
+      color: rgba(239, 246, 255, 0.92);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-width: 48ch;
+    }
+
+    .feature-list {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 0.72rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-radius: 11px;
+      padding: 0.7rem 0.78rem;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: rgba(255, 255, 255, 0.18) 0px 0px 0px 1px;
+    }
+
+    .feature-item i {
+      margin-top: 3px;
+      color: #dbeafe;
+      width: 16px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .feature-item strong {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin-bottom: 0.14rem;
+    }
+
+    .feature-item span {
+      display: block;
+      font-size: 0.8rem;
+      color: rgba(239, 246, 255, 0.9);
+      line-height: 1.45;
+    }
+
+    .brand-footnote {
+      position: relative;
+      z-index: 1;
+      font-size: 0.77rem;
+      color: rgba(239, 246, 255, 0.82);
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .login-card {
       background: var(--surface);
-      border-radius: 16px;
-      padding: 2.25rem 2rem 2.5rem;
+      border-radius: 18px;
+      padding: 2.1rem 2rem 2.3rem;
       box-shadow: var(--shadow-card);
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .card-heading { margin-bottom: 1.75rem; }
@@ -215,6 +331,41 @@
     }
     .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 960px) {
+      .login-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-panel {
+        padding: 1.6rem;
+      }
+
+      .brand-copy h1 {
+        font-size: 1.55rem;
+      }
+
+      .feature-list {
+        gap: 0.62rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body { padding: 0.8rem; }
+
+      .brand-panel,
+      .login-card {
+        border-radius: 14px;
+      }
+
+      .login-card {
+        padding: 1.6rem 1.2rem 1.7rem;
+      }
+
+      .brand-copy p {
+        font-size: 0.88rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -224,40 +375,85 @@
   </div>
 
   <div class="login-wrap">
-    <div class="brand-bar">
-      <div class="brand-icon"><i class="fas fa-hard-hat"></i></div>
-      <div class="brand-name">LDMS</div>
-      <div class="brand-subtitle">Lidar Defect Management System</div>
-    </div>
-    <div class="login-card">
-      <div class="card-heading">
-        <h1>Welcome back</h1>
-        <p>Sign in to your LiDAR Defect Management account</p>
-      </div>
-
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-      <div class="flash-message flash-{{ category }}">
-        <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
-        {{ message }}
-      </div>
-      {% endfor %}
-      {% endwith %}
-
-      <form method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+    <div class="login-shell">
+      <aside class="brand-panel" aria-label="System overview">
+        <div class="brand-bar">
+          <div class="brand-icon"><i class="fas fa-hard-hat"></i></div>
+          <div class="brand-name">LDMS</div>
+          <div class="brand-subtitle">Lidar Defect Management System</div>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+        <div class="brand-copy">
+          <h1>Inspect smarter, track faster, resolve with confidence.</h1>
+          <p>
+            LDMS centralizes your 3D model inspection workflow from upload to closure, so teams can manage building defects with speed and full traceability.
+          </p>
         </div>
-        <button type="submit" class="btn-login" id="sign-in-btn">
-          <i class="fas fa-sign-in-alt"></i> Sign in
-        </button>
-      </form>
+
+        <div class="feature-list" role="list" aria-label="Platform features">
+          <div class="feature-item" role="listitem">
+            <i class="fas fa-cube"></i>
+            <div>
+              <strong>Interactive 3D Visualization</strong>
+              <span>Inspect GLB scans, focus defect points, and switch display modes such as X-Ray and wireframe.</span>
+            </div>
+          </div>
+          <div class="feature-item" role="listitem">
+            <i class="fas fa-triangle-exclamation"></i>
+            <div>
+              <strong>Defect Lifecycle Tracking</strong>
+              <span>Update severity, status, notes, and evidence with a clear workflow from reported to fixed.</span>
+            </div>
+          </div>
+          <div class="feature-item" role="listitem">
+            <i class="fas fa-chart-line"></i>
+            <div>
+              <strong>Project and Progress Analytics</strong>
+              <span>Monitor portfolio health, activity, and performance trends across active inspection projects.</span>
+            </div>
+          </div>
+          <div class="feature-item" role="listitem">
+            <i class="fas fa-clock-rotate-left"></i>
+            <div>
+              <strong>Audit Timeline and Bulk Operations</strong>
+              <span>Track every change with timeline history and handle high-volume updates with batch actions.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="brand-footnote"><i class="fas fa-shield"></i> Role-based access for Inspector and Developer workflows</div>
+      </aside>
+
+      <div class="login-card">
+        <div class="card-heading">
+          <h1>Welcome back</h1>
+          <p>Sign in to your LiDAR Defect Management account</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+          </div>
+          <button type="submit" class="btn-login" id="sign-in-btn">
+            <i class="fas fa-sign-in-alt"></i> Sign in
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 

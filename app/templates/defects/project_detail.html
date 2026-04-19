@@ -711,50 +711,6 @@
                 </div>
             </div>
 
-            <!-- AI Hotspots Card -->
-            <section class="bento-card span-2 hotspots-card" style="border-left: 5px solid #ef4444; background: linear-gradient(160deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 class="insights-h2" style="font-size: 1.6rem; color: #ffffff;"><i class="fas fa-microchip" style="color: #ef4444; margin-right: 0.75rem;"></i> AI Spatial Insights</h2>
-                    <span class="chip" style="background: #ef4444; color: white; border: none; font-weight: 900; padding: 6px 16px; letter-spacing: 0.05em;">ACTIVE ANALYSIS</span>
-                </div>
-                
-                {% if hotspots %}
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
-                    {% for spot in hotspots %}
-                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.75rem; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">
-                        <div style="position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #ef4444;"></div>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
-                            <div>
-                                <div style="color: #ef4444; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;">Verified Cluster</div>
-                                <h3 style="color: #000000; font-size: 1.6rem; font-weight: 900; margin: 0;">HOTSPOT #{{ spot.id }}</h3>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="color: #000000; font-weight: 900; font-size: 1.8rem; line-height: 1;">{{ spot.count }}</div>
-                                <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em;">DEFECTS</div>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                            {% for loc in spot.locations %}
-                            <span style="font-size: 1rem; color: #ffffff; background: rgba(59, 130, 246, 0.6); padding: 8px 16px; border-radius: 12px; font-weight: 900; border: 1px solid rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">{{ loc }}</span>
-                            {% endfor %}
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
-                            <span style="font-size: 0.95rem; color: #94a3b8; font-weight: 600;"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> {{ spot.critical_count }} Critical issues</span>
-                            <span style="color: #ef4444; font-weight: 900; font-size: 0.9rem;">HIGH RISK ZONE</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div style="text-align: center; padding: 4rem 2rem; background: rgba(0,0,0,0.1); border-radius: 20px; border: 1px dashed rgba(255,255,255,0.1);">
-                    <i class="fas fa-radar fa-spin-pulse" style="font-size: 3rem; color: #475569; margin-bottom: 1.5rem; opacity: 0.5;"></i>
-                    <h3 style="color: #94a3b8; font-size: 1.3rem;">No Critical Clusters Detected</h3>
-                    <p style="color: #64748b; margin-top: 0.5rem;">The AI analyzer is active and monitoring spatial defect density in real-time.</p>
-                </div>
-                {% endif %}
-            </section>
         {% endif %}
             <!-- Table Card -->
             <section class="bento-card span-2 table-card" style="padding: 0;">
