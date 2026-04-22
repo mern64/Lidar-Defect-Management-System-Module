@@ -390,41 +390,6 @@
             color: #f2f2f2;
         }
 
-        .dedup-meta-grid {
-            margin-top: 10px;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-
-        .dedup-meta-item {
-            border-radius: 8px;
-            padding: 7px 10px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(17, 17, 17, 0.65);
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .dedup-meta-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--ldms-dark-muted);
-            font-weight: 600;
-        }
-
-        .dedup-meta-value {
-            font-size: 12px;
-            color: #e6edf8;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         .project-info-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -2039,8 +2004,7 @@
             color: var(--ldms-text-strong);
         }
 
-        body.light-mode .import-summary-item,
-        body.light-mode .dedup-meta-item {
+        body.light-mode .import-summary-item {
             background: rgba(255, 255, 255, 0.86);
             border-color: var(--ldms-border-strong);
             box-shadow: var(--ldms-ring);
@@ -2061,13 +2025,11 @@
             border-color: rgba(37, 99, 235, 0.28);
         }
 
-        body.light-mode .import-summary-label,
-        body.light-mode .dedup-meta-label {
+        body.light-mode .import-summary-label {
             color: var(--ldms-muted);
         }
 
-        body.light-mode .import-summary-value,
-        body.light-mode .dedup-meta-value {
+        body.light-mode .import-summary-value {
             color: var(--ldms-text);
         }
 
@@ -2353,8 +2315,7 @@
                 gap: 12px;
             }
 
-            .import-summary-grid,
-            .dedup-meta-grid {
+            .import-summary-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -2520,27 +2481,6 @@
             </div>
             {% endif %}
 
-            {% set source_upload = scan.source_upload_id or (upload_metadata.id if upload_metadata else None) %}
-            {% if source_upload or scan.import_batch_id or scan.scan_fingerprint or scan.created_by_user_id %}
-            <div class="dedup-meta-grid">
-                <div class="dedup-meta-item">
-                    <span class="dedup-meta-label">Source Upload ID</span>
-                    <span class="dedup-meta-value">{{ source_upload or 'N/A' }}</span>
-                </div>
-                <div class="dedup-meta-item">
-                    <span class="dedup-meta-label">Import Batch</span>
-                    <span class="dedup-meta-value">{{ scan.import_batch_id or 'N/A' }}</span>
-                </div>
-                <div class="dedup-meta-item">
-                    <span class="dedup-meta-label">Scan Fingerprint</span>
-                    <span class="dedup-meta-value">{{ (scan.scan_fingerprint[:12] ~ '...') if scan.scan_fingerprint else 'N/A' }}</span>
-                </div>
-                <div class="dedup-meta-item">
-                    <span class="dedup-meta-label">Created By User ID</span>
-                    <span class="dedup-meta-value">{{ scan.created_by_user_id if scan.created_by_user_id else 'N/A' }}</span>
-                </div>
-            </div>
-            {% endif %}
         </div>
 
         <!-- Main Container -->
