@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDMS - My Tasks</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #0f172a;
+            --panel: rgba(255, 255, 255, 0.06);
+            --edge: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --primary: #0ea5e9;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.12), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.1), transparent 30%),
+                linear-gradient(145deg, #0f172a 0%, #111827 55%, #0b1020 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 18px 44px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--edge);
+            border-radius: 14px;
+            padding: 16px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 1px solid var(--edge);
+            border-radius: 10px;
+            padding: 9px 12px;
+            text-decoration: none;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: rgba(14, 165, 233, 0.16);
+            border-color: rgba(14, 165, 233, 0.38);
+        }
+
+        .btn.warn {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.34);
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .tab {
+            border-radius: 10px;
+            border: 1px solid var(--edge);
+            text-decoration: none;
+            color: var(--text);
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab.active {
+            border-color: rgba(14, 165, 233, 0.45);
+            background: rgba(14, 165, 233, 0.16);
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+
+        .filters label {
+            display: grid;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        select,
+        input[type="date"] {
+            width: 100%;
+            padding: 9px 10px;
+            border-radius: 9px;
+            border: 1px solid var(--edge);
+            background: rgba(2, 6, 23, 0.4);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .tasks {
+            display: grid;
+            gap: 10px;
+        }
+
+        .task-item {
+            border: 1px solid var(--edge);
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .task-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--edge);
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .pill.overdue {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.14);
+        }
+
+        .row-actions {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .check {
+            width: 20px;
+            height: 20px;
+            accent-color: #0ea5e9;
+        }
+
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 22px;
+        }
+
+        .flash-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .flash {
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+        }
+
+        .flash.success {
+            border: 1px solid rgba(16, 185, 129, 0.34);
+            background: rgba(16, 185, 129, 0.12);
+            color: #a7f3d0;
+        }
+
+        .flash.error {
+            border: 1px solid rgba(239, 68, 68, 0.34);
+            background: rgba(239, 68, 68, 0.12);
+            color: #fecaca;
+        }
+
+        @media (max-width: 900px) {
+            .tabs,
+            .filters,
+            .row-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <section class="card topbar">
+            <div>
+                <h1><i class="fas fa-list-check"></i> My Tasks</h1>
+                <p style="margin: 6px 0 0; color: var(--muted);">Track defects by project ownership and update repair progress.</p>
+            </div>
+            <div class="actions">
+                <a class="btn" href="{{ url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <a class="btn" href="{{ url_for('developer.export_tasks_csv', queue=queue) }}"><i class="fas fa-file-csv"></i> Export CSV</a>
+                {% if current_user.is_admin %}
+                <a class="btn" href="{{ url_for('developer.admin_users') }}"><i class="fas fa-users-cog"></i> User Admin</a>
+                {% endif %}
+                <a class="btn" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <section class="flash-list">
+            {% for category, message in messages %}
+            <div class="flash {{ 'error' if category in ['error', 'danger'] else 'success' }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        {% endwith %}
+
+        <section class="card tabs">
+            <a class="tab {{ 'active' if queue == 'mine' else '' }}" href="{{ url_for('developer.my_tasks', queue='mine', status=status_filter, scan=scan_filter) }}">Mine ({{ counts.mine }})</a>
+            <a class="tab {{ 'active' if queue == 'unassigned' else '' }}" href="{{ url_for('developer.my_tasks', queue='unassigned', status=status_filter, scan=scan_filter) }}">Unassigned ({{ counts.unassigned }})</a>
+            <a class="tab {{ 'active' if queue == 'all' else '' }}" href="{{ url_for('developer.my_tasks', queue='all', status=status_filter, scan=scan_filter) }}">All ({{ counts.all }})</a>
+        </section>
+
+        <section class="card">
+            <form method="get" action="{{ url_for('developer.my_tasks') }}" class="filters">
+                <input type="hidden" name="queue" value="{{ queue }}">
+                <label>
+                    Status
+                    <select name="status">
+                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                        <option value="Reported" {{ 'selected' if status_filter == 'Reported' else '' }}>Reported</option>
+                        <option value="Under Review" {{ 'selected' if status_filter == 'Under Review' else '' }}>Under Review</option>
+                        <option value="Fixed" {{ 'selected' if status_filter == 'Fixed' else '' }}>Fixed</option>
+                    </select>
+                </label>
+                <label>
+                    Scan
+                    <select name="scan">
+                        <option value="all" {{ 'selected' if scan_filter == 'all' else '' }}>All scans</option>
+                        {% for scan in scan_options %}
+                        <option value="{{ scan.id }}" {{ 'selected' if scan_filter == scan.id|string else '' }}>#{{ scan.id }} {{ scan.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <div></div>
+                <button class="btn primary" type="submit"><i class="fas fa-filter"></i> Apply Filters</button>
+            </form>
+        </section>
+
+        <section class="tasks">
+            {% if tasks %}
+            {% for task in tasks %}
+            <article class="task-item">
+                <div class="task-head">
+                    <div class="task-title">
+                        <span>Defect #{{ task.id }}</span>
+                    </div>
+                    <div class="meta">
+                        <span>Scan #{{ task.scan_id }}: {{ task.scan.name }}</span>
+                        <span>{{ task.defect_type or 'Unknown' }}</span>
+                        <span>{{ task.severity or 'Medium' }}</span>
+                    </div>
+                </div>
+
+                <div class="meta" style="margin-bottom: 10px;">
+                    <span>Status: <strong>{{ task.status }}</strong></span>
+                    <span>Project Owner: <strong>{{ task.scan.assigned_to.username if task.scan.assigned_to else 'Unassigned' }}</strong></span>
+                    <span>Location: <strong>{{ task.location or 'Unknown' }}</strong></span>
+                </div>
+
+                <form class="row-actions" method="post" action="{{ url_for('developer.update_task', defect_id=task.id, queue=queue) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <label>
+                        Status
+                        <select name="status">
+                            <option value="Reported" {{ 'selected' if task.status == 'Reported' else '' }}>Reported</option>
+                            <option value="Under Review" {{ 'selected' if task.status == 'Under Review' else '' }}>Under Review</option>
+                            <option value="Fixed" {{ 'selected' if task.status == 'Fixed' else '' }}>Fixed</option>
+                        </select>
+                    </label>
+                    <div class="meta">Element: {{ task.element or 'N/A' }}</div>
+                    <button class="btn primary" type="submit"><i class="fas fa-floppy-disk"></i> Save</button>
+                </form>
+            </article>
+            {% endfor %}
+            {% else %}
+            <section class="card empty">
+                <i class="fas fa-inbox"></i>
+                <p>No tasks matched this queue and filter.</p>
+            </section>
+            {% endif %}
+        </section>
+    </main>
+
+</body>
+
+</html>

@@ -166,7 +166,7 @@
     <div class="register-card">
       <div class="card-heading">
         <h1>Create new user</h1>
-        <p>Add a new inspector or developer to the system</p>
+        <p>Add a new inspector, developer, or manager to the system</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -193,10 +193,12 @@
           <select id="role" name="role">
             <option value="inspector">Inspector</option>
             <option value="developer">Developer</option>
+            <option value="manager">Manager</option>
           </select>
           <p class="role-hint">
             <strong>Inspector:</strong> Upload scan files &nbsp;·&nbsp;
-            <strong>Developer:</strong> Full dashboard access
+            <strong>Developer:</strong> Work on assigned projects &nbsp;·&nbsp;
+            <strong>Manager:</strong> Assign projects to developers
           </p>
         </div>
         <button type="submit" class="btn-register">
@@ -205,7 +207,7 @@
       </form>
 
       <div class="back-link">
-        <a href="{{ url_for('developer.dashboard') }}">
+        <a href="{{ url_for('developer.manager_dashboard') if current_user.is_manager else url_for('developer.dashboard') }}">
           <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
       </div>

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDMS - Manager Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --bg: #ecf3fc;
+            --bg-2: #dfeaf8;
+            --panel: rgba(255, 255, 255, 0.88);
+            --panel-solid: #ffffff;
+            --ink: #0f1a2e;
+            --muted: #536280;
+            --line: #d7e2f2;
+            --accent: #1f7aec;
+            --accent-2: #0ea5e9;
+            --control-radius: 0.72rem;
+            --control-height: 2.35rem;
+            --chip-radius: 999px;
+            --success-bg: #eaf9f0;
+            --success-ink: #1d7a42;
+            --warn-bg: #fff4de;
+            --warn-ink: #956100;
+            --shadow-card: rgba(19, 19, 22, 0.1) 0px 1px 5px -4px,
+                rgba(34, 42, 53, 0.08) 0px 0px 0px 1px,
+                rgba(34, 42, 53, 0.08) 0px 8px 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background:
+                radial-gradient(55rem 28rem at 0% 0%, rgba(31, 122, 236, 0.18), transparent 65%),
+                radial-gradient(45rem 20rem at 100% 0%, rgba(14, 165, 233, 0.14), transparent 65%),
+                linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+        }
+
+        .shell {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 1.4rem 1rem 2rem;
+        }
+
+        .topbar {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+            padding: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .topbar-main {
+            display: grid;
+            gap: 0.55rem;
+        }
+
+        .brand-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .brand-logo {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.62rem;
+            border: 1px solid rgba(31, 122, 236, 0.25);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.25rem;
+            box-shadow: rgba(31, 122, 236, 0.18) 0px 4px 10px;
+            object-fit: contain;
+        }
+
+        .brand-text {
+            display: grid;
+            line-height: 1.05;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.02rem;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid rgba(31, 122, 236, 0.25);
+            background: rgba(255, 255, 255, 0.75);
+            color: #2459b8;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .title {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(1.3rem, 2vw, 1.9rem);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            margin: 0.25rem 0 0;
+            color: var(--muted);
+            max-width: 55ch;
+            font-size: 0.94rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .user-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: var(--control-height);
+            padding: 0.45rem 0.72rem;
+            border-radius: var(--chip-radius);
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            background: var(--panel-solid);
+            border-radius: var(--control-radius);
+            min-height: var(--control-height);
+            padding: 0.52rem 0.95rem;
+            text-decoration: none;
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.84rem;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(10, 24, 48, 0.08);
+        }
+
+        .btn.primary {
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .escalation-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .escalation-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+        }
+
+        .escalation-card .label {
+            color: var(--muted);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .escalation-card .value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.2rem;
+        }
+
+        .escalation-card .hint {
+            color: var(--muted);
+            font-size: 0.77rem;
+        }
+
+        .escalation-card.danger {
+            border-color: rgba(239, 68, 68, 0.25);
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), rgba(255, 255, 255, 0.88));
+        }
+
+        .escalation-card.warning {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.09), rgba(255, 255, 255, 0.88));
+        }
+
+        .escalation-card.critical {
+            border-color: rgba(185, 28, 28, 0.3);
+            background: linear-gradient(180deg, rgba(185, 28, 28, 0.1), rgba(255, 255, 255, 0.88));
+        }
+
+        .metric {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 0.9rem;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+            animation: fadeSlide 0.45s ease both;
+        }
+
+        .metric.projects {
+            border-color: rgba(31, 122, 236, 0.28);
+            background: linear-gradient(180deg, rgba(31, 122, 236, 0.1), rgba(255, 255, 255, 0.88));
+        }
+
+        .metric.unassigned {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(255, 255, 255, 0.88));
+        }
+
+        .metric.urgent {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.12), rgba(255, 255, 255, 0.88));
+        }
+
+        .metric.new24h {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.11), rgba(255, 255, 255, 0.88));
+        }
+
+        .metric:nth-child(2) {
+            animation-delay: 0.05s;
+        }
+
+        .metric:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+
+        .metric:nth-child(4) {
+            animation-delay: 0.15s;
+        }
+
+        .metric .label {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .metric .value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.55rem;
+            letter-spacing: -0.02em;
+        }
+
+        .metric.projects .value {
+            color: #1e5cb8;
+        }
+
+        .metric.unassigned .value {
+            color: #9a6700;
+        }
+
+        .metric.urgent .value {
+            color: #b91c1c;
+        }
+
+        .metric.new24h .value {
+            color: #136c46;
+        }
+
+        .filters {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 0.65rem;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.55rem;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+        }
+
+        .filters select,
+        .filters button {
+            width: 100%;
+            min-height: var(--control-height);
+            border-radius: var(--control-radius);
+            border: 1px solid var(--line);
+            padding: 0.52rem 0.72rem;
+            font: inherit;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .filters select {
+            font-weight: 600;
+        }
+
+        .filters select:nth-child(1) {
+            border-color: rgba(31, 122, 236, 0.32);
+            background: linear-gradient(180deg, rgba(31, 122, 236, 0.08), #ffffff);
+        }
+
+        .filters select:nth-child(2) {
+            border-color: rgba(245, 158, 11, 0.35);
+            background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), #ffffff);
+        }
+
+        .filters select:nth-child(3) {
+            border-color: rgba(16, 185, 129, 0.32);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), #ffffff);
+        }
+
+        .filters button {
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            color: #fff;
+            border-color: transparent;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.65fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 1rem;
+            padding: 0.85rem;
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            margin: 0 0 0.7rem;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .project-item {
+            border: 1px solid var(--line);
+            border-radius: 0.85rem;
+            padding: 0.75rem;
+            background: var(--panel-solid);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .project-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(16, 35, 71, 0.08);
+        }
+
+        .project-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.55rem;
+            margin-bottom: 0.48rem;
+        }
+
+        .project-name {
+            margin: 0;
+            font-size: 0.96rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .pill {
+            border-radius: var(--chip-radius);
+            font-size: 0.68rem;
+            padding: 0.28rem 0.52rem;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .pill.unassigned {
+            background: var(--warn-bg);
+            color: var(--warn-ink);
+            border-color: #ffd89a;
+        }
+
+        .pill.assigned {
+            background: var(--success-bg);
+            color: var(--success-ink);
+            border-color: #bfe4c0;
+        }
+
+        .project-meta {
+            color: var(--muted);
+            font-size: 0.81rem;
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.55rem;
+        }
+
+        .project-meta span {
+            background: #f4f8fd;
+            border: 1px solid #e5eefb;
+            border-radius: var(--chip-radius);
+            padding: 0.24rem 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .escalation-flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .escalation-flag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+            border-radius: var(--chip-radius);
+            border: 1px solid transparent;
+            padding: 0.25rem 0.52rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .escalation-flag.danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .escalation-flag.warning {
+            background: rgba(245, 158, 11, 0.13);
+            color: #9a6700;
+            border-color: rgba(245, 158, 11, 0.28);
+        }
+
+        .escalation-flag.critical {
+            background: rgba(185, 28, 28, 0.14);
+            color: #7f1d1d;
+            border-color: rgba(185, 28, 28, 0.32);
+        }
+
+        .workload-row.overloaded td {
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .workload-row.balanced td {
+            background: rgba(245, 158, 11, 0.07);
+        }
+
+        .workload-row.underloaded td {
+            background: rgba(16, 185, 129, 0.07);
+        }
+
+        .load-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+            border-radius: var(--chip-radius);
+            padding: 0.2rem 0.48rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .load-chip.overloaded {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+            border-color: rgba(239, 68, 68, 0.26);
+        }
+
+        .load-chip.balanced {
+            background: rgba(245, 158, 11, 0.13);
+            color: #9a6700;
+            border-color: rgba(245, 158, 11, 0.28);
+        }
+
+        .load-chip.underloaded {
+            background: rgba(16, 185, 129, 0.11);
+            color: #136c46;
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        .util-track {
+            width: 100%;
+            min-width: 110px;
+            height: 0.4rem;
+            border-radius: 999px;
+            background: #e5edf8;
+            overflow: hidden;
+            margin-bottom: 0.2rem;
+        }
+
+        .util-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+        }
+
+        .util-label {
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .progress-wrap {
+            margin-bottom: 0.6rem;
+        }
+
+        .progress-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.32rem;
+            font-size: 0.76rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 0.46rem;
+            border-radius: 999px;
+            background: #e5edf8;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            transition: width 0.25s ease;
+        }
+
+        .progress-fill.complete {
+            background: linear-gradient(120deg, #13b86a, #38d39f);
+        }
+
+        .assign-row {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .assign-row select,
+        .assign-row button {
+            min-height: var(--control-height);
+            border-radius: var(--control-radius);
+            border: 1px solid var(--line);
+            padding: 0.52rem 0.72rem;
+            font: inherit;
+            font-size: 0.84rem;
+        }
+
+        .assign-row select {
+            flex: 1;
+            min-width: 150px;
+            background: #fff;
+        }
+
+        .assign-row button {
+            background: #e6f1fe;
+            color: #104d9f;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .assign-row button:hover {
+            background: #d8eaff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.55rem 0.4rem;
+            border-bottom: 1px solid #e9f0fa;
+        }
+
+        th {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        th.header-blue {
+            color: #1e5cb8;
+            background: rgba(31, 122, 236, 0.08);
+        }
+
+        th.header-amber {
+            color: #9a6700;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        th.header-red {
+            color: #b91c1c;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        th.header-green {
+            color: #136c46;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 980px) {
+            .metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .escalation-strip {
+                grid-template-columns: 1fr;
+            }
+            .filters {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .metrics,
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .topbar-main {
+                width: 100%;
+            }
+            .actions {
+                width: 100%;
+            }
+            .user-pill {
+                width: 100%;
+                justify-content: center;
+            }
+            .actions .btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="topbar">
+            <div class="topbar-main">
+                <div class="brand-row">
+                    <img class="brand-logo" src="/static/favicon.svg" alt="LDMS Logo">
+                    <div class="brand-text">
+                        <span class="brand-name">LDMS</span>
+                        <span class="brand-sub">Manager Center</span>
+                    </div>
+                </div>
+                <h1 class="title">Manager Command Center</h1>
+                <p class="subtitle">Assign inspector projects to developers and balance team workload.</p>
+            </div>
+            <div class="actions">
+                <span class="user-pill"><i class="fas fa-user"></i> {{ current_user.username }}</span>
+                <a class="btn primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
+                <a class="btn" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </header>
+
+        <section class="metrics">
+            <article class="metric projects">
+                <div class="label">All Projects</div>
+                <div class="value">{{ metrics.project_counts.all }}</div>
+            </article>
+            <article class="metric unassigned">
+                <div class="label">Unassigned</div>
+                <div class="value">{{ metrics.project_counts.unassigned }}</div>
+            </article>
+            <article class="metric urgent">
+                <div class="label">Urgent Defects</div>
+                <div class="value">{{ metrics.urgent_attention }}</div>
+            </article>
+            <article class="metric new24h">
+                <div class="label">New Defects (24h)</div>
+                <div class="value">{{ metrics.new_24h }}</div>
+            </article>
+        </section>
+
+        <section class="escalation-strip">
+            <article class="escalation-card danger">
+                <div class="label">Urgent Hotspots</div>
+                <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
+                <div class="hint">Projects with 3+ urgent/high unresolved defects</div>
+            </article>
+            <article class="escalation-card warning">
+                <div class="label">Stale Reviews</div>
+                <div class="value">{{ escalation_summary.stale_reviews }}</div>
+                <div class="hint">Projects with 2+ items under review for over 7 days</div>
+            </article>
+            <article class="escalation-card critical">
+                <div class="label">Overdue Backlog</div>
+                <div class="value">{{ escalation_summary.overdue_backlog }}</div>
+                <div class="hint">Projects with 3+ unresolved overdue defects</div>
+            </article>
+        </section>
+
+        <form class="filters" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+            <select name="sort">
+                <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+            </select>
+            <select name="status_filter">
+                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All status</option>
+                <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In progress</option>
+                <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+            </select>
+            <select name="date_range">
+                <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All time</option>
+                <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 days</option>
+                <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 days</option>
+                <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 months</option>
+            </select>
+            <button type="submit">Apply Filters</button>
+        </form>
+
+        <section class="grid">
+            <article class="panel">
+                <h2>Projects From Inspectors</h2>
+                <div class="project-list">
+                    {% for scan, defect_count, reported, review, fixed in scans %}
+                    <div class="project-item">
+                        <div class="project-head">
+                            <h3 class="project-name">{{ scan.name }}</h3>
+                            {% if scan.assigned_to %}
+                            <span class="pill assigned">Assigned to {{ scan.assigned_to.username }}</span>
+                            {% else %}
+                            <span class="pill unassigned">Unassigned</span>
+                            {% endif %}
+                        </div>
+                        <div class="project-meta">
+                            <span>{{ defect_count }} defects</span>
+                            <span>{{ reported }} reported</span>
+                            <span>{{ review }} under review</span>
+                            <span>{{ fixed }} fixed</span>
+                        </div>
+                        {% set scan_escalation = project_escalations.get(scan.id) %}
+                        {% if scan_escalation and scan_escalation.flags %}
+                        <div class="escalation-flags">
+                            {% for flag in scan_escalation.flags %}
+                            <span class="escalation-flag {{ flag.level }}">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {{ flag.label }}: {{ flag.detail }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if defect_count > 0 %}
+                        {% set progress_percent = ((fixed / defect_count) * 100) | int %}
+                        <div class="progress-wrap">
+                            <div class="progress-head">
+                                <span>Progress</span>
+                                <span>{{ progress_percent }}%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill {% if progress_percent == 100 %}complete{% endif %}" style="width: {{ progress_percent }}%"></div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="progress-wrap">
+                            <div class="progress-head">
+                                <span>Progress</span>
+                                <span>0%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <form class="assign-row" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <select name="assigned_to_user_id" required>
+                                <option value="">Unassigned</option>
+                                {% for dev in developers %}
+                                <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit"><i class="fas fa-user-check"></i> Assign</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="project-item">No projects match your filters.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="panel">
+                <h2>Developer Capacity Heatmap</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="header-blue">Developer</th>
+                            <th class="header-amber">Projects</th>
+                            <th class="header-blue">Open Defects</th>
+                            <th class="header-red">Urgent</th>
+                            <th class="header-amber">Avg Age</th>
+                            <th class="header-red">Load</th>
+                            <th class="header-green">Capacity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in team_workload %}
+                        <tr class="workload-row {{ row.load_state }}">
+                            <td>{{ row.developer.username }}</td>
+                            <td>{{ row.assigned_projects }}</td>
+                            <td>{{ row.open_defects }}</td>
+                            <td>{{ row.urgent_open }}</td>
+                            <td>{{ row.average_age_days }}d</td>
+                            <td>
+                                <span class="load-chip {{ row.load_state }}">{{ row.load_state }}</span>
+                            </td>
+                            <td>
+                                <div class="util-track">
+                                    <div class="util-fill" style="width: {{ row.utilization_percent }}%"></div>
+                                </div>
+                                <div class="util-label">{{ row.utilization_percent }}%</div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7">No active developers available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

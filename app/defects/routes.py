@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request, send_from_directory, abort, render_template, url_for, current_app
 from flask_login import login_required, current_user
 from app.extensions import db, csrf
-from app.models import Defect, Scan
+from app.models import Defect, Scan, ActivityLog
 from app.utils import load_upload_metadata
 import os
 from datetime import datetime
+import uuid
+from sqlalchemy.exc import IntegrityError
 
 defects_bp = Blueprint('defects', __name__)
 
@@ -41,7 +43,24 @@ def visualize_scan(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     model_url = url_for('defects.serve_model', scan_id=scan_id) if scan.model_path else None
-    
+
+    def _to_non_negative_int(value):
+        try:
+            return max(int(value), 0)
+        except (TypeError, ValueError):
+            return None
+
+    added = _to_non_negative_int(request.args.get('added'))
+    skipped = _to_non_negative_int(request.args.get('skipped'))
+    reused = request.args.get('reused') == '1'
+    import_summary = None
+    if added is not None or skipped is not None:
+        import_summary = {
+            'added': added if added is not None else 0,
+            'skipped': skipped if skipped is not None else 0,
+            'reused': reused,
+        }
+
     upload_metadata = load_upload_metadata(scan_id)
     
     return render_template('defects/visualization.html', 
@@ -49,7 +68,8 @@ def visualize_scan(scan_id):
                           scan_id=scan_id, 
                           model_url=model_url, 
                           defects=defects,
-                          upload_metadata=upload_metadata)
+                          upload_metadata=upload_metadata,
+                          import_summary=import_summary)
 
 @defects_bp.route('/scans/<int:scan_id>/defects', methods=['GET'])
 @login_required
@@ -71,6 +91,9 @@ def get_scan_defects(scan_id):
         'defect_type': d.defect_type,
         'severity': d.severity,
         'status': d.status,
+        'assigned_to_user_id': d.assigned_to_user_id,
+        'assigned_to_username': d.assigned_to.username if d.assigned_to else None,
+        'due_date': d.due_date.strftime('%Y-%m-%d') if d.due_date else None,
         'description': d.description,
         'created_at': upload_date if upload_date else (d.created_at.strftime('%Y-%m-%d') if d.created_at else None)
     } for d in defects]
@@ -94,6 +117,10 @@ def get_defect_details(defect_id):
         'y': defect.y,
         'z': defect.z,
         'status': defect.status,
+        'assigned_to_user_id': defect.assigned_to_user_id,
+        'assigned_to_username': defect.assigned_to.username if defect.assigned_to else None,
+        'assigned_at': defect.assigned_at.isoformat() if defect.assigned_at else None,
+        'due_date': defect.due_date.strftime('%Y-%m-%d') if defect.due_date else None,
         'imageUrl': image_url,
         'notes': defect.notes
     })
@@ -102,9 +129,15 @@ def get_defect_details(defect_id):
 @csrf.exempt
 @login_required
 def update_defect_status(defect_id):
-    defect = Defect.query.get_or_404(defect_id)
+    defect = db.session.get(Defect, defect_id)
+    if defect is None:
+        abort(404)
     data = request.get_json()
     old_status = defect.status
+    old_assignee = defect.assigned_to.username if defect.assigned_to else 'Unassigned'
+    old_due = defect.due_date.strftime('%Y-%m-%d') if defect.due_date else ''
+    request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
+
     # Only developers can change the status
     if 'status' in data and current_user.role == 'developer':
         defect.status = data['status']
@@ -116,9 +149,57 @@ def update_defect_status(defect_id):
         defect.defect_type = data['defect_type']
     if 'severity' in data:
         defect.severity = data['severity']
+
+    assignment_fields_present = 'assigned_to_user_id' in data or 'due_date' in data
+    if assignment_fields_present:
+        return jsonify({'message': 'Per-defect assignment is disabled. Assign project owner from Developer Dashboard.'}), 400
         
     defect.auto_calculate_priority()
-    db.session.commit()
+
+    if old_status != defect.status:
+        db.session.add(ActivityLog(
+            defect_id=defect.id,
+            scan_id=defect.scan_id,
+            action='status updated',
+            old_value=old_status,
+            new_value=defect.status,
+            request_id=request_id,
+            event_uuid=f"{request_id}:status:{defect.id}:{defect.status}",
+            actor_user_id=current_user.id,
+        ))
+
+    new_assignee = defect.assigned_to.username if defect.assigned_to else 'Unassigned'
+    if old_assignee != new_assignee:
+        db.session.add(ActivityLog(
+            defect_id=defect.id,
+            scan_id=defect.scan_id,
+            action='assignee updated',
+            old_value=old_assignee,
+            new_value=new_assignee,
+            request_id=request_id,
+            event_uuid=f"{request_id}:assignee:{defect.id}:{defect.assigned_to_user_id or 0}",
+            actor_user_id=current_user.id,
+        ))
+
+    new_due = defect.due_date.strftime('%Y-%m-%d') if defect.due_date else ''
+    if old_due != new_due:
+        db.session.add(ActivityLog(
+            defect_id=defect.id,
+            scan_id=defect.scan_id,
+            action='due date updated',
+            old_value=old_due,
+            new_value=new_due,
+            request_id=request_id,
+            event_uuid=f"{request_id}:due:{defect.id}:{new_due or 'none'}",
+            actor_user_id=current_user.id,
+        ))
+
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        # Duplicate idempotency key (event_uuid) means retry of an already applied update.
+        return jsonify({'message': 'Duplicate update ignored', 'status': defect.status}), 200
 
     # Send email notification if status changed
     if old_status != defect.status:
@@ -145,18 +226,45 @@ def delete_defect(defect_id):
 def create_defect(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     data = request.get_json()
+    x = float(data.get('x', 0) or 0)
+    y = float(data.get('y', 0) or 0)
+    z = float(data.get('z', 0) or 0)
+    defect_type = data.get('defect_type', 'Unknown')
+    element = data.get('element', '')
+
+    source_defect_key = str(data.get('source_defect_key') or '').strip() or None
+    coord_key = Defect.build_coord_key(x, y, z, defect_type, element)
+
+    existing = None
+    if source_defect_key:
+        existing = Defect.query.filter_by(scan_id=scan_id, source_defect_key=source_defect_key).first()
+    if existing is None:
+        existing = Defect.query.filter_by(scan_id=scan_id, coord_key=coord_key, is_active=True).first()
+
+    if existing:
+        return jsonify({
+            'message': 'Duplicate defect skipped',
+            'defectId': existing.id,
+            'duplicate': True,
+        }), 200
+
     defect = Defect(
         scan_id=scan_id,
-        x=data.get('x', 0),
-        y=data.get('y', 0),
-        z=data.get('z', 0),
-        element=data.get('element', ''),
+        x=x,
+        y=y,
+        z=z,
+        element=element,
         location=data.get('location', ''),
-        defect_type=data.get('defect_type', 'Unknown'),
+        defect_type=defect_type,
         severity=data.get('severity', 'Medium'),
         description=data.get('description', ''),
         status=data.get('status', 'Reported'),
-        notes=data.get('notes', '')
+        notes=data.get('notes', ''),
+        source_defect_key=source_defect_key,
+        coord_key=coord_key,
+        is_manual=True,
+        created_by_user_id=current_user.id,
+        import_batch_id=f"manual-{uuid.uuid4().hex[:12]}",
     )
     
     defect.auto_calculate_priority()

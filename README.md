@@ -1,6 +1,6 @@
 # Lidar Defect Management System (LDMS)
 
-A **Flask web application** for managing building defects detected from **LiDAR / Point Cloud Data (PCD)** scans. The system enables inspectors to upload 3D scan data, process it to identify defects, and allows developers to review, prioritise, and track those defects through their lifecycle.
+A **Flask web application** for managing building defects detected from **LiDAR / Point Cloud Data (PCD)** scans. The system enables inspectors to upload 3D scan data, process it to identify defects, and allows developers and managers to review, assign, prioritise, and track those defects through their lifecycle.
 
 > **Tech Stack**: Python · Flask · PostgreSQL · Docker · Gunicorn
 
@@ -31,6 +31,8 @@ Defects logged with coordinates, room location, type, severity & AI priority
         ↓
 Developer reviews via Premium Bento Grid Dashboard
         ↓
+Defects are assigned, queued, and due-dated in My Tasks
+        ↓
 Status updates (Reported/Review/Fixed) tracked via activity logs
         ↓
 Analytics & PDF Reports generated for project close-out
@@ -43,7 +45,7 @@ Analytics & PDF Reports generated for project close-out
 ```
 ┌─────────────────────────────────────────────────────┐
 │                   Web Browser                        │
-│              (Inspector / Developer)                 │
+│         (Inspector / Developer / Manager)            │
 └─────────────────┬───────────────────────────────────┘
                   │ HTTP
 ┌─────────────────▼───────────────────────────────────┐
@@ -173,13 +175,18 @@ Manages individual defect records — viewing, editing, and status changes.
 ---
 
 ### `developer` — Developer Dashboard & Analytics
-The **developer-facing** module. Provides an overview of all scans, defects, and activity logs.
+The **developer and manager** module. Provides personal work queues for developers and cross-project assignment oversight for managers.
 
 | Route | Method | Description |
 |-------|--------|-------------|
 | `/developer` | GET | Developer dashboard — scans and defect summary |
-| `/developer/defects` | GET | Full defect table with filter/sort |
-| `/developer/activity` | GET | Activity log for all defect changes |
+| `/manager/dashboard` | GET | Manager dashboard — all projects, assignment, and team workload |
+| `/developer/scan/<scan_id>` | GET | Scan detail view with defect cards, charts, and bulk updates |
+| `/developer/scan/<scan_id>/assign` | POST | Assign a project owner (manager access) |
+| `/developer/tasks` | GET | Personal task queue with Mine, Unassigned, Overdue, and All tabs |
+| `/developer/tasks/<defect_id>/update` | POST | Update task status, assignee, and due date |
+| `/developer/tasks/bulk-assign` | POST | Bulk claim, unassign, or assign selected tasks |
+| `/developer/recent-activity` | GET | Activity log for dashboard widgets |
 
 ---
 
@@ -211,6 +218,8 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
                          │ severity      │  ← Low/Medium/High/Critical
                          │ priority      │  ← Low/Medium/High/Urgent
                          │ status        │  ← Reported/Under Review/Fixed
+                         │ assigned_to_*  │  ← Developer task ownership
+                         │ due_date      │  ← Task deadline
                          │ description   │
                          │ image_path    │  ← Snapshot image
                          │ notes         │
@@ -228,6 +237,9 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
                     │ action                  │  ← e.g. "updated status"
                     │ old_value               │
                     │ new_value               │
+                    │ event_uuid              │  ← idempotency key
+                    │ request_id              │
+                    │ actor_user_id           │
                     │ timestamp               │
                     └─────────────────────────┘
 ```
@@ -239,10 +251,39 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
 | Role | Access | Responsibility |
 |------|--------|----------------|
 | `Inspector` | Upload, Run AI, Reports | Field personnel who capture scans and generate closing documents. |
-| `Developer` | Review, Status, Analytics | Maintenance team who fix defects and track resolution progress. |
+| `Developer` | Review, Status, Analytics, Tasks | Maintenance team who fix defects, claim work, and track resolution progress. |
+| `Manager` | Portfolio Oversight, Assignment, Team Workload | Coordinates project ownership across developers and monitors cross-project queues. |
 
 > [!NOTE]
-> **Data Integrity**: Developers can update defect **Status** and **Notes**, but **Priority** is automatically managed by the AI system (DBSCAN/Risk Score) or restricted to Inspectors to prevent unauthorized priority shifting.
+> **Data Integrity**: Developers can update defect **Status**, **Assignee**, and **Due Date**, while **Priority** is automatically managed by the AI system (DBSCAN/Risk Score) or restricted to Inspectors to prevent unauthorized priority shifting.
+
+### My Tasks Workflow
+
+The developer queue adds a lightweight task-management layer on top of defects:
+
+* **Mine**: defects assigned to the current developer.
+* **Unassigned**: defects awaiting ownership.
+* **Overdue**: defects with a past due date that are not fixed.
+* **All**: full task queue for review or bulk action.
+
+From the task page, developers can claim tasks, unassign them, bulk-assign to another developer, and set due dates in one place.
+
+### Endpoint Permission Matrix
+
+| Area | Inspector | Developer | Manager |
+|------|-----------|-----------|---------|
+| Upload/process scans | ✅ | ✅ | ❌ |
+| Defect assignment/status updates | ✅ | ✅ | ✅ |
+| My Tasks queue and bulk assignment | ❌ | ✅ | ❌ |
+| Developer dashboard and analytics | ❌ | ✅ | ❌ |
+| Manager dashboard and project assignment | ❌ | ❌ | ✅ |
+| User creation via register | ❌ | ✅ | ✅ |
+
+Implementation notes:
+
+* Role checks are enforced server-side on protected routes.
+* Disabled users cannot authenticate.
+* Assignment targets are limited to active and available developers.
 
 
 ---

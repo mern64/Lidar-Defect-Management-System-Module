@@ -100,7 +100,7 @@ docker compose logs -f
 
 ## Create the First Admin User
 
-After the containers are running, create your first developer (admin) account:
+After the containers are running, create your first admin account (developer or manager):
 
 ```bash
 docker exec -it flask_app conda run -n pcd flask create-user
@@ -109,7 +109,7 @@ docker exec -it flask_app conda run -n pcd flask create-user
 You will be prompted for:
 - **Username** — e.g. `admin`
 - **Password** — choose a secure password
-- **Role** — choose `developer` for admin access, or `inspector` for a regular user
+- **Role** — choose `developer` or `manager` for admin access, or `inspector` for a regular user
 
 > Run this command once per user you want to create. You can create multiple users.
 

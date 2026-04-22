@@ -344,6 +344,87 @@
             gap: 4px;
         }
 
+        .import-summary-grid {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .import-summary-item {
+            border-radius: 9px;
+            padding: 8px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(17, 17, 17, 0.72);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .import-summary-item.good {
+            border-color: rgba(34, 197, 94, 0.32);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .import-summary-item.warn {
+            border-color: rgba(245, 158, 11, 0.34);
+            background: rgba(245, 158, 11, 0.14);
+        }
+
+        .import-summary-item.info {
+            border-color: rgba(37, 99, 235, 0.34);
+            background: rgba(37, 99, 235, 0.14);
+        }
+
+        .import-summary-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ldms-dark-muted);
+            font-weight: 700;
+        }
+
+        .import-summary-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f2f2f2;
+        }
+
+        .dedup-meta-grid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .dedup-meta-item {
+            border-radius: 8px;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(17, 17, 17, 0.65);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .dedup-meta-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ldms-dark-muted);
+            font-weight: 600;
+        }
+
+        .dedup-meta-value {
+            font-size: 12px;
+            color: #e6edf8;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .project-info-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -1958,6 +2039,38 @@
             color: var(--ldms-text-strong);
         }
 
+        body.light-mode .import-summary-item,
+        body.light-mode .dedup-meta-item {
+            background: rgba(255, 255, 255, 0.86);
+            border-color: var(--ldms-border-strong);
+            box-shadow: var(--ldms-ring);
+        }
+
+        body.light-mode .import-summary-item.good {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.26);
+        }
+
+        body.light-mode .import-summary-item.warn {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.28);
+        }
+
+        body.light-mode .import-summary-item.info {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.28);
+        }
+
+        body.light-mode .import-summary-label,
+        body.light-mode .dedup-meta-label {
+            color: var(--ldms-muted);
+        }
+
+        body.light-mode .import-summary-value,
+        body.light-mode .dedup-meta-value {
+            color: var(--ldms-text);
+        }
+
         body.light-mode .viewer-container {
             background: #ececec;
         }
@@ -2240,6 +2353,11 @@
                 gap: 12px;
             }
 
+            .import-summary-grid,
+            .dedup-meta-grid {
+                grid-template-columns: 1fr;
+            }
+
             .viewer-toolbar {
                 top: 10px;
                 left: 10px;
@@ -2384,6 +2502,45 @@
                         model' }}</span>
                 </div>
             </div>
+
+            {% if import_summary %}
+            <div class="import-summary-grid">
+                <div class="import-summary-item good">
+                    <span class="import-summary-label">Added</span>
+                    <span class="import-summary-value">{{ import_summary.added }}</span>
+                </div>
+                <div class="import-summary-item warn">
+                    <span class="import-summary-label">Skipped Duplicates</span>
+                    <span class="import-summary-value">{{ import_summary.skipped }}</span>
+                </div>
+                <div class="import-summary-item info">
+                    <span class="import-summary-label">Scan Record</span>
+                    <span class="import-summary-value">{{ 'Reused Existing' if import_summary.reused else 'Created New' }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            {% set source_upload = scan.source_upload_id or (upload_metadata.id if upload_metadata else None) %}
+            {% if source_upload or scan.import_batch_id or scan.scan_fingerprint or scan.created_by_user_id %}
+            <div class="dedup-meta-grid">
+                <div class="dedup-meta-item">
+                    <span class="dedup-meta-label">Source Upload ID</span>
+                    <span class="dedup-meta-value">{{ source_upload or 'N/A' }}</span>
+                </div>
+                <div class="dedup-meta-item">
+                    <span class="dedup-meta-label">Import Batch</span>
+                    <span class="dedup-meta-value">{{ scan.import_batch_id or 'N/A' }}</span>
+                </div>
+                <div class="dedup-meta-item">
+                    <span class="dedup-meta-label">Scan Fingerprint</span>
+                    <span class="dedup-meta-value">{{ (scan.scan_fingerprint[:12] ~ '...') if scan.scan_fingerprint else 'N/A' }}</span>
+                </div>
+                <div class="dedup-meta-item">
+                    <span class="dedup-meta-label">Created By User ID</span>
+                    <span class="dedup-meta-value">{{ scan.created_by_user_id if scan.created_by_user_id else 'N/A' }}</span>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Main Container -->
@@ -2513,6 +2670,14 @@
                                 <span class="drawer-label">Status</span>
                                 <span class="drawer-value" id="drawerStatus">-</span>
                             </div>
+                            <div class="drawer-item">
+                                <span class="drawer-label">Assignee</span>
+                                <span class="drawer-value" id="drawerAssignee">Unassigned</span>
+                            </div>
+                            <div class="drawer-item">
+                                <span class="drawer-label">Due Date</span>
+                                <span class="drawer-value" id="drawerDueDate">-</span>
+                            </div>
                             <div class="drawer-item drawer-item-wide">
                                 <span class="drawer-label">Coordinates</span>
                                 <span class="drawer-value" id="drawerCoords">-</span>
@@ -2613,6 +2778,12 @@
                         <small class="status-readonly-note"><i class="fas fa-info-circle"></i>
                             Only developers can change the status.</small>
                         {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Project Owner</label>
+                        <input type="text" id="defectAssignedToDisplay" readonly style="opacity:0.7;cursor:not-allowed;">
+                        <small class="status-readonly-note"><i class="fas fa-info-circle"></i>
+                            Project owner assignment is managed on Developer Dashboard.</small>
                     </div>
                     <div class="form-group">
                         <label>Notes</label>
@@ -3071,7 +3242,7 @@
                             <span>Y ${d.y.toFixed(2)}</span>
                             <span>Z ${d.z.toFixed(2)}</span>
                         </div>
-                        <span class="defect-row-date">${d.created_at || 'Unknown'}</span>
+                        <span class="defect-row-date">${d.assigned_to_username || 'Unassigned'}${d.due_date ? ' · Due ' + d.due_date : ''}</span>
                     </div>
                 </div>
             `).join('');
@@ -3199,6 +3370,8 @@
                         document.getElementById('drawerType').textContent = data.defect_type || 'Unknown';
                         document.getElementById('drawerSeverity').textContent = data.severity || 'Medium';
                         document.getElementById('drawerStatus').textContent = data.status || 'Reported';
+                        document.getElementById('drawerAssignee').textContent = data.assigned_to_username || 'Unassigned';
+                        document.getElementById('drawerDueDate').textContent = data.due_date || '-';
                         document.getElementById('drawerCoords').textContent = `X ${data.x}, Y ${data.y}, Z ${data.z}`;
                         document.getElementById('drawerNotes').textContent = data.notes || 'No notes added';
 
@@ -3518,6 +3691,7 @@
                         document.getElementById('defectStatus').value = data.status;
                         var statusDisplay = document.getElementById('defectStatusDisplay');
                         if (statusDisplay) statusDisplay.value = data.status;
+                        document.getElementById('defectAssignedToDisplay').value = data.assigned_to_username || 'Unassigned';
                         document.getElementById('defectNotes').value = data.notes || '';
                         if (data.imageUrl) {
                             document.getElementById('defectImage').src = data.imageUrl;
@@ -3540,10 +3714,11 @@
                 const severity = document.getElementById('defectSeverity').value;
                 const status = document.getElementById('defectStatus').value;
                 const notes = document.getElementById('defectNotes').value;
+                const payload = { location, defect_type, severity, status, notes };
                 fetch(`/defect/${currentDefectId}/status`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ location, defect_type, severity, status, notes })
+                    body: JSON.stringify(payload)
                 })
                     .then(response => response.json())
                     .then(() => {

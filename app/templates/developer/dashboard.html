@@ -16,10 +16,13 @@
             --ink: #e2e8f0;
             --muted: #94a3b8;
             --edge: rgba(255, 255, 255, 0.08);
-            --accent: #7c3aed;
+            --accent: #1f7aec;
             --accent-2: #22d3ee;
             --success: #10b981;
             --warning: #f59e0b;
+            --control-radius: 0.72rem;
+            --control-height: 2.35rem;
+            --chip-radius: 999px;
             --shadow-card-dark: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.24) 0px 8px 20px;
             --shadow-card-light: rgba(19, 19, 22, 0.2) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.08) 0px 8px 20px;
         }
@@ -30,7 +33,7 @@
             --ink: #0f172a;
             --muted: #475569;
             --edge: rgba(0, 0, 0, 0.08);
-            --accent: #7c3aed;
+            --accent: #1f7aec;
             --accent-2: #0ea5e9;
             --success: #059669;
             --warning: #d97706;
@@ -145,12 +148,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
+            min-height: var(--control-height);
+            padding: 0.45rem 0.95rem;
+            border-radius: var(--chip-radius);
             border: 1px solid var(--edge);
             background: rgba(34, 211, 238, 0.14);
             color: var(--ink);
-            font-weight: 700;
+            font-weight: 600;
+            font-size: 0.84rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -190,12 +195,14 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 0.45rem 0.9rem;
-            border-radius: 999px;
+            min-height: var(--control-height);
+            padding: 0.45rem 0.95rem;
+            border-radius: var(--chip-radius);
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.06);
             color: var(--ink);
-            font-weight: 700;
+            font-weight: 600;
+            font-size: 0.84rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -287,8 +294,9 @@
         }
 
         .sort-select {
-            padding: 0.65rem 0.75rem;
-            border-radius: 10px;
+            min-height: var(--control-height);
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--control-radius);
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
@@ -319,12 +327,16 @@
         }
 
         .metric-chip {
-            padding: 0.55rem 0.85rem;
-            border-radius: 12px;
+            min-height: var(--control-height);
+            padding: 0.5rem 0.82rem;
+            border-radius: var(--chip-radius);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
             background: rgba(34, 211, 238, 0.12);
             color: var(--ink);
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
             border: 1px solid rgba(34, 211, 238, 0.25);
         }
 
@@ -514,10 +526,10 @@
         }
 
         .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.72rem;
-            font-weight: 700;
+            padding: 0.28rem 0.52rem;
+            border-radius: var(--chip-radius);
+            font-size: 0.68rem;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.02em;
             border: 1px solid var(--edge);
@@ -583,12 +595,13 @@
         }
 
         .btn {
-            padding: 0.6rem 1.05rem;
-            border-radius: 8px;
+            min-height: var(--control-height);
+            padding: 0.52rem 0.95rem;
+            border-radius: var(--control-radius);
             border: 1px solid rgba(99, 102, 241, 0.4);
             cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: 0.86rem;
+            font-weight: 600;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
@@ -883,7 +896,7 @@
             <div class="hero-top">
                 <div class="breadcrumbs">
                     <i class="fas fa-home"></i>
-                    <span>Developer Dashboard</span>
+                    <span>Developer Workspace</span>
                 </div>
                 <div class="hero-tools" id="tour-dev-tools">
                     <span class="eyebrow"><i class="fas fa-bolt"></i> Live status</span>
@@ -902,7 +915,7 @@
             </div>
 
             <div>
-                <h1><i class="fas fa-code"></i> Developer Dashboard</h1>
+                <h1><i class="fas fa-code"></i> Developer Workspace</h1>
                 <p class="subtitle">Monitor every scan, filter by status, and glide through project progress with a
                     bento-inspired overview.</p>
                 <div class="hero-metrics" id="tour-dev-hero-metrics">
@@ -932,7 +945,7 @@
                         <label for="status_filter" class="meta-label">Filter</label>
                         <select id="status_filter" name="status_filter" class="sort-select"
                             onchange="this.form.submit()">
-                            <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Projects</option>
+                            <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Claims</option>
                             <option value="in_progress" {% if status_filter=='in_progress' %}selected{% endif %}>In
                                 Progress</option>
                             <option value="complete" {% if status_filter=='complete' %}selected{% endif %}>Complete
@@ -1037,6 +1050,10 @@
                                 No Defects
                                 {% endif %}
                             </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Project Owner</div>
+                            <div class="meta-value">{{ scan.assigned_to.username if scan.assigned_to else 'Unassigned' }}</div>
                         </div>
                     </div>
 

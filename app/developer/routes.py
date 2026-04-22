@@ -1,19 +1,104 @@
 import json
 import os
+import uuid
+import csv
+import io
+from datetime import datetime, timedelta
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
-from flask_login import login_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, make_response
+from flask_login import login_required, current_user
 from app.extensions import db
-from app.models import Scan, Defect, DefectStatus, DefectPriority
+from app.models import Scan, Defect, DefectStatus, DefectPriority, User, ActivityLog
 from app.utils import load_upload_metadata
 
 developer_bp = Blueprint("developer", __name__)
 
 
+def _ensure_developer_access():
+    if not current_user.is_developer:
+        abort(403)
+
+
+def _ensure_admin_access():
+    if not current_user.is_admin:
+        abort(403)
+
+
+def _ensure_manager_access():
+    if not current_user.is_manager:
+        abort(403)
+
+
+def _default_due_date_for_defect(defect: Defect) -> datetime:
+    """Apply a simple SLA policy from severity/type when due date is missing."""
+    severity_days = {
+        'Critical': 2,
+        'High': 5,
+        'Medium': 10,
+        'Low': 20,
+    }
+    type_days = {
+        'structural': 3,
+        'electrical': 4,
+        'water': 4,
+        'crack': 6,
+        'plumbing': 8,
+        'mechanical': 8,
+        'finish': 14,
+    }
+
+    severity_days_value = severity_days.get(defect.severity or 'Medium', 10)
+    defect_type = (defect.defect_type or '').lower()
+    type_days_value = min((days for key, days in type_days.items() if key in defect_type), default=10)
+    due_days = min(severity_days_value, type_days_value)
+    return datetime.utcnow() + timedelta(days=due_days)
+
+
+def _valid_assignment_target(user_id: int | None) -> User | None:
+    if not user_id:
+        return None
+    return User.query.filter_by(
+        id=user_id,
+        role='developer',  # Can only assign to developers, not managers
+        is_active=True,
+        is_available=True,
+    ).first()
+
+
+def _parse_due_date(raw_value):
+    if raw_value in (None, ""):
+        return None
+    text = str(raw_value).strip()
+    if not text:
+        return None
+    try:
+        if "T" in text:
+            return datetime.fromisoformat(text)
+        return datetime.fromisoformat(f"{text}T00:00:00")
+    except ValueError:
+        return None
+
+
+def _log_activity(defect, action, old_value, new_value, request_id):
+    if old_value == new_value:
+        return
+    db.session.add(ActivityLog(
+        defect_id=defect.id,
+        scan_id=defect.scan_id,
+        action=action,
+        old_value=str(old_value) if old_value is not None else "",
+        new_value=str(new_value) if new_value is not None else "",
+        request_id=request_id,
+        event_uuid=f"{request_id}:{action}:{defect.id}:{str(new_value)[:40]}",
+        actor_user_id=current_user.id,
+    ))
+
+
 @developer_bp.route("/developer", methods=["GET"])
 @login_required
 def dashboard():
-    """Developer dashboard - view all projects and their defects"""
+    """Developer dashboard - focused personal work queue."""
+    _ensure_developer_access()
     sort = request.args.get("sort", "recent")
     status_filter = request.args.get("status_filter", "all")
     date_range = request.args.get("date_range", "all")
@@ -28,8 +113,10 @@ def dashboard():
         db.func.coalesce(db.func.sum(db.case((Defect.status == 'Fixed', 1), else_=0)), 0).label('fixed_count')
     ).outerjoin(Defect).group_by(Scan.id).order_by(order_clause)
     
+    # Developers only see their own assigned projects.
+    query = query.filter(Scan.assigned_to_user_id == current_user.id)
+    
     # Apply date range filter
-    from datetime import datetime, timedelta, timezone
     if date_range == "week":
         cutoff = datetime.now() - timedelta(days=7)
         query = query.filter(Scan.created_at >= cutoff)
@@ -61,28 +148,19 @@ def dashboard():
     total_fixed = sum(row.fixed_count for row in scans)
 
     # --- Dashboard "At a Glance" Metrics ---
-    from datetime import datetime, timedelta, timezone
-    
-    # 1. Urgent Attention: High/Urgent priority that are NOT fixed
     urgent_attention = Defect.query.filter(
         Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
-        Defect.status != DefectStatus.FIXED
+        Defect.status != DefectStatus.FIXED,
     ).count()
 
-    # 2. Stale Reviews: 'Under Review' status for > 7 days
-    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
-    # Note: tracking strictly by 'updated_at' would be better if we had it on Defect, 
-    # but we can approximate using created_at or join with ActivityLog. 
-    # For now, let's use created_at for simplicity or assume if it's still Under Review it's stale.
-    # A better approach: Join with ActivityLog to find when it was last updated.
-    # Simple proxy: Defects created > 7 days ago still in 'Under Review'
+    now_utc = datetime.utcnow()
+    seven_days_ago = now_utc - timedelta(days=7)
     stale_reviews = Defect.query.filter(
         Defect.status == DefectStatus.UNDER_REVIEW,
-        Defect.created_at < seven_days_ago
+        Defect.created_at < seven_days_ago,
     ).count()
 
-    # 3. Recent Activity: Defects created in last 24h
-    last_24h = datetime.now(timezone.utc) - timedelta(hours=24)
+    last_24h = now_utc - timedelta(hours=24)
     new_defects_24h = Defect.query.filter(Defect.created_at >= last_24h).count()
 
     return render_template(
@@ -98,15 +176,310 @@ def dashboard():
         metrics={
             'urgent_attention': urgent_attention,
             'stale_reviews': stale_reviews,
-            'new_24h': new_defects_24h
-        }
+            'new_24h': new_defects_24h,
+        },
     )
+
+
+@developer_bp.route("/manager/dashboard", methods=["GET"])
+@login_required
+def manager_dashboard():
+    """Manager dashboard - all projects and team assignment management."""
+    _ensure_manager_access()
+    sort = request.args.get("sort", "recent")
+    status_filter = request.args.get("status_filter", "all")
+    date_range = request.args.get("date_range", "all")
+    order_clause = Scan.created_at.desc() if sort == "recent" else Scan.created_at.asc()
+
+    query = db.session.query(
+        Scan,
+        db.func.count(Defect.id).label('defect_count'),
+        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Reported', 1), else_=0)), 0).label('reported_count'),
+        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Under Review', 1), else_=0)), 0).label('review_count'),
+        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Fixed', 1), else_=0)), 0).label('fixed_count')
+    ).outerjoin(Defect).group_by(Scan.id).order_by(order_clause)
+
+    if date_range == "week":
+        cutoff = datetime.now() - timedelta(days=7)
+        query = query.filter(Scan.created_at >= cutoff)
+    elif date_range == "month":
+        cutoff = datetime.now() - timedelta(days=30)
+        query = query.filter(Scan.created_at >= cutoff)
+    elif date_range == "3months":
+        cutoff = datetime.now() - timedelta(days=90)
+        query = query.filter(Scan.created_at >= cutoff)
+
+    scans = query.all()
+
+    if status_filter != "all":
+        filtered_scans = []
+        for scan_data in scans:
+            _, defect_count, reported, review, fixed = scan_data
+            if status_filter == "complete" and defect_count > 0 and fixed == defect_count:
+                filtered_scans.append(scan_data)
+            elif status_filter == "in_progress" and review > 0:
+                filtered_scans.append(scan_data)
+            elif status_filter == "started" and reported > 0 and review == 0 and fixed == 0:
+                filtered_scans.append(scan_data)
+        scans = filtered_scans
+
+    total_defects = sum(row.defect_count for row in scans)
+    total_reported = sum(row.reported_count for row in scans)
+    total_review = sum(row.review_count for row in scans)
+    total_fixed = sum(row.fixed_count for row in scans)
+
+    now_utc = datetime.utcnow()
+    seven_days_ago = now_utc - timedelta(days=7)
+    urgent_attention = Defect.query.filter(
+        Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
+        Defect.status != DefectStatus.FIXED,
+    ).count()
+    stale_reviews = Defect.query.filter(
+        Defect.status == DefectStatus.UNDER_REVIEW,
+        Defect.created_at < seven_days_ago,
+    ).count()
+    new_defects_24h = Defect.query.filter(Defect.created_at >= (now_utc - timedelta(hours=24))).count()
+
+    project_counts = {
+        'mine': Scan.query.filter(Scan.assigned_to_user_id == current_user.id).count(),
+        'unassigned': Scan.query.filter(Scan.assigned_to_user_id.is_(None)).count(),
+        'all': Scan.query.count(),
+    }
+
+    developers = User.query.filter_by(role='developer', is_active=True, is_available=True).order_by(User.username.asc()).all()
+
+    scan_ids = [scan.id for scan, _, _, _, _ in scans]
+    escalation_summary = {
+        'urgent_hotspots': 0,
+        'stale_reviews': 0,
+        'overdue_backlog': 0,
+    }
+    project_escalations = {}
+    escalation_counts_by_scan = {}
+
+    if scan_ids:
+        escalation_rows = db.session.query(
+            Defect.scan_id,
+            db.func.coalesce(
+                db.func.sum(
+                    db.case(
+                        (
+                            db.and_(
+                                Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
+                                Defect.status != DefectStatus.FIXED,
+                                Defect.is_active.is_(True),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ),
+                0,
+            ).label('urgent_open_count'),
+            db.func.coalesce(
+                db.func.sum(
+                    db.case(
+                        (
+                            db.and_(
+                                Defect.status == DefectStatus.UNDER_REVIEW,
+                                Defect.created_at < seven_days_ago,
+                                Defect.is_active.is_(True),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ),
+                0,
+            ).label('stale_review_count'),
+            db.func.coalesce(
+                db.func.sum(
+                    db.case(
+                        (
+                            db.and_(
+                                Defect.due_date.isnot(None),
+                                Defect.due_date < now_utc,
+                                Defect.status != DefectStatus.FIXED,
+                                Defect.is_active.is_(True),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ),
+                0,
+            ).label('overdue_open_count'),
+        ).filter(
+            Defect.scan_id.in_(scan_ids)
+        ).group_by(Defect.scan_id).all()
+
+        for row in escalation_rows:
+            escalation_counts_by_scan[row.scan_id] = {
+                'urgent_open_count': int(row.urgent_open_count or 0),
+                'stale_review_count': int(row.stale_review_count or 0),
+                'overdue_open_count': int(row.overdue_open_count or 0),
+            }
+
+    for scan, _, _, _, _ in scans:
+        counts = escalation_counts_by_scan.get(scan.id, {
+            'urgent_open_count': 0,
+            'stale_review_count': 0,
+            'overdue_open_count': 0,
+        })
+        flags = []
+
+        if counts['urgent_open_count'] >= 3:
+            flags.append({
+                'type': 'urgent_hotspots',
+                'label': 'Urgent Hotspot',
+                'detail': f"{counts['urgent_open_count']} urgent/high open",
+                'level': 'danger',
+            })
+            escalation_summary['urgent_hotspots'] += 1
+        if counts['stale_review_count'] >= 2:
+            flags.append({
+                'type': 'stale_reviews',
+                'label': 'Stale Review',
+                'detail': f"{counts['stale_review_count']} reviews older than 7d",
+                'level': 'warning',
+            })
+            escalation_summary['stale_reviews'] += 1
+        if counts['overdue_open_count'] >= 3:
+            flags.append({
+                'type': 'overdue_backlog',
+                'label': 'Overdue Backlog',
+                'detail': f"{counts['overdue_open_count']} overdue unresolved",
+                'level': 'critical',
+            })
+            escalation_summary['overdue_backlog'] += 1
+
+        project_escalations[scan.id] = {
+            'flags': flags,
+            'counts': counts,
+        }
+
+    team_workload = []
+    for dev in developers:
+        assigned_projects = Scan.query.filter_by(assigned_to_user_id=dev.id).count()
+        open_defect_rows = Defect.query.join(Scan, Scan.id == Defect.scan_id).filter(
+            Scan.assigned_to_user_id == dev.id,
+            Defect.status != DefectStatus.FIXED,
+            Defect.is_active.is_(True),
+        ).all()
+        open_defects = len(open_defect_rows)
+        urgent_open = sum(1 for defect in open_defect_rows if defect.priority in (DefectPriority.URGENT, DefectPriority.HIGH))
+        average_age_days = 0.0
+        if open_defect_rows:
+            age_days_values = [max((now_utc - (defect.created_at or now_utc)).total_seconds() / 86400, 0) for defect in open_defect_rows]
+            average_age_days = round(sum(age_days_values) / len(age_days_values), 1)
+
+        if open_defects >= 20 or urgent_open >= 8:
+            load_state = 'overloaded'
+        elif open_defects >= 8 or urgent_open >= 3:
+            load_state = 'balanced'
+        else:
+            load_state = 'underloaded'
+
+        utilization_percent = min(int((open_defects / 20) * 100), 100) if open_defects > 0 else 0
+
+        team_workload.append({
+            'developer': dev,
+            'assigned_projects': assigned_projects,
+            'open_defects': open_defects,
+            'urgent_open': urgent_open,
+            'average_age_days': average_age_days,
+            'load_state': load_state,
+            'utilization_percent': utilization_percent,
+        })
+
+    return render_template(
+        "manager/dashboard.html",
+        scans=scans,
+        total_defects=total_defects,
+        total_reported=total_reported,
+        total_review=total_review,
+        total_fixed=total_fixed,
+        sort=sort,
+        status_filter=status_filter,
+        date_range=date_range,
+        metrics={
+            'urgent_attention': urgent_attention,
+            'stale_reviews': stale_reviews,
+            'new_24h': new_defects_24h,
+            'project_counts': project_counts,
+        },
+        developers=developers,
+        team_workload=team_workload,
+        escalation_summary=escalation_summary,
+        project_escalations=project_escalations,
+    )
+
+
+@developer_bp.route('/developer/scan/<int:scan_id>/assign', methods=['POST'])
+@login_required
+def assign_project(scan_id):
+    """Assign a whole project to one developer instead of assigning per defect."""
+    _ensure_manager_access()
+
+    scan = db.session.get(Scan, scan_id)
+    if scan is None:
+        abort(404)
+
+    assignee_raw = (request.form.get('assigned_to_user_id') or '').strip()
+    request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
+
+    old_owner = scan.assigned_to.username if scan.assigned_to else 'Unassigned'
+
+    if assignee_raw in ('', 'null', 'none'):
+        scan.assigned_to_user_id = None
+        scan.assigned_at = None
+        new_owner = 'Unassigned'
+    else:
+        try:
+            assignee_id = int(assignee_raw)
+        except ValueError:
+            flash('Invalid developer selection.', 'error')
+            return redirect(request.referrer or url_for('developer.manager_dashboard'))
+
+        assignee = _valid_assignment_target(assignee_id)
+        if not assignee:
+            flash('Selected developer is not active/available.', 'error')
+            return redirect(request.referrer or url_for('developer.manager_dashboard'))
+
+        scan.assigned_to_user_id = assignee.id
+        scan.assigned_at = datetime.utcnow()
+        new_owner = assignee.username
+
+    defects = Defect.query.filter(
+        Defect.scan_id == scan.id,
+        Defect.is_active.is_(True),
+    ).all()
+    for defect in defects:
+        defect.assigned_to_user_id = scan.assigned_to_user_id
+        defect.assigned_at = scan.assigned_at
+        defect.due_date = None
+
+    if old_owner != new_owner:
+        db.session.add(ActivityLog(
+            scan_id=scan.id,
+            action='project owner updated',
+            old_value=old_owner,
+            new_value=new_owner,
+            request_id=request_id,
+            event_uuid=f"{request_id}:scan-owner:{scan.id}:{scan.assigned_to_user_id or 0}",
+            actor_user_id=current_user.id,
+        ))
+
+    db.session.commit()
+    flash(f'Project {scan.name} assigned to {new_owner}.', 'success')
+    return redirect(request.referrer or url_for('developer.manager_dashboard'))
 
 
 @developer_bp.route("/developer/scan/<int:scan_id>", methods=["GET"])
 @login_required
 def view_scan(scan_id):
     """View detailed defects for a specific scan"""
+    _ensure_developer_access()
     from sqlalchemy import or_
 
     scan = Scan.query.get_or_404(scan_id)
@@ -225,7 +598,7 @@ def view_scan(scan_id):
         upload_metadata=upload_metadata,
         search_query=search_query,
         sort_by=sort_by,
-        hotspots=hotspots
+        hotspots=hotspots,
     )
 
 
@@ -233,7 +606,7 @@ def view_scan(scan_id):
 @login_required
 def update_defect_progress(defect_id):
     """Update defect status/progress"""
-    from app.models import ActivityLog
+    _ensure_developer_access()
     
     defect = Defect.query.get_or_404(defect_id)
     scan_id = defect.scan_id
@@ -249,12 +622,16 @@ def update_defect_progress(defect_id):
 
     # Log changes
     if new_status and new_status != defect.status:
+        request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
         activity = ActivityLog(
             defect_id=defect_id,
             scan_id=scan_id,
             action='status updated',
             old_value=defect.status,
-            new_value=new_status
+            new_value=new_status,
+            request_id=request_id,
+            event_uuid=f"{request_id}:status:{defect_id}:{new_status}",
+            actor_user_id=current_user.id,
         )
         db.session.add(activity)
     
@@ -336,12 +713,15 @@ def serve_defect_image(image_path: str):
 @login_required
 def bulk_update_defects(scan_id):
     """Bulk update multiple defects at once"""
-    from app.models import ActivityLog
+    _ensure_developer_access()
     
     scan = Scan.query.get_or_404(scan_id)
     
     defect_ids = request.form.getlist("defect_ids[]")
     new_status = request.form.get("bulk_status")
+    bulk_action = (request.form.get("bulk_action") or "status_only").strip()
+    bulk_assignee_raw = request.form.get("bulk_assignee_id")
+    request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
     
     if not defect_ids:
         flash("⚠ No defects selected", "error")
@@ -352,12 +732,24 @@ def bulk_update_defects(scan_id):
     if new_status and new_status not in valid_statuses:
         flash("⚠ Invalid status", "error")
         return redirect(url_for('developer.view_scan', scan_id=scan_id))
+
+    target_assignee = None
+    skipped_invalid_assignee = False
+    if bulk_action == 'assign_to_user':
+        try:
+            assignee_id = int(bulk_assignee_raw or 0)
+            target_assignee = _valid_assignment_target(assignee_id)
+            if not target_assignee:
+                skipped_invalid_assignee = True
+        except (TypeError, ValueError):
+            skipped_invalid_assignee = True
     
     # Update all selected defects
     updated_count = 0
     for defect_id in defect_ids:
         defect = Defect.query.filter_by(id=int(defect_id), scan_id=scan_id).first()
         if defect:
+            old_assignee = defect.assigned_to.username if defect.assigned_to else 'Unassigned'
             # Log status change
             if new_status and new_status != defect.status:
                 activity = ActivityLog(
@@ -365,19 +757,39 @@ def bulk_update_defects(scan_id):
                     scan_id=scan_id,
                     action='status updated (bulk)',
                     old_value=defect.status,
-                    new_value=new_status
+                    new_value=new_status,
+                    request_id=request_id,
+                    event_uuid=f"{request_id}:bulk-status:{defect.id}:{new_status}",
+                    actor_user_id=current_user.id,
                 )
                 db.session.add(activity)
             
             if new_status:
                 defect.status = new_status
+
+            if bulk_action == 'claim_me':
+                defect.assigned_to_user_id = current_user.id
+                defect.assigned_at = datetime.utcnow()
+                if not defect.due_date:
+                    defect.due_date = _default_due_date_for_defect(defect)
+            elif bulk_action == 'unassign':
+                defect.assigned_to_user_id = None
+                defect.assigned_at = None
+            elif bulk_action == 'assign_to_user' and target_assignee:
+                defect.assigned_to_user_id = target_assignee.id
+                defect.assigned_at = datetime.utcnow()
+                if not defect.due_date:
+                    defect.due_date = _default_due_date_for_defect(defect)
+
+            new_assignee = defect.assigned_to.username if defect.assigned_to else 'Unassigned'
+            _log_activity(defect, 'assignee updated (bulk)', old_assignee, new_assignee, request_id)
             defect.auto_calculate_priority()
             updated_count += 1
     
     db.session.commit()
     
     # Send bulk email notification
-    if updated_count > 0 and (new_status or new_priority):
+    if updated_count > 0 and new_status:
         try:
             from app.notifications import send_bulk_update_notification
             send_bulk_update_notification(
@@ -389,6 +801,8 @@ def bulk_update_defects(scan_id):
         except Exception as e:
             current_app.logger.error('Failed to send bulk update email: %s', e)
 
+    if skipped_invalid_assignee:
+        flash("⚠ Invalid assignee was skipped; status updates were still applied.", "error")
     flash(f"✓ Successfully updated {updated_count} defect(s)", "success")
     return redirect(url_for('developer.view_scan', scan_id=scan_id))
 
@@ -406,6 +820,7 @@ def bulk_update_defects(scan_id):
 @login_required
 def get_charts_data(scan_id):
     """Get data for charts (status, priority, severity)"""
+    _ensure_developer_access()
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
 
@@ -440,6 +855,7 @@ def get_charts_data(scan_id):
 @login_required
 def get_heatmap_data(scan_id):
     """Get heatmap data by location"""
+    _ensure_developer_access()
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     
@@ -469,7 +885,7 @@ def get_heatmap_data(scan_id):
 @login_required
 def get_recent_activity():
     """Get recent activity across all scans"""
-    from app.models import ActivityLog
+    _ensure_developer_access()
     
     # Get last 20 activities
     activities = ActivityLog.query.order_by(ActivityLog.timestamp.desc()).limit(20).all()
@@ -483,3 +899,291 @@ def get_recent_activity():
         'scan_id': a.scan_id,
         'timestamp': a.timestamp.strftime('%Y-%m-%d %H:%M:%S') if a.timestamp else ''
     } for a in activities])
+
+
+@developer_bp.route("/developer/tasks", methods=["GET"])
+@login_required
+def my_tasks():
+    """Personal work queue for developers."""
+    _ensure_developer_access()
+
+    queue = request.args.get("queue", "mine")
+    status_filter = request.args.get("status", "all")
+    scan_filter = request.args.get("scan", "all")
+    base_query = Defect.query.join(Scan).filter(Defect.is_active.is_(True))
+
+    if queue == "unassigned":
+        base_query = base_query.filter(Scan.assigned_to_user_id.is_(None))
+    elif queue == "all":
+        pass
+    else:
+        queue = "mine"
+        base_query = base_query.filter(Scan.assigned_to_user_id == current_user.id)
+
+    if status_filter != "all":
+        base_query = base_query.filter(Defect.status == status_filter)
+    if scan_filter != "all":
+        try:
+            scan_filter_id = int(scan_filter)
+            base_query = base_query.filter(Defect.scan_id == scan_filter_id)
+        except (TypeError, ValueError):
+            scan_filter = "all"
+
+    tasks = base_query.order_by(
+        Defect.created_at.desc(),
+    ).all()
+
+    scan_options = Scan.query.order_by(Scan.created_at.desc()).all()
+
+    counts = {
+        "mine": Defect.query.filter(
+            Defect.is_active.is_(True),
+            Defect.scan_id.in_(db.session.query(Scan.id).filter(Scan.assigned_to_user_id == current_user.id)),
+        ).count(),
+        "unassigned": Defect.query.filter(
+            Defect.is_active.is_(True),
+            Defect.scan_id.in_(db.session.query(Scan.id).filter(Scan.assigned_to_user_id.is_(None))),
+        ).count(),
+        "all": Defect.query.filter(Defect.is_active.is_(True)).count(),
+    }
+
+    return render_template(
+        "developer/tasks.html",
+        tasks=tasks,
+        queue=queue,
+        status_filter=status_filter,
+        scan_filter=str(scan_filter),
+        scan_options=scan_options,
+        counts=counts,
+    )
+
+
+@developer_bp.route("/developer/tasks/<int:defect_id>/update", methods=["POST"])
+@login_required
+def update_task(defect_id):
+    """Update status for a task from the queue page."""
+    _ensure_developer_access()
+
+    defect = Defect.query.get_or_404(defect_id)
+    request_id = request.headers.get("X-Request-ID") or request.headers.get("X-Correlation-ID") or uuid.uuid4().hex
+
+    old_status = defect.status
+    new_status = request.form.get("status", "").strip()
+
+    valid_statuses = [e.value for e in DefectStatus]
+    if new_status and new_status in valid_statuses:
+        defect.status = new_status
+
+    defect.auto_calculate_priority()
+
+    _log_activity(defect, "status updated", old_status, defect.status, request_id)
+
+    db.session.commit()
+    flash(f"Updated task #{defect.id}", "success")
+    return redirect(url_for("developer.my_tasks", queue=request.args.get("queue", "mine")))
+
+
+@developer_bp.route("/developer/tasks/bulk-assign", methods=["POST"])
+@login_required
+def bulk_assign_tasks():
+    """Bulk assignment actions from My Tasks page."""
+    _ensure_developer_access()
+
+    defect_ids = request.form.getlist("defect_ids[]")
+    action = (request.form.get("bulk_action") or "").strip()
+    assignee_raw = request.form.get("bulk_assignee_id")
+    queue = request.form.get("queue", "mine")
+    request_id = request.headers.get("X-Request-ID") or request.headers.get("X-Correlation-ID") or uuid.uuid4().hex
+
+    if not defect_ids:
+        flash("No tasks selected", "error")
+        return redirect(url_for("developer.my_tasks", queue=queue))
+
+    selected_ids = []
+    for raw_id in defect_ids:
+        try:
+            selected_ids.append(int(raw_id))
+        except (TypeError, ValueError):
+            continue
+
+    if not selected_ids:
+        flash("No valid tasks selected", "error")
+        return redirect(url_for("developer.my_tasks", queue=queue))
+
+    tasks = Defect.query.filter(Defect.id.in_(selected_ids), Defect.is_active.is_(True)).all()
+    if not tasks:
+        flash("Selected tasks were not found", "error")
+        return redirect(url_for("developer.my_tasks", queue=queue))
+
+    target_assignee = None
+    if action == "assign_to_user":
+        try:
+            assignee_id = int(assignee_raw or 0)
+            target_assignee = _valid_assignment_target(assignee_id)
+            if not target_assignee:
+                flash("Invalid assignee skipped. No task assignment changed.", "error")
+                target_assignee = None
+        except (TypeError, ValueError):
+            flash("Invalid assignee skipped. No task assignment changed.", "error")
+            target_assignee = None
+
+    updated = 0
+    for defect in tasks:
+        old_assignee = defect.assigned_to.username if defect.assigned_to else "Unassigned"
+        if action == "claim_me":
+            defect.assigned_to_user_id = current_user.id
+            defect.assigned_at = datetime.utcnow()
+        elif action == "unassign":
+            defect.assigned_to_user_id = None
+            defect.assigned_at = None
+        elif action == "assign_to_user" and target_assignee:
+            defect.assigned_to_user_id = target_assignee.id
+            defect.assigned_at = datetime.utcnow()
+            if not defect.due_date:
+                defect.due_date = _default_due_date_for_defect(defect)
+        else:
+            continue
+
+        new_assignee = defect.assigned_to.username if defect.assigned_to else "Unassigned"
+        _log_activity(defect, "assignee updated (bulk)", old_assignee, new_assignee, request_id)
+        updated += 1
+
+    db.session.commit()
+    flash(f"Updated assignee for {updated} task(s)", "success")
+    return redirect(url_for("developer.my_tasks", queue=queue))
+
+
+@developer_bp.route("/developer/tasks/export.csv", methods=["GET"])
+@login_required
+def export_tasks_csv():
+    """Export queue with assignment fields for reporting."""
+    _ensure_developer_access()
+
+    now_utc = datetime.utcnow()
+    queue = request.args.get("queue", "all")
+    query = Defect.query.join(Scan).filter(Defect.is_active.is_(True))
+
+    if queue == 'mine':
+        query = query.filter(Defect.assigned_to_user_id == current_user.id)
+    elif queue == 'unassigned':
+        query = query.filter(Defect.assigned_to_user_id.is_(None))
+    elif queue == 'overdue':
+        query = query.filter(
+            Defect.due_date.isnot(None),
+            Defect.due_date < now_utc,
+            Defect.status != DefectStatus.FIXED,
+        )
+
+    tasks = query.order_by(Defect.created_at.desc()).all()
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow([
+        'defect_id', 'scan_id', 'scan_name', 'status', 'severity', 'priority',
+        'assignee', 'assignee_id', 'assigned_at', 'due_date', 'location', 'defect_type',
+        'x', 'y', 'z', 'created_at',
+    ])
+    for d in tasks:
+        writer.writerow([
+            d.id,
+            d.scan_id,
+            d.scan.name if d.scan else '',
+            d.status,
+            d.severity,
+            d.priority,
+            d.assigned_to.username if d.assigned_to else '',
+            d.assigned_to_user_id or '',
+            d.assigned_at.isoformat() if d.assigned_at else '',
+            d.due_date.isoformat() if d.due_date else '',
+            d.location or '',
+            d.defect_type or '',
+            d.x,
+            d.y,
+            d.z,
+            d.created_at.isoformat() if d.created_at else '',
+        ])
+
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename=ldms_tasks_{queue}_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.csv'
+    return response
+
+
+@developer_bp.route('/developer/admin/users', methods=['GET'])
+@login_required
+def admin_users():
+    """Light admin page to manage users and account states."""
+    _ensure_admin_access()
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('developer/admin_users.html', users=users)
+
+
+@developer_bp.route('/developer/admin/users/<int:user_id>/update', methods=['POST'])
+@login_required
+def admin_update_user(user_id):
+    """Apply account/role/password updates from admin page."""
+    _ensure_admin_access()
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    action = (request.form.get('action') or '').strip()
+    request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
+
+    if action == 'toggle_active':
+        old = 'active' if user.is_active else 'inactive'
+        user.is_active = not user.is_active
+        new = 'active' if user.is_active else 'inactive'
+        db.session.add(ActivityLog(
+            action='user account state changed',
+            old_value=f"{user.username}:{old}",
+            new_value=f"{user.username}:{new}",
+            request_id=request_id,
+            event_uuid=f"{request_id}:user-state:{user.id}:{new}",
+            actor_user_id=current_user.id,
+        ))
+    elif action == 'toggle_available':
+        old = 'available' if user.is_available else 'unavailable'
+        user.is_available = not user.is_available
+        new = 'available' if user.is_available else 'unavailable'
+        db.session.add(ActivityLog(
+            action='user availability changed',
+            old_value=f"{user.username}:{old}",
+            new_value=f"{user.username}:{new}",
+            request_id=request_id,
+            event_uuid=f"{request_id}:user-availability:{user.id}:{new}",
+            actor_user_id=current_user.id,
+        ))
+    elif action == 'change_role':
+        new_role = request.form.get('role', '').strip()
+        if new_role in ('inspector', 'developer'):
+            old_role = user.role
+            user.role = new_role
+            db.session.add(ActivityLog(
+                action='user role changed',
+                old_value=f"{user.username}:{old_role}",
+                new_value=f"{user.username}:{new_role}",
+                request_id=request_id,
+                event_uuid=f"{request_id}:user-role:{user.id}:{new_role}",
+                actor_user_id=current_user.id,
+            ))
+    elif action == 'reset_password':
+        new_password = request.form.get('new_password', '')
+        if len(new_password) >= 6:
+            user.set_password(new_password)
+            db.session.add(ActivityLog(
+                action='user password reset',
+                old_value=user.username,
+                new_value='password_reset',
+                request_id=request_id,
+                event_uuid=f"{request_id}:user-password:{user.id}",
+                actor_user_id=current_user.id,
+            ))
+        else:
+            flash('Password must be at least 6 characters.', 'error')
+            return redirect(url_for('developer.admin_users'))
+    else:
+        flash('Unsupported admin action.', 'error')
+        return redirect(url_for('developer.admin_users'))
+
+    db.session.commit()
+    flash(f'Updated user {user.username}.', 'success')
+    return redirect(url_for('developer.admin_users'))

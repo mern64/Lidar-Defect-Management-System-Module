@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDMS - User Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #0f172a, #111827);
+            color: #e2e8f0;
+        }
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 26px 18px 42px;
+            display: grid;
+            gap: 14px;
+        }
+        .card {
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.05);
+            padding: 14px;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #e2e8f0;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .users {
+            display: grid;
+            gap: 10px;
+        }
+        .user {
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+        .head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .pill {
+            border-radius: 999px;
+            padding: 3px 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .pill.good { border-color: rgba(16,185,129,0.5); color: #86efac; }
+        .pill.bad { border-color: rgba(239,68,68,0.5); color: #fecaca; }
+        .pill.warn { border-color: rgba(245,158,11,0.5); color: #fde68a; }
+        .actions {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            align-items: end;
+        }
+        select, input {
+            width: 100%;
+            border-radius: 9px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(2,6,23,0.45);
+            color: #e2e8f0;
+            padding: 8px;
+            font-weight: 600;
+        }
+        .flashes { display: grid; gap: 8px; }
+        .flash { border-radius: 10px; padding: 10px 12px; font-weight: 600; }
+        .flash.success { border: 1px solid rgba(16,185,129,0.4); background: rgba(16,185,129,0.15); color: #a7f3d0; }
+        .flash.error { border: 1px solid rgba(239,68,68,0.4); background: rgba(239,68,68,0.15); color: #fecaca; }
+        @media (max-width: 980px) {
+            .actions { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <section class="card toolbar">
+            <div>
+                <h1><i class="fas fa-users-cog"></i> User Administration</h1>
+                <p style="margin: 6px 0 0; color: #94a3b8;">Manage role, account state, availability, and password resets.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap: wrap;">
+                <a class="btn" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
+                <a class="btn" href="{{ url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <section class="flashes">
+            {% for category, message in messages %}
+            <div class="flash {{ 'error' if category in ['error', 'danger'] else 'success' }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        {% endwith %}
+
+        <section class="users">
+            {% for user in users %}
+            <article class="user">
+                <div class="head">
+                    <div>
+                        <strong>{{ user.username }}</strong>
+                        <div class="meta">
+                            <span>Role: {{ user.role }}</span>
+                            <span>Email: {{ user.email or 'N/A' }}</span>
+                            <span>Created: {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <span class="pill {{ 'good' if user.is_active else 'bad' }}">{{ 'Active' if user.is_active else 'Inactive' }}</span>
+                        <span class="pill {{ 'good' if user.is_available else 'warn' }}">{{ 'Available' if user.is_available else 'Unavailable' }}</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="toggle_active">
+                        <button class="btn" type="submit">{{ 'Deactivate' if user.is_active else 'Activate' }}</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="toggle_available">
+                        <button class="btn" type="submit">{{ 'Mark Unavailable' if user.is_available else 'Mark Available' }}</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}" style="display:grid; gap:6px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="change_role">
+                        <select name="role">
+                            <option value="inspector" {{ 'selected' if user.role == 'inspector' else '' }}>Inspector</option>
+                            <option value="developer" {{ 'selected' if user.role == 'developer' else '' }}>Developer</option>
+                        </select>
+                        <button class="btn" type="submit">Change Role</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}" style="display:grid; gap:6px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="reset_password">
+                        <input type="password" name="new_password" minlength="6" placeholder="New password" required>
+                        <button class="btn" type="submit">Reset Password</button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>

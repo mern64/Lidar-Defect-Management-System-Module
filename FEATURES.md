@@ -32,12 +32,20 @@ This document tracks the evolution of the **LiDAR Defect Management System (LDMS
 - **Glassmorphism Design**: High-end aesthetic with backdrop filters, semi-transparent panels, and premium typography (Space Grotesk).
 - **High-Visibility Alerts**: Danger-red accents for critical hotspots and verified cluster banners for high-risk zones.
 - **Defect Master Log**: Enhanced table with mini-progress bars for risk scores and status-badge tracking.
+- **Developer My Tasks Queue**: Personal task view with Mine, Unassigned, Overdue, and All tabs plus bulk assignment actions.
 
 ## 👥 Roles & Security
 - **Role-Based Access Control (RBAC)**:
     - **Inspector**: Permissions to upload scans, run AI detection, change defect priority, and generate PDF Reports.
-    - **Developer**: Permissions to track progress, update repair notes, and change defect status.
+    - **Developer**: Permissions to track progress, update repair notes, change defect status, and manage defect assignments/due dates.
+    - **Manager**: Permissions to access the manager dashboard, assign project ownership to developers, and monitor team workload.
 - **Permission Guarding**: Manual priority overrides are restricted for Developers to ensure repair teams focus on AI-driven risk targets; only Inspectors or the AI logic can influence priority rankings.
+
+## 🧩 Task Management
+- **Task Ownership Fields**: Defects now carry assignee metadata, assignment timestamps, and due dates.
+- **Task Queue Filters**: Developers can filter tasks by personal ownership, unassigned items, and overdue work.
+- **Bulk Actions**: Selected tasks can be claimed, unassigned, or re-assigned to another developer in one operation.
+- **Activity Logging**: Status, assignee, and due-date changes are tracked with idempotent activity entries.
 
 ## 📄 Data Integration & Orchestration
 - **PDF Image Extraction Engine**: Professional extraction of embedded images from uploaded PDF inspection reports, ensuring defect records are visually linked to field notes.

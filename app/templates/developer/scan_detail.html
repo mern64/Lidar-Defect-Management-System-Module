@@ -1118,6 +1118,9 @@
                     id="bulk-form" onsubmit="return confirmBulkUpdate()"
                     style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="bulk_action" id="bulk-action">
+                        <option value="status_only">Status Only</option>
+                    </select>
                     <select name="bulk_status">
                         <option value="">-- Update Status --</option>
                         <option value="Reported">Reported</option>
@@ -1262,6 +1265,10 @@
                                 <div class="field-value">{{ defect.created_at.strftime('%Y-%m-%d %H:%M') if
                                     defect.created_at else 'Unknown' }}</div>
                             </div>
+                            <div class="defect-field">
+                                <div class="field-label">Project Owner</div>
+                                <div class="field-value">{{ scan.assigned_to.username if scan.assigned_to else 'Unassigned' }}</div>
+                            </div>
                         </div>
 
 
@@ -1392,6 +1399,8 @@
                     document.getElementById('spinner-backdrop').classList.add('active');
                 });
             });
+
+            toggleBulkAssignee();
         });
 
         // Close lightbox with ESC key
@@ -1443,7 +1452,9 @@
 
         function confirmBulkUpdate() {
             const count = document.querySelectorAll('.defect-checkbox:not(#select-all):checked').length;
-            return confirm(`Are you sure you want to update ${count} defect(s)? This action will apply to all selected items.`);
+            const action = document.getElementById('bulk-action').value;
+            const status = document.querySelector('select[name="bulk_status"]').value;
+            return confirm(`Apply bulk action (${action}) to ${count} defect(s)${status ? ` and set status ${status}` : ''}?`);
         }
 
         // Charts, heatmap

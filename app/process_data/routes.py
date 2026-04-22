@@ -3,6 +3,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, List, Optional, Set, Tuple
 
 from flask import (
@@ -17,7 +18,7 @@ from flask import (
     send_from_directory,
     url_for,
 )
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from .glb_snapshot import SnapshotRecord, extract_snapshots
 
@@ -347,15 +348,51 @@ def process_defect_file():
         metadata = _load_latest_metadata()
         defect_assignments = _defect_assignments_map(metadata) if metadata else {}
 
-        # Create a new scan
+        # Create (or reuse) a scan for this upload source.
         scan_name = request.form.get("scan_name", f"Scan from {source_kind}")
         glb_file = _load_glb_defect_file()  # Get the GLB path
         model_path = os.path.basename(glb_file) if glb_file else None
-        scan = Scan(name=scan_name, model_path=model_path)
-        db.session.add(scan)
-        db.session.commit()
+        source_upload_id = str((metadata or {}).get("id") or "").strip() or None
+        project_name = (metadata or {}).get("project_name") or scan_name
+        scan_fingerprint = Scan.build_fingerprint(model_path, project_name, source_upload_id)
+        import_batch_id = source_upload_id or f"import-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+
+        scan = None
+        if source_upload_id:
+            scan = Scan.query.filter_by(source_upload_id=source_upload_id).first()
+        if scan is None and scan_fingerprint:
+            scan = Scan.query.filter_by(scan_fingerprint=scan_fingerprint).first()
+
+        reused_scan = False
+        if scan is None:
+            scan = Scan(
+                name=scan_name,
+                name_normalized=Scan.normalize_name(scan_name),
+                model_path=model_path,
+                source_upload_id=source_upload_id,
+                scan_fingerprint=scan_fingerprint,
+                import_batch_id=import_batch_id,
+                created_by_user_id=current_user.id,
+            )
+            db.session.add(scan)
+            db.session.commit()
+        else:
+            reused_scan = True
+            if not scan.name_normalized:
+                scan.name_normalized = Scan.normalize_name(scan.name)
+            if not scan.source_upload_id and source_upload_id:
+                scan.source_upload_id = source_upload_id
+            if not scan.scan_fingerprint and scan_fingerprint:
+                scan.scan_fingerprint = scan_fingerprint
+            if model_path and not scan.model_path:
+                scan.model_path = model_path
+            if import_batch_id:
+                scan.import_batch_id = import_batch_id
+            db.session.commit()
 
         # Create defects with image assignments
+        created_count = 0
+        skipped_count = 0
         for rec in _prepare_for_postgres(defects):
             # Get image path for this defect if assigned
             image_path = None
@@ -368,6 +405,34 @@ def process_defect_file():
                     # Store relative path from upload_data folder
                     image_path = os.path.join(os.path.basename(image_dir), filename)
 
+            source_defect_key = defect_id_str or None
+            coord_key = Defect.build_coord_key(
+                rec["x"],
+                rec["y"],
+                rec["z"],
+                rec.get("defect_type", "Unknown"),
+                rec.get("element"),
+            )
+
+            existing_defect = None
+            if source_defect_key:
+                existing_defect = Defect.query.filter_by(
+                    scan_id=scan.id,
+                    source_defect_key=source_defect_key,
+                ).first()
+            if existing_defect is None:
+                existing_defect = Defect.query.filter_by(
+                    scan_id=scan.id,
+                    coord_key=coord_key,
+                    is_active=True,
+                ).first()
+
+            if existing_defect:
+                skipped_count += 1
+                if image_path and not existing_defect.image_path:
+                    existing_defect.image_path = image_path
+                continue
+
             defect = Defect(
                 scan_id=scan.id,
                 x=rec["x"],
@@ -379,8 +444,15 @@ def process_defect_file():
                 description=rec.get("description", ""),
                 status="Reported",
                 image_path=image_path,
+                source_defect_key=source_defect_key,
+                coord_key=coord_key,
+                import_batch_id=import_batch_id,
+                created_by_user_id=current_user.id,
+                is_manual=False,
+                is_active=True,
             )
             db.session.add(defect)
+            created_count += 1
         db.session.commit()
 
         # Persist a per-scan copy of the upload metadata so that
@@ -388,8 +460,19 @@ def process_defect_file():
         if metadata:
             _save_scan_metadata(scan.id, metadata)
 
-        flash(f"Defects saved to database. Scan ID: {scan.id}", "success")
-        return redirect(url_for("defects.visualize_scan", scan_id=scan.id))
+        flash(
+            f"Defects processed for Scan ID {scan.id}. Added: {created_count}, skipped duplicates: {skipped_count}.",
+            "success",
+        )
+        return redirect(
+            url_for(
+                "defects.visualize_scan",
+                scan_id=scan.id,
+                added=created_count,
+                skipped=skipped_count,
+                reused=1 if reused_scan else 0,
+            )
+        )
 
     # GET logic
     defects, source_path, source_kind = _load_defects()

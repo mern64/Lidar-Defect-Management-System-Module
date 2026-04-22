@@ -27,6 +27,10 @@ def login():
             flash('Invalid username or password.', 'error')
             return render_template('auth/login.html')
 
+        if not user.is_active:
+            flash('This account is disabled. Contact an administrator.', 'error')
+            return render_template('auth/login.html')
+
         login_user(user)
         flash(f'Welcome back, {user.username}!', 'success')
 
@@ -43,11 +47,13 @@ def login():
 
 def _redirect_by_role(user):
     """Redirect user to the appropriate page based on their role."""
+    if user.is_manager:
+        return redirect(url_for('developer.manager_dashboard'))
     if user.is_developer:
         return redirect(url_for('developer.dashboard'))
-    else:
-        # Inspector → inspector dashboard
-        return redirect(url_for('upload_data.inspector_dashboard'))
+
+    # Inspector → inspector dashboard
+    return redirect(url_for('upload_data.inspector_dashboard'))
 
 
 @auth_bp.route('/logout')
@@ -62,9 +68,9 @@ def logout():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 @login_required
 def register():
-    """Register a new user — only accessible to developers."""
-    if not current_user.is_developer:
-        flash('Only developers can create new users.', 'error')
+    """Register a new user — only accessible to developers and managers."""
+    if not current_user.is_admin:
+        flash('Only developers and managers can create new users.', 'error')
         return _redirect_by_role(current_user)
 
     if request.method == 'POST':
@@ -84,7 +90,7 @@ def register():
             flash('Username already exists.', 'error')
             return render_template('auth/register.html')
 
-        if role not in ('inspector', 'developer'):
+        if role not in ('inspector', 'developer', 'manager'):
             role = 'inspector'
 
         user = User(username=username, role=role)
@@ -93,6 +99,6 @@ def register():
         db.session.commit()
 
         flash(f'User "{username}" created successfully as {role}.', 'success')
-        return redirect(url_for('developer.dashboard'))
+        return _redirect_by_role(current_user)
 
     return render_template('auth/register.html')
