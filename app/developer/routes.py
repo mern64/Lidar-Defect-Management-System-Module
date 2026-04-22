@@ -1129,6 +1129,11 @@ def admin_update_user(user_id):
     request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
 
     if action == 'toggle_active':
+        if user.role == 'manager' and user.is_active:
+            active_manager_count = User.query.filter_by(role='manager', is_active=True).count()
+            if active_manager_count <= 1:
+                flash('Cannot deactivate the only active manager account.', 'error')
+                return redirect(url_for('developer.admin_users'))
         old = 'active' if user.is_active else 'inactive'
         user.is_active = not user.is_active
         new = 'active' if user.is_active else 'inactive'
@@ -1155,6 +1160,11 @@ def admin_update_user(user_id):
     elif action == 'change_role':
         new_role = request.form.get('role', '').strip()
         if new_role in ('inspector', 'developer'):
+            if user.role == 'manager':
+                manager_count = User.query.filter_by(role='manager').count()
+                if manager_count <= 1:
+                    flash('Cannot change role for the only manager account.', 'error')
+                    return redirect(url_for('developer.admin_users'))
             old_role = user.role
             user.role = new_role
             db.session.add(ActivityLog(
@@ -1180,6 +1190,25 @@ def admin_update_user(user_id):
         else:
             flash('Password must be at least 6 characters.', 'error')
             return redirect(url_for('developer.admin_users'))
+    elif action == 'delete_user':
+        if user.id == current_user.id:
+            flash('You cannot delete your own account while logged in.', 'error')
+            return redirect(url_for('developer.admin_users'))
+        if user.role == 'manager':
+            manager_count = User.query.filter_by(role='manager').count()
+            if manager_count <= 1:
+                flash('Cannot delete the only manager account.', 'error')
+                return redirect(url_for('developer.admin_users'))
+
+        db.session.add(ActivityLog(
+            action='user deleted',
+            old_value=f"{user.username}:{user.role}",
+            new_value='deleted',
+            request_id=request_id,
+            event_uuid=f"{request_id}:user-delete:{user.id}",
+            actor_user_id=current_user.id,
+        ))
+        db.session.delete(user)
     else:
         flash('Unsupported admin action.', 'error')
         return redirect(url_for('developer.admin_users'))

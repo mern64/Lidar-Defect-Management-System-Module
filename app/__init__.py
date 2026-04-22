@@ -25,8 +25,13 @@ def _apply_schema_evolution(app: Flask) -> None:
         # users
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT true",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(120)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(30)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS department VARCHAR(80)",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(80)",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP",
         "CREATE INDEX IF NOT EXISTS ix_users_role_active ON users (role, is_active)",
+        "CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)",
         # scans
         "ALTER TABLE scans ADD COLUMN IF NOT EXISTS name_normalized VARCHAR(255)",
         "ALTER TABLE scans ADD COLUMN IF NOT EXISTS source_upload_id VARCHAR(120)",

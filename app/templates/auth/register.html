@@ -33,14 +33,15 @@
       background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       color: var(--ink);
+      padding: 1rem;
     }
 
-    .register-wrap { width: 100%; max-width: 440px; padding: 1rem; }
+    .register-wrap { width: 100%; max-width: 1050px; }
 
-    .brand-bar { text-align: center; margin-bottom: 2rem; }
+    .brand-bar { text-align: center; margin-bottom: 0.8rem; }
 
     .brand-icon {
       display: inline-flex;
@@ -66,32 +67,43 @@
     .register-card {
       background: var(--surface);
       border-radius: 16px;
-      padding: 2.25rem 2rem 2.5rem;
+      padding: 1.2rem 1.35rem 1.35rem;
       box-shadow: var(--shadow-card);
     }
 
-    .card-heading { margin-bottom: 1.75rem; }
+    .card-heading { margin-bottom: 0.9rem; }
     .card-heading h1 {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.5rem; font-weight: 700;
+      font-size: 1.26rem; font-weight: 700;
       color: var(--ink); letter-spacing: -0.02em;
       line-height: 1.2; margin-bottom: 0.35rem;
     }
-    .card-heading p { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
+    .card-heading p { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
 
-    .form-group { margin-bottom: 1.2rem; }
+    .register-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem 0.85rem;
+      align-items: start;
+    }
+
+    .span-2 {
+      grid-column: 1 / -1;
+    }
+
+    .form-group { margin-bottom: 0.2rem; }
 
     .form-group label {
       display: block; font-size: 0.8125rem;
-      font-weight: 600; color: var(--ink-2); margin-bottom: 0.45rem;
+      font-weight: 600; color: var(--ink-2); margin-bottom: 0.25rem;
     }
 
     .form-group input,
     .form-group select {
       width: 100%;
-      padding: 0.7rem 0.875rem;
+      padding: 0.58rem 0.72rem;
       border-radius: 10px; border: none;
-      font-size: 0.9375rem; font-family: 'Inter', sans-serif;
+      font-size: 0.87rem; font-family: 'Inter', sans-serif;
       color: var(--ink); background: #f4f6fb;
       box-shadow:
         var(--shadow-inset),
@@ -111,9 +123,25 @@
 
     .form-group input::placeholder { color: #b8c0d4; }
 
+    .field-hint {
+      margin-top: 0.22rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.3;
+      min-height: 0.86rem;
+    }
+
+    .field-hint.error {
+      color: #b91c1c;
+    }
+
+    .field-hint.success {
+      color: #166534;
+    }
+
     .role-hint {
-      margin-top: 0.4rem; font-size: 0.78125rem;
-      color: var(--muted); line-height: 1.5;
+      margin-top: 0.22rem; font-size: 0.72rem;
+      color: var(--muted); line-height: 1.35;
     }
     .role-hint strong { color: var(--ink-2); }
 
@@ -123,7 +151,7 @@
       border: none; border-radius: 10px;
       font-size: 0.9375rem; font-weight: 600;
       font-family: 'Inter', sans-serif; cursor: pointer;
-      margin-top: 1.5rem;
+      margin-top: 0.4rem;
       display: flex; align-items: center; justify-content: center; gap: 8px;
       box-shadow:
         rgba(37, 99, 235, 0.45) 0px 4px 14px 0px,
@@ -135,7 +163,7 @@
 
     .flash-message {
       padding: 0.7rem 0.875rem; border-radius: 10px;
-      margin-bottom: 1.25rem; font-size: 0.8125rem;
+      margin-bottom: 0.65rem; font-size: 0.8rem;
       font-weight: 500; display: flex; align-items: flex-start; gap: 8px;
     }
     .flash-error {
@@ -147,7 +175,7 @@
       box-shadow: rgba(5,150,105,0.22) 0px 0px 0px 1px, rgba(5,150,105,0.06) 0px 2px 8px 0px;
     }
 
-    .back-link { text-align: center; margin-top: 1.5rem; }
+    .back-link { text-align: center; margin-top: 0.55rem; }
     .back-link a {
       font-size: 0.8125rem; color: var(--muted);
       text-decoration: none; font-weight: 500;
@@ -155,6 +183,28 @@
       transition: color 0.15s;
     }
     .back-link a:hover { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      body {
+        align-items: center;
+      }
+
+      .register-wrap {
+        max-width: 520px;
+      }
+
+      .register-form {
+        grid-template-columns: 1fr;
+      }
+
+      .register-card {
+        padding: 1.4rem 1.2rem 1.3rem;
+      }
+
+      .span-2 {
+        grid-column: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -166,7 +216,7 @@
     <div class="register-card">
       <div class="card-heading">
         <h1>Create new user</h1>
-        <p>Add a new inspector, developer, or manager to the system</p>
+        <p>Add a new corporate profile based on your role permissions</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -178,40 +228,158 @@
       {% endfor %}
       {% endwith %}
 
-      <form method="post">
+      <form method="post" class="register-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label for="full_name">Full Name</label>
+          <input type="text" id="full_name" name="full_name" placeholder="e.g. Nur Afiqah binti Rahman" required autocomplete="name">
+          <p class="field-hint">Use legal or preferred corporate display name.</p>
+        </div>
         <div class="form-group">
           <label for="username">Username</label>
           <input type="text" id="username" name="username" placeholder="Enter username" required autofocus autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <p class="field-hint">Short unique ID for login, e.g. afiqah.r.</p>
+        </div>
+        <div class="form-group">
+          <label for="email">Work Email</label>
+          <input type="email" id="email" name="email" placeholder="name@company.com" required autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <p class="field-hint" id="emailHint">Enter an official company email.</p>
+        </div>
+        <div class="form-group">
+          <label for="phone_number">Phone Number</label>
+          <input type="tel" id="phone_number" name="phone_number" placeholder="+60 12-345 6789" autocomplete="tel">
+          <p class="field-hint" id="phoneHint">Optional. Include country code for best results.</p>
+        </div>
+        <div class="form-group">
+          <label for="department">Department</label>
+          <input type="text" id="department" name="department" placeholder="e.g. Facilities Maintenance" autocomplete="organization-title">
+        </div>
+        <div class="form-group">
+          <label for="job_title">Job Title</label>
+          <input type="text" id="job_title" name="job_title" placeholder="e.g. Senior Building Inspector" autocomplete="organization-title">
         </div>
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" name="password" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <p class="field-hint" id="passwordHint">Use at least 6 characters.</p>
         </div>
         <div class="form-group">
           <label for="role">Role</label>
           <select id="role" name="role">
+            {% if 'inspector' in allowed_roles %}
             <option value="inspector">Inspector</option>
+            {% endif %}
+            {% if 'developer' in allowed_roles %}
             <option value="developer">Developer</option>
+            {% endif %}
+            {% if 'manager' in allowed_roles %}
             <option value="manager">Manager</option>
+            {% endif %}
           </select>
           <p class="role-hint">
             <strong>Inspector:</strong> Upload scan files &nbsp;·&nbsp;
-            <strong>Developer:</strong> Work on assigned projects &nbsp;·&nbsp;
-            <strong>Manager:</strong> Assign projects to developers
+            <strong>Developer:</strong> Work on assigned projects
+            {% if 'manager' in allowed_roles %}
+            &nbsp;·&nbsp;<strong>Manager:</strong> Assign projects to developers
+            {% endif %}
           </p>
         </div>
-        <button type="submit" class="btn-register">
+        <button type="submit" class="btn-register span-2">
           <i class="fas fa-user-plus"></i> Create user
         </button>
       </form>
 
-      <div class="back-link">
+      <div class="back-link span-2">
         <a href="{{ url_for('developer.manager_dashboard') if current_user.is_manager else url_for('developer.dashboard') }}">
           <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
       </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      const form = document.querySelector('form');
+      if (!form) return;
+
+      const emailInput = document.getElementById('email');
+      const phoneInput = document.getElementById('phone_number');
+      const passwordInput = document.getElementById('password');
+
+      const emailHint = document.getElementById('emailHint');
+      const phoneHint = document.getElementById('phoneHint');
+      const passwordHint = document.getElementById('passwordHint');
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^\+?[0-9\s\-()]{8,20}$/;
+
+      function setHint(hintEl, kind, message) {
+        if (!hintEl) return;
+        hintEl.classList.remove('error', 'success');
+        if (kind) hintEl.classList.add(kind);
+        hintEl.textContent = message;
+      }
+
+      function validateEmail() {
+        const value = (emailInput.value || '').trim();
+        if (!value) {
+          setHint(emailHint, 'error', 'Work email is required.');
+          return false;
+        }
+        if (!emailRegex.test(value)) {
+          setHint(emailHint, 'error', 'Use a valid email format, e.g. name@company.com.');
+          return false;
+        }
+        setHint(emailHint, 'success', 'Email format looks good.');
+        return true;
+      }
+
+      function validatePhone() {
+        const value = (phoneInput.value || '').trim();
+        if (!value) {
+          setHint(phoneHint, '', 'Optional. Include country code for best results.');
+          return true;
+        }
+        if (!phoneRegex.test(value)) {
+          setHint(phoneHint, 'error', 'Use digits with optional +, spaces, () or - only.');
+          return false;
+        }
+        setHint(phoneHint, 'success', 'Phone number format looks good.');
+        return true;
+      }
+
+      function validatePassword() {
+        const value = passwordInput.value || '';
+        if (value.length < 6) {
+          setHint(passwordHint, 'error', 'Password must be at least 6 characters.');
+          return false;
+        }
+        const hasLetter = /[A-Za-z]/.test(value);
+        const hasNumber = /\d/.test(value);
+        if (hasLetter && hasNumber) {
+          setHint(passwordHint, 'success', 'Good: includes letters and numbers.');
+        } else {
+          setHint(passwordHint, '', 'Tip: combine letters and numbers for a stronger password.');
+        }
+        return true;
+      }
+
+      emailInput.addEventListener('input', validateEmail);
+      phoneInput.addEventListener('input', validatePhone);
+      passwordInput.addEventListener('input', validatePassword);
+
+      form.addEventListener('submit', function (event) {
+        const emailOk = validateEmail();
+        const phoneOk = validatePhone();
+        const passwordOk = validatePassword();
+
+        if (!emailOk || !phoneOk || !passwordOk) {
+          event.preventDefault();
+          const firstInvalid = !emailOk ? emailInput : (!phoneOk ? phoneInput : passwordInput);
+          firstInvalid.focus();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

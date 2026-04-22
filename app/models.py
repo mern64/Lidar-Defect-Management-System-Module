@@ -13,6 +13,10 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     email = db.Column(db.String(120))
+    full_name = db.Column(db.String(120))
+    phone_number = db.Column(db.String(30))
+    department = db.Column(db.String(80))
+    job_title = db.Column(db.String(80))
     role = db.Column(db.String(20), default='inspector')  # 'inspector', 'developer', or 'manager'
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_available = db.Column(db.Boolean, default=True, nullable=False)

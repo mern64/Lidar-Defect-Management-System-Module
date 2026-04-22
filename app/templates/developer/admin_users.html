@@ -7,25 +7,45 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --bg-from: #eef2f8;
+            --bg-to: #e7edf7;
+            --surface: #ffffff;
+            --surface-soft: #f8fbff;
+            --text: #13203a;
+            --text-muted: #5b6b86;
+            --border: rgba(35, 58, 102, 0.14);
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --danger: #dc2626;
+            --danger-soft: rgba(220, 38, 38, 0.1);
+            --shadow-card: rgba(37, 99, 235, 0.08) 0px 0px 0px 1px, rgba(15, 23, 42, 0.08) 0px 8px 24px;
+            --shadow-soft: rgba(15, 23, 42, 0.06) 0px 3px 12px;
+        }
+
         body {
             margin: 0;
             font-family: Inter, system-ui, -apple-system, sans-serif;
-            background: linear-gradient(145deg, #0f172a, #111827);
-            color: #e2e8f0;
+            background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+            color: var(--text);
         }
+
         .wrap {
             max-width: 1180px;
             margin: 0 auto;
             padding: 26px 18px 42px;
             display: grid;
-            gap: 14px;
+            gap: 16px;
         }
+
         .card {
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid var(--border);
             border-radius: 14px;
-            background: rgba(255,255,255,0.05);
-            padding: 14px;
+            background: var(--surface);
+            padding: 16px;
+            box-shadow: var(--shadow-card);
         }
+
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -33,29 +53,73 @@
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        .toolbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-subtitle {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #e2e8f0;
+            justify-content: center;
+            color: var(--text);
             text-decoration: none;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
+            background: var(--surface-soft);
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.18s ease;
+            box-shadow: var(--shadow-soft);
         }
+
+        .btn:hover {
+            border-color: rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
         .users {
             display: grid;
-            gap: 10px;
+            gap: 12px;
         }
+
         .user {
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 12px;
-            background: rgba(255,255,255,0.03);
+            padding: 14px;
+            background: var(--surface);
+            box-shadow: var(--shadow-soft);
         }
+
         .head {
             display: flex;
             justify-content: space-between;
@@ -63,43 +127,113 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
+        .user-name {
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
         .meta {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 13px;
         }
+
         .pill {
             border-radius: 999px;
             padding: 3px 8px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid var(--border);
             font-size: 12px;
             font-weight: 700;
+            background: #fff;
         }
-        .pill.good { border-color: rgba(16,185,129,0.5); color: #86efac; }
-        .pill.bad { border-color: rgba(239,68,68,0.5); color: #fecaca; }
-        .pill.warn { border-color: rgba(245,158,11,0.5); color: #fde68a; }
+
+        .pill.good {
+            border-color: rgba(16, 185, 129, 0.35);
+            color: #065f46;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .pill.bad {
+            border-color: rgba(220, 38, 38, 0.35);
+            color: #991b1b;
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .pill.warn {
+            border-color: rgba(245, 158, 11, 0.38);
+            color: #92400e;
+            background: rgba(245, 158, 11, 0.13);
+        }
+
         .actions {
             margin-top: 10px;
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 8px;
             align-items: end;
         }
-        select, input {
+
+        select,
+        input {
             width: 100%;
             border-radius: 9px;
-            border: 1px solid rgba(255,255,255,0.18);
-            background: rgba(2,6,23,0.45);
-            color: #e2e8f0;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
             padding: 8px;
             font-weight: 600;
         }
-        .flashes { display: grid; gap: 8px; }
-        .flash { border-radius: 10px; padding: 10px 12px; font-weight: 600; }
-        .flash.success { border: 1px solid rgba(16,185,129,0.4); background: rgba(16,185,129,0.15); color: #a7f3d0; }
-        .flash.error { border: 1px solid rgba(239,68,68,0.4); background: rgba(239,68,68,0.15); color: #fecaca; }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: rgba(37, 99, 235, 0.5);
+            box-shadow: rgba(37, 99, 235, 0.12) 0px 0px 0px 3px;
+        }
+
+        .flashes {
+            display: grid;
+            gap: 8px;
+        }
+
+        .flash {
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+        }
+
+        .flash.success {
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.12);
+            color: #065f46;
+        }
+
+        .flash.error {
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            background: rgba(220, 38, 38, 0.12);
+            color: #991b1b;
+        }
+
+        .btn-danger {
+            border-color: rgba(220, 38, 38, 0.3);
+            background: var(--danger-soft);
+            color: #991b1b;
+        }
+
+        .btn-danger:hover {
+            border-color: rgba(220, 38, 38, 0.5);
+            background: rgba(220, 38, 38, 0.16);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         @media (max-width: 980px) {
             .actions { grid-template-columns: 1fr; }
         }
@@ -110,11 +244,11 @@
         <section class="card toolbar">
             <div>
                 <h1><i class="fas fa-users-cog"></i> User Administration</h1>
-                <p style="margin: 6px 0 0; color: #94a3b8;">Manage role, account state, availability, and password resets.</p>
+                <p class="toolbar-subtitle">Manage role, account state, availability, and password resets.</p>
             </div>
-            <div style="display:flex; gap:8px; flex-wrap: wrap;">
-                <a class="btn" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
-                <a class="btn" href="{{ url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <div class="toolbar-actions">
+                <a class="btn btn-primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
+                <a class="btn" href="{{ url_for('developer.manager_dashboard') if current_user.is_manager else url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
             </div>
         </section>
 
@@ -133,10 +267,14 @@
             <article class="user">
                 <div class="head">
                     <div>
-                        <strong>{{ user.username }}</strong>
+                        <span class="user-name">{{ user.full_name or user.username }}</span>
                         <div class="meta">
+                            <span>Username: {{ user.username }}</span>
                             <span>Role: {{ user.role }}</span>
                             <span>Email: {{ user.email or 'N/A' }}</span>
+                            <span>Phone: {{ user.phone_number or 'N/A' }}</span>
+                            <span>Department: {{ user.department or 'N/A' }}</span>
+                            <span>Title: {{ user.job_title or 'N/A' }}</span>
                             <span>Created: {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</span>
                         </div>
                     </div>
@@ -174,6 +312,20 @@
                         <input type="hidden" name="action" value="reset_password">
                         <input type="password" name="new_password" minlength="6" placeholder="New password" required>
                         <button class="btn" type="submit">Reset Password</button>
+                    </form>
+
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="delete_user">
+                        <button
+                            class="btn btn-danger"
+                            type="submit"
+                            onclick="return confirm('Delete user {{ user.username }}? This cannot be undone.')"
+                            {{ 'disabled' if user.id == current_user.id else '' }}
+                            title="{{ 'You cannot delete your own account' if user.id == current_user.id else 'Delete user' }}"
+                        >
+                            Delete User
+                        </button>
                     </form>
                 </div>
             </article>

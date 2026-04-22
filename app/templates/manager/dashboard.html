@@ -738,6 +738,7 @@
             <div class="actions">
                 <span class="user-pill"><i class="fas fa-user"></i> {{ current_user.username }}</span>
                 <a class="btn primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
+                <a class="btn" href="{{ url_for('developer.admin_users') }}"><i class="fas fa-users-cog"></i> User Admin</a>
                 <a class="btn" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </header>
