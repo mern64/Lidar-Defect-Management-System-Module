@@ -1084,9 +1084,11 @@
                         <i class="fas fa-moon"></i>
                         <span>Dark</span>
                     </button>
-                    <a href="{{ url_for('auth.logout') }}" class="theme-toggle logout-toggle">
+                    <a href="{{ url_for('auth.profile') }}" class="theme-toggle" data-tooltip="Your profile">
                         <i class="fas fa-user"></i>
                         <span>{{ current_user.username }}</span>
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="theme-toggle logout-toggle" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -1108,16 +1110,6 @@
                             <span class="value">{{ scans|length }}</span>
                             <span class="detail">Currently in your queue</span>
                         </article>
-                        <article class="hero-summary-card review">
-                            <span class="label">Open Review</span>
-                            <span class="value">{{ metrics.stale_reviews }}</span>
-                            <span class="detail">Older than seven days</span>
-                        </article>
-                        <article class="hero-summary-card fixed">
-                            <span class="label">Fixed</span>
-                            <span class="value">{{ total_fixed }}</span>
-                            <span class="detail">Completed across assigned scans</span>
-                        </article>
                     </div>
 
                     <section class="ldms-page-note" style="margin-top:0.25rem;">
@@ -1132,23 +1124,7 @@
                     </section>
                 </div>
 
-                <aside class="hero-side">
-                    <h3><i class="fas fa-sparkles"></i> Today at a glance</h3>
-                    <div class="hero-side-list">
-                        <div class="hero-side-item">
-                            <span class="k">Urgent attention</span>
-                            <span class="v danger">{{ metrics.urgent_attention }}</span>
-                        </div>
-                        <div class="hero-side-item">
-                            <span class="k">Stale reviews</span>
-                            <span class="v warn">{{ metrics.stale_reviews }}</span>
-                        </div>
-                        <div class="hero-side-item">
-                            <span class="k">New in 24h</span>
-                            <span class="v good">{{ metrics.new_24h }}</span>
-                        </div>
-                    </div>
-                </aside>
+                
             </div>
 
             <div class="hero-actions" id="tour-dev-filters">

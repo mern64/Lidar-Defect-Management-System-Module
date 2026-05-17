@@ -26,7 +26,7 @@ def _validate_origin():
     from urllib.parse import urlparse
     parsed = urlparse(origin)
     allowed_hosts = current_app.config.get('SERVER_NAME') or 'localhost:5100'
-    allowed = {'localhost', '127.0.0.1', '0.0.0.0'}
+    allowed = {'localhost', '127.0.0.1', '0.0.0.0', 'pcd-app.fly.dev', 'pcd-app'}
     host = parsed.hostname or ''
     port = parsed.port
     if host in allowed:
@@ -169,8 +169,8 @@ def update_defect_status(defect_id):
     old_due = defect.due_date.strftime('%Y-%m-%d') if defect.due_date else ''
     request_id = request.headers.get('X-Request-ID') or request.headers.get('X-Correlation-ID') or uuid.uuid4().hex
 
-    # Only developers can change the status
-    if 'status' in data and current_user.role == 'developer':
+    # Developers, managers, and inspectors can change the status
+    if 'status' in data and current_user.role in ('developer', 'manager', 'inspector'):
         defect.status = data['status']
     if 'notes' in data:
         defect.notes = data['notes']
