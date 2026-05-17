@@ -7,16 +7,15 @@
     <title>LDMS — {{ scan.name }}</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
         :root {
             --bg: #0b1020;
             --panel: rgba(255, 255, 255, 0.04);
             --ink: #e2e8f0;
             --muted: #94a3b8;
             --edge: rgba(255, 255, 255, 0.08);
-            --accent: #7c3aed;
+            --accent: #3b82f6;
             --accent-2: #22d3ee;
             --success: #10b981;
             --warning: #f59e0b;
@@ -29,7 +28,7 @@
             --ink: #0f172a;
             --muted: #475569;
             --edge: rgba(0, 0, 0, 0.1);
-            --accent: #7c3aed;
+            --accent: #3b82f6;
             --accent-2: #0ea5e9;
             --success: #059669;
             --warning: #d97706;
@@ -42,7 +41,7 @@
 
         body {
             margin: 0;
-            font-family: 'Space Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.14), transparent 36%),
                 radial-gradient(circle at 85% 10%, rgba(34, 211, 238, 0.1), transparent 32%),
                 linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
@@ -851,45 +850,6 @@
             }
         }
 
-        /* Loading overlay */
-        #ldms-loader {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(11, 16, 32, 0.8);
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        #ldms-loader.active {
-            display: flex;
-        }
-
-        .loader-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: ldms-spin 0.8s linear infinite;
-        }
-
-        .loader-text {
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        @keyframes ldms-spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    
         body.light-mode h1, body.light-mode h2, body.light-mode h3, 
         body.light-mode h4, body.light-mode h5, body.light-mode h6,
         body.light-mode .defect-title, body.light-mode .info-value, 
@@ -952,16 +912,10 @@
         body.light-mode .heat-row > div:nth-child(2) { color: #334155 !important; }
 
 
-        body.light-mode #ldms-loader {
-            background: rgba(248, 250, 252, 0.85);
-        }
-        body.light-mode .loader-spinner {
-            border-color: rgba(0, 0, 0, 0.1);
-            border-top-color: #3b82f6;
-        }
-        body.light-mode .loader-text {
-            color: #334155;
-        }
+
+        
+  .hero-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
     </style>
 </head>
 
@@ -976,14 +930,18 @@
       })();
     </script>
 
-    <div id="ldms-loader">
-        <div class="loader-spinner"></div>
-        <span class="loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+    <div id="ldms-loader" class="ldms-loader" style="background: rgba(11, 16, 32, 0.8); backdrop-filter: blur(4px);">
+        <div class="ldms-loader-spinner"></div>
+        <span class="ldms-loader-text"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
     </div>
     <div style="position:fixed;top:12px;right:12px;z-index:9999;display:flex;gap:8px;align-items:center;">
-        <a href="{{ url_for('auth.logout') }}"
-            style="display:inline-flex;align-items:center;gap:8px;padding:0.45rem 0.9rem;border-radius:999px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;text-decoration:none;font-family:system-ui;font-weight:600;font-size:0.85rem;backdrop-filter:blur(8px);">
-            <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
+        <a href="{{ url_for('auth.profile') }}"
+            style="display:inline-flex;align-items:center;gap:8px;padding:0.45rem 0.9rem;border-radius:999px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;text-decoration:none;font-family:system-ui;font-weight:600;font-size:0.85rem;backdrop-filter:blur(8px);" data-tooltip="Your profile">
+            <i class="fas fa-user"></i> {{ current_user.username }}
+        </a>
+        <a href="{{ url_for('auth.logout') }}" data-confirm="Sign out now?" data-confirm-btn="Sign out"
+            style="display:inline-flex;align-items:center;gap:8px;padding:0.45rem 0.9rem;border-radius:999px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;text-decoration:none;font-family:system-ui;font-weight:600;font-size:0.85rem;backdrop-filter:blur(8px);" data-tooltip="Sign out">
+            <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
@@ -998,7 +956,7 @@
                     <i class="fas fa-chevron-right"></i>
                     <span>{{ scan.name }}</span>
                 </div>
-                <a href="{{ url_for('developer.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i>
+                <a href="{{ url_for('developer.dashboard') }}" class="back-link" data-tooltip="Back to dashboard"><i class="fas fa-arrow-left"></i>
                     Back</a>
             </div>
             <div>
@@ -1096,10 +1054,10 @@
                     <option value="status" {% if sort_by=='status' %}selected{% endif %}>Status</option>
                 </select>
 
-                <button type="submit" class="btn">Search</button>
+                <button type="submit" class="btn" data-tooltip="Search defects">Search</button>
                 {% if search_query %}
                 <a href="{{ url_for('developer.view_scan', scan_id=scan.id) }}" class="btn secondary"
-                    style="min-width: 80px; justify-content: center;">
+                    style="min-width: 80px; justify-content: center;" data-tooltip="Clear search">
                     <i class="fas fa-times-circle"></i> Clear
                 </a>
                 {% endif %}
@@ -1115,20 +1073,28 @@
             <div class="bulk-actions-bar" id="bulk-actions">
                 <span class="count"><span id="selected-count">0</span> selected</span>
                 <form method="post" action="{{ url_for('developer.bulk_update_defects', scan_id=scan.id) }}"
-                    id="bulk-form" onsubmit="return confirmBulkUpdate()"
+                    id="bulk-form" onsubmit="return confirmBulkUpdate(this)"
                     style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <select name="bulk_action" id="bulk-action">
+                    <select name="bulk_action" id="bulk-action" onchange="toggleAssignee()">
                         <option value="status_only">Status Only</option>
+                        <option value="assign_to_user">Assign to User</option>
+                        <option value="unassign">Unassign</option>
                     </select>
-                    <select name="bulk_status">
+                    <select name="bulk_status" id="bulk-status">
                         <option value="">-- Update Status --</option>
                         <option value="Reported">Reported</option>
                         <option value="Under Review">Under Review</option>
                         <option value="Fixed">Fixed</option>
                     </select>
+                    <select name="bulk_assignee_id" id="bulk-assignee" style="display:none;">
+                        <option value="">-- Select User --</option>
+                        {% for dev in developers %}
+                        <option value="{{ dev.id }}">{{ dev.username }}</option>
+                        {% endfor %}
+                    </select>
 
-                    <button type="submit" class="btn"><i class="fas fa-edit"></i> Apply to Selected</button>
+                    <button type="submit" class="btn" data-tooltip="Apply bulk action to selected defects"><i class="fas fa-edit"></i> Apply to Selected</button>
                     <button type="button" class="btn secondary" onclick="clearSelection()"><i class="fas fa-times"></i>
                         Clear</button>
                 </form>
@@ -1290,7 +1256,7 @@
 
                         <form method="post"
                             action="{{ url_for('developer.update_defect_progress', defect_id=defect.id) }}"
-                            class="update-form" onsubmit="return confirmUpdate()">
+                            class="update-form" onsubmit="return confirmUpdate(this)">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <div class="form-group">
                                 <label for="status-{{ defect.id }}">Update Status:</label>
@@ -1312,7 +1278,7 @@
                                     placeholder="Add progress notes, repair details, or status updates...">{{ defect.notes or '' }}</textarea>
                             </div>
 
-                            <button type="submit" class="btn"><i class="fas fa-save"></i> Update Defect</button>
+                            <button type="submit" class="btn" data-tooltip="Save defect update"><i class="fas fa-save"></i> Update Defect</button>
                         </form>
                     </div>
                 </div>
@@ -1330,85 +1296,35 @@
     </main>
 
     <!-- Lightbox -->
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-        <img id="lightbox-img" src="" alt="Full size defect image">
+    <div class="ldms-lightbox" id="ldms-lightbox">
+        <span class="ldms-lightbox-close" id="ldms-lightbox-close">&times;</span>
+        <img id="ldms-lightbox-img" src="" alt="Full size defect image">
     </div>
 
-    <!-- Loading Spinner -->
-    <div class="spinner-backdrop" id="spinner-backdrop"></div>
-    <div class="spinner" id="spinner">
-        <div class="spinner-circle"></div>
-    </div>
-
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
     <script>
-        // Toast notification function
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = 'slideIn 0.3s ease-out reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Show flash messages as toasts
-        {% with messages = get_flashed_messages(with_categories = true) %}
-        {% if messages %}
-        document.addEventListener('DOMContentLoaded', function () {
-            {% for category, message in messages %}
-            showToast('{{ message }}', '{{ category }}');
-            {% endfor %}
-        });
-        {% endif %}
-        {% endwith %}
-
-        // Lightbox functionality
-        function openLightbox(imgSrc) {
-            document.getElementById('lightbox').classList.add('active');
-            document.getElementById('lightbox-img').src = imgSrc;
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
         // Add click handlers to all defect images
         document.addEventListener('DOMContentLoaded', function () {
             const images = document.querySelectorAll('.defect-image img');
             images.forEach(img => {
                 img.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    openLightbox(this.src);
+                    ldmsOpenLightbox(this.src);
                 });
             });
 
-            // Show loading spinner on form submit
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function () {
-                    document.getElementById('spinner').classList.add('active');
-                    document.getElementById('spinner-backdrop').classList.add('active');
-                });
-            });
-
-            toggleBulkAssignee();
-        });
-
-        // Close lightbox with ESC key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeLightbox();
+            toggleAssignee();
         });
 
         // Bulk Actions Functions
+        function toggleAssignee() {
+            var action = document.getElementById('bulk-action').value;
+            var assignee = document.getElementById('bulk-assignee');
+            if (assignee) assignee.style.display = action === 'assign_to_user' ? '' : 'none';
+        }
+
         function updateBulkActions() {
             const checkboxes = document.querySelectorAll('.defect-checkbox:not(#select-all):checked');
             const count = checkboxes.length;
@@ -1446,15 +1362,45 @@
             updateBulkActions();
         }
 
-        function confirmUpdate() {
-            return confirm('Are you sure you want to update this defect? This will change its status.');
+        function confirmUpdate(form) {
+            if (typeof Swal === 'undefined') return true;
+            Swal.fire({
+                title: 'Update this defect?',
+                text: 'This will change its status.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, update',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusCancel: true,
+            }).then(function (result) {
+                if (result.isConfirmed) form.submit();
+            });
+            return false;
         }
 
-        function confirmBulkUpdate() {
+        function confirmBulkUpdate(form) {
+            if (typeof Swal === 'undefined') return true;
             const count = document.querySelectorAll('.defect-checkbox:not(#select-all):checked').length;
             const action = document.getElementById('bulk-action').value;
             const status = document.querySelector('select[name="bulk_status"]').value;
-            return confirm(`Apply bulk action (${action}) to ${count} defect(s)${status ? ` and set status ${status}` : ''}?`);
+            Swal.fire({
+                title: 'Apply bulk action?',
+                text: `${action} to ${count} defect(s)${status ? ` and set status ${status}` : ''}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, apply',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusCancel: true,
+            }).then(function (result) {
+                if (result.isConfirmed) form.submit();
+            });
+            return false;
         }
 
         // Charts, heatmap
@@ -1468,7 +1414,7 @@
                     renderPriorityChart(data.priority);
                     renderSeverityChart(data.severity);
                 })
-                .catch(error => console.error('Error loading charts:', error));
+                .catch(function() { /* chart load failed silently */ });
         }
 
         function renderStatusChart(statusData) {
@@ -1545,7 +1491,7 @@
                     html += '</div>';
                     container.innerHTML = html;
                 })
-                .catch(error => console.error('Error loading heatmap:', error));
+                .catch(function() { /* heatmap load failed silently */ });
         }
 
         function varThemeColor() {
@@ -1562,7 +1508,7 @@
         });
     </script>
     <script>
-        document.querySelectorAll('a[href]').forEach(link => {
+        document.querySelectorAll('a[href]').forEach(link => { if (link.hasAttribute("data-confirm")) return; {
             const href = link.getAttribute('href') || '';
             if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
                 link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));

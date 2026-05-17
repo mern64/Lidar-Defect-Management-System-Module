@@ -1,0 +1,18 @@
+<div id="ldms-shortcuts-modal" x-data="{ open: false }" x-show="open" x-cloak
+     @keydown.window="if ($event.key === '?' && !['INPUT','TEXTAREA'].includes($event.target.tagName)) { $event.preventDefault(); open = !open; }"
+     @keydown.escape="open = false"
+     class="ldms-search-overlay" @click.self="open = false">
+  <div class="ldms-search-dialog" style="max-width:480px;" @click.stop>
+    <div class="ldms-search-header">
+      <h3 style="margin:0;font-size:1rem;"><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h3>
+      <button @click="open = false" style="background:none;border:none;color:var(--ldms-dark-muted);cursor:pointer;font-size:1.2rem;">&times;</button>
+    </div>
+    <div class="ldms-shortcuts-list" style="padding:1rem 1.25rem;">
+      <div class="ldms-shortcut-row"><kbd>Ctrl+K</kbd><span>Global search</span></div>
+      <div class="ldms-shortcut-row"><kbd>/</kbd><span>Quick search</span></div>
+      <div class="ldms-shortcut-row"><kbd>?</kbd><span>Toggle this help</span></div>
+      <div class="ldms-shortcut-row"><kbd>Esc</kbd><span>Close modal / drawer</span></div>
+      <div class="ldms-shortcut-row"><kbd>Ctrl+K</kbd> or <kbd>/</kbd><span>Global search</span></div>
+    </div>
+  </div>
+</div>

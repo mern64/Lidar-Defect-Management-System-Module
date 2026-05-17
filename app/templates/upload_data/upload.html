@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
   <style>
     :root {
       --bg-from: #eef1f7;
@@ -211,20 +212,7 @@
     .pac-item-query { color: var(--ink) !important; }
     .pac-matched { font-weight: 600; }
 
-    /* Loading overlay */
-    #ldms-loader {
-      display: none; position: fixed; inset: 0; z-index: 99999;
-      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-    }
-    #ldms-loader.active { display: flex; }
-    .loader-spinner {
-      width: 34px; height: 34px;
-      border: 3px solid rgba(37, 99, 235, 0.15); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+     }
 
     @media (max-width: 640px) {
       .topbar { padding: 0 1rem; }
@@ -232,32 +220,30 @@
       .form-card { padding: 1.5rem; }
       .form-row { grid-template-columns: 1fr; }
     }
+
+    
+    }
   </style>
 </head>
 <body>
-  <script>
-    (function() {
-      if (!localStorage.getItem('theme-set')) document.body.classList.add('light-mode');
-      else if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-    })();
-  </script>
-
-  <div id="ldms-loader">
+  <div id="ldms-loader" class="ldms-loader">
     <div class="loader-spinner"></div>
     <span class="loader-text"><i class="fas fa-cloud-upload-alt"></i> Processing…</span>
   </div>
 
   <header class="topbar">
     <div class="topbar-left">
-      <a href="/projects" class="back-link"><i class="fas fa-arrow-left"></i> Projects</a>
+      <a href="{{ url_for('defects.list_projects') }}" class="back-link"><i class="fas fa-arrow-left"></i> Projects</a>
     </div>
     <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand">
       <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
       Lidar Defect Management System
     </a>
-    <a href="{{ url_for('auth.logout') }}" class="user-pill">
+    <a href="{{ url_for('auth.profile') }}" class="user-pill">
       <i class="fas fa-user"></i>
       {{ current_user.username }}
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out">
       <i class="fas fa-sign-out-alt"></i>
     </a>
   </header>
@@ -268,6 +254,18 @@
       <h1>Upload Scan Data</h1>
       <p>Upload the 3D GLB model and PDF defect report. The system will store your files and start automated processing.</p>
     </div>
+
+    <section class="ldms-page-note" style="margin-bottom:1.25rem;">
+      <div>
+        <h2 style="font-size:1rem;">What happens next</h2>
+        <p>Your upload is validated, PDF images are extracted, and defect snapshots are queued before the scan appears in the project view.</p>
+      </div>
+      <div class="note-chips">
+        <span class="ldms-chip"><i class="fas fa-shield-alt"></i> File validation</span>
+        <span class="ldms-chip"><i class="fas fa-image"></i> Image extraction</span>
+        <span class="ldms-chip"><i class="fas fa-list-check"></i> Defect queue</span>
+      </div>
+    </section>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}{% for category, message in messages %}
@@ -329,7 +327,7 @@
           <textarea id="notes" name="notes" placeholder="Any additional details or comments…"></textarea>
         </div>
 
-        <button type="submit" class="btn-submit">
+        <button type="submit" class="btn-submit" data-tooltip="Upload and start processing">
           <i class="fas fa-rocket"></i> Upload &amp; Start Processing
         </button>
       </form>
@@ -358,12 +356,15 @@
       } catch(e) { document.getElementById('address').placeholder = 'Enter address manually'; }
     }
     function gm_authFailure() { document.getElementById('address').placeholder = 'Enter address manually'; }
-    (function(g){var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await(a=m.createElement("script"));e.set("libraries","places");e.set("callback",c+".maps."+q);e.set("key","AIzaSyDfdb_IObBro3FDBEupx4WEgGQyLAlw79w");a.src="https://maps.googleapis.com/maps/api/js?"+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once."):(d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n)))})();
+    (function(g){var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await(a=m.createElement("script"));e.set("libraries","places");e.set("callback",c+".maps."+q);e.set("key","{{ google_maps_api_key }}");a.src="https://maps.googleapis.com/maps/api/js?"+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once."):(d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n)))})();
     google.maps.importLibrary("places").then(()=>initAutocomplete()).catch(()=>{ document.getElementById('address').placeholder='Enter address manually'; });
     document.getElementById('uploadForm').addEventListener('submit',()=>document.getElementById('ldms-loader').classList.add('active'));
   </script>
   <script>
     window.setTimeout(()=>{ if(!autocompleteInitialized) document.getElementById('address').placeholder='Enter address manually (e.g. 123 Main St, Singapore 123456)'; }, 8000);
   </script>
+  <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+  <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
 </body>
 </html>

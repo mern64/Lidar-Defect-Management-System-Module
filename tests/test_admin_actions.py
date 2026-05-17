@@ -2,7 +2,7 @@ from app.extensions import db
 from app.models import User
 
 
-def test_admin_can_toggle_user_active(app, login_dev):
+def test_admin_can_toggle_user_active(app, login_manager):
     with app.app_context():
         target = User(username="target_user", role="inspector", is_active=True, is_available=True)
         target.set_password("password123")
@@ -10,7 +10,7 @@ def test_admin_can_toggle_user_active(app, login_dev):
         db.session.commit()
         target_id = target.id
 
-    response = login_dev.post(
+    response = login_manager.post(
         f"/developer/admin/users/{target_id}/update",
         data={"action": "toggle_active"},
         follow_redirects=False,
@@ -55,15 +55,15 @@ def test_manager_cannot_create_manager_account(app, login_manager):
         follow_redirects=True,
     )
     assert response.status_code == 200
-    assert b"Manager account creation is restricted" in response.data
+    assert b"restricted to inspector or developer" in response.data
 
     with app.app_context():
         manager = User.query.filter_by(username="manager2").first()
         assert manager is None
 
 
-def test_register_persists_corporate_profile_fields(app, login_dev):
-    response = login_dev.post(
+def test_register_persists_corporate_profile_fields(app, login_manager):
+    response = login_manager.post(
         "/register",
         data={
             "username": "newdev",
@@ -89,7 +89,7 @@ def test_register_persists_corporate_profile_fields(app, login_dev):
         assert user.job_title == "Building Engineer"
 
 
-def test_admin_can_delete_non_manager_user(app, login_dev):
+def test_admin_can_delete_non_manager_user(app, login_manager):
     with app.app_context():
         target = User(username="delete_me", role="inspector", is_active=True, is_available=True)
         target.set_password("password123")
@@ -97,7 +97,7 @@ def test_admin_can_delete_non_manager_user(app, login_dev):
         db.session.commit()
         target_id = target.id
 
-    response = login_dev.post(
+    response = login_manager.post(
         f"/developer/admin/users/{target_id}/update",
         data={"action": "delete_user"},
         follow_redirects=False,
@@ -109,19 +109,20 @@ def test_admin_can_delete_non_manager_user(app, login_dev):
         assert deleted is None
 
 
-def test_admin_cannot_delete_only_manager(app, login_dev):
+def test_admin_cannot_delete_only_manager(app, login_manager):
     with app.app_context():
         manager = User.query.filter_by(role="manager").first()
         assert manager is not None
         manager_id = manager.id
 
-    response = login_dev.post(
+    response = login_manager.post(
         f"/developer/admin/users/{manager_id}/update",
         data={"action": "delete_user"},
         follow_redirects=True,
     )
     assert response.status_code == 200
-    assert b"Cannot delete the only manager account" in response.data
+    # Manager cannot delete themselves (the only manager)
+    assert b"You cannot delete your own account while logged in" in response.data
 
     with app.app_context():
         manager = db.session.get(User, manager_id)

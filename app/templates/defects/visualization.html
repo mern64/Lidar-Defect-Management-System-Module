@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
         * {
             margin: 0;
@@ -2381,6 +2382,10 @@
                 padding: 7px 8px;
             }
         }
+        
+          .top-bar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+          .meta-grid { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 
@@ -2398,28 +2403,25 @@
         <!-- Navigation Bar -->
         <nav class="navbar" id="tour-viz-nav">
             <div class="nav-left">
-                <a href="/projects" class="nav-brand">
+                <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="nav-brand">
                     <i class="fas fa-hard-hat"></i>
                     LDMS
                 </a>
-                <div class="nav-links">
-                    <a href="/projects" class="nav-link"><i class="fas fa-folder-open"></i> Projects</a>
-                    <span class="crumb-separator"><i class="fas fa-chevron-right"></i></span>
-                    <span class="nav-link nav-project-name">{{ upload_metadata.project_name if
-                        upload_metadata and upload_metadata.project_name else scan.name }}</span>
-                    <span class="crumb-separator"><i class="fas fa-chevron-right"></i></span>
-                    <a href="/scans/{{ scan_id }}/visualize" class="nav-link active"><i class="fas fa-eye"></i>
-                        3D Visualization</a>
-                </div>
+                <a href="{{ url_for('defects.list_projects') }}" class="nav-link" data-tooltip="View all projects">
+                    <i class="fas fa-folder-open"></i> My Projects
+                </a>
             </div>
             <div class="nav-right">
                 <button class="btn btn-outline tour-trigger" id="tourReplayVisualization" type="button">
                     <i class="fas fa-compass"></i> Tutorial
                 </button>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-logout" title="Logout">
-                    <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
+                <a href="{{ url_for('auth.profile') }}" class="btn btn-outline btn-logout" title="Profile">
+                    <i class="fas fa-user"></i> {{ current_user.username }}
                 </a>
-                <button class="btn btn-outline btn-icon" id="themeToggle" onclick="toggleTheme()"
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-logout" title="Logout" data-confirm="Sign out now?" data-confirm-btn="Sign out">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+                <button class="btn btn-outline btn-icon" id="ldms-theme-btn"
                     title="Toggle Light/Dark Mode">
                     <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
@@ -2895,7 +2897,7 @@
 
             // ==================== PBR MATERIAL APPLICATION ====================
             function applyPBRMaterials(scene) {
-                console.log('Applying PBR materials to scene...');
+                /* PBR materials applied */
                 let materialsApplied = 0;
 
                 scene.meshes.forEach(mesh => {
@@ -2971,10 +2973,10 @@
                     mesh.material = pbrMaterial;
                     materialsApplied++;
 
-                    console.log(`Applied ${recipeKey} PBR material to: ${mesh.name}`);
+                    /* PBR material applied */
                 });
 
-                console.log(`✓ Applied ${materialsApplied} PBR materials`);
+                /* PBR materials complete */
                 return materialsApplied;
             }
 
@@ -3027,10 +3029,10 @@
             let rootMesh = null;
             let snapshotMeshes = [];
             {% if model_url %}
-            console.log('Loading model from: {{ model_url }}');
+            /* model loading */
             BABYLON.SceneLoader.ImportMeshAsync('', '{{ model_url }}', '', scene, null, '.glb')
                 .then(function (result) {
-                    console.log('Model loaded successfully, meshes:', result.meshes.length);
+                    /* model loaded */
                     loadedMeshes = result.meshes;
                     modelLoaded = true;
 
@@ -3051,14 +3053,14 @@
                                 position: mesh.absolutePosition.clone()
                             });
                             mesh.isVisible = false;
-                            console.log('Found Snapshot mesh:', mesh.name, 'at', mesh.absolutePosition.x.toFixed(2), mesh.absolutePosition.y.toFixed(2), mesh.absolutePosition.z.toFixed(2));
+                            /* snapshot mesh found */
                         }
                     });
 
                     // Apply PBR materials to all meshes
                     applyPBRMaterials(scene);
 
-                    console.log('Total Snapshot meshes found:', snapshotMeshes.length);
+                    /* snapshots counted */
 
                     // Center camera on model
                     if (result.meshes.length > 0) {
@@ -3082,18 +3084,18 @@
 
                         camera.target = modelCenter;
                         camera.radius = size.length() * 1.5;
-                        console.log('Camera centered at:', modelCenter, 'radius:', camera.radius);
+                        /* camera positioned */
 
                         createMarkersFromSnapshots();
                         loadDefects();
                     }
                 })
                 .catch(function (error) {
-                    console.error('Error loading model:', error);
+                    /* model load error */
                     loadDefects();
                 });
             {% else %}
-            console.log('No model URL provided');
+            /* no model URL */
             loadDefects();
             {% endif %}
 
@@ -3382,7 +3384,7 @@
                             notesEl.textContent = data.notes || 'No notes added';
                         }
                     })
-                    .catch(err => console.error('Error loading defect details:', err));
+                    .catch(function() { /* defect details error */ });
             }
 
             // Create markers from GLB Snapshot meshes
@@ -3670,18 +3672,25 @@
             }
 
             function deleteDefect(defectId) {
-                if (confirm('Are you sure you want to delete this defect? This action cannot be undone.')) {
-                    fetch(`/defect/${defectId}`, { method: 'DELETE' })
-                        .then(response => response.json())
-                        .then(() => {
-                            if (currentDrawerDefectId === defectId) {
-                                closeDefectDrawer();
-                            }
-                            loadDefects();
-                            showToast('Defect deleted successfully', 'success');
-                        })
-                        .catch(() => showToast('Failed to delete defect', 'error'));
-                }
+                ldmsConfirm({
+                    title: 'Delete this defect?',
+                    text: 'This action cannot be undone.',
+                    icon: 'error',
+                    confirmText: 'Delete',
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        fetch(`/defect/${defectId}`, { method: 'DELETE' })
+                            .then(response => response.json())
+                            .then(() => {
+                                if (currentDrawerDefectId === defectId) {
+                                    closeDefectDrawer();
+                                }
+                                loadDefects();
+                                showToast('Defect deleted successfully', 'success');
+                            })
+                            .catch(() => showToast('Failed to delete defect', 'error'));
+                    }
+                });
             }
 
             // View controls
@@ -4001,6 +4010,9 @@
             }
         </script>
     </main>
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
 </body>
 
 </html>

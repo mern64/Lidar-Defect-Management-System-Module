@@ -1,0 +1,92 @@
+<div id="ldms-search-modal" x-data="ldmsSearch()" x-show="open" x-cloak
+     @keydown.window="onKeydown($event)"
+     class="ldms-search-overlay" @click.self="close()">
+  <div class="ldms-search-dialog" @click.stop>
+    <div class="ldms-search-header">
+      <i class="fas fa-search"></i>
+      <input type="text" x-model="query" @input="onInput()"
+             placeholder="Search projects, defects, locations..." x-ref="input"
+             data-tooltip="Search (Ctrl+K)"
+             @keydown.escape="close()" @keydown.down.prevent="next()" @keydown.up.prevent="prev()"
+             @keydown.enter.prevent="go()">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="ldms-search-body" x-show="query.length > 0">
+      <template x-if="loading">
+        <div class="ldms-search-loading"><div class="ldms-loader-spinner"></div></div>
+      </template>
+      <template x-if="!loading && results.length === 0 && query.length > 0">
+        <div class="ldms-search-empty">
+          <i class="fas fa-search-minus"></i>
+          <p>No results for "<span x-text="query"></span>"</p>
+        </div>
+      </template>
+      <template x-for="(r, i) in results" :key="r.url">
+        <a :href="r.url" class="ldms-search-result"
+           :class="{ 'ldms-search-result-active': i === activeIndex }"
+           @mouseenter="activeIndex = i">
+          <i :class="r.icon"></i>
+          <div class="ldms-search-result-content">
+            <span class="ldms-search-result-title" x-text="r.title"></span>
+            <span class="ldms-search-result-subtitle" x-text="r.subtitle"></span>
+          </div>
+          <span class="ldms-search-result-type" x-text="r.type"></span>
+        </a>
+      </template>
+    </div>
+    <div class="ldms-search-footer" x-show="!query.length">
+      <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+      <span><kbd>Enter</kbd> Open</span>
+      <span><kbd>ESC</kbd> Close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+function ldmsSearch() {
+  return {
+    open: false,
+    query: '',
+    results: [],
+    loading: false,
+    activeIndex: 0,
+    _debounce: null,
+    _reqId: 0,
+    onInput() {
+      clearTimeout(this._debounce);
+      this._debounce = setTimeout(() => this.search(), 300);
+    },
+    onKeydown(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        this.open = !this.open;
+        if (this.open) this.$nextTick(() => this.$refs.input?.focus());
+      }
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+        e.preventDefault();
+        this.open = true;
+        this.$nextTick(() => this.$refs.input?.focus());
+      }
+    },
+    async search() {
+      if (!this.query.trim()) { this.results = []; return; }
+      this.loading = true;
+      this.activeIndex = 0;
+      const reqId = ++this._reqId;
+      try {
+        const r = await fetch('/api/search?q=' + encodeURIComponent(this.query));
+        if (!r.ok) { this.results = []; return; }
+        const data = await r.json();
+        if (reqId === this._reqId) this.results = data;
+      } catch { if (reqId === this._reqId) this.results = []; }
+      if (reqId === this._reqId) this.loading = false;
+    },
+    next() { this.activeIndex = Math.min(this.activeIndex + 1, this.results.length - 1); },
+    prev() { this.activeIndex = Math.max(this.activeIndex - 1, 0); },
+    go() {
+      if (this.results[this.activeIndex]) window.location.href = this.results[this.activeIndex].url;
+    },
+    close() { this.open = false; this.query = ''; this.results = []; }
+  };
+}
+</script>

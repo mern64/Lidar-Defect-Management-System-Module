@@ -1,916 +1,819 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDMS - Manager Dashboard</title>
+    <title>LDMS — Manager Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
-
         :root {
-            --bg: #ecf3fc;
-            --bg-2: #dfeaf8;
-            --panel: rgba(255, 255, 255, 0.88);
-            --panel-solid: #ffffff;
-            --ink: #0f1a2e;
-            --muted: #536280;
-            --line: #d7e2f2;
-            --accent: #1f7aec;
-            --accent-2: #0ea5e9;
-            --control-radius: 0.72rem;
-            --control-height: 2.35rem;
-            --chip-radius: 999px;
-            --success-bg: #eaf9f0;
-            --success-ink: #1d7a42;
-            --warn-bg: #fff4de;
-            --warn-ink: #956100;
-            --shadow-card: rgba(19, 19, 22, 0.1) 0px 1px 5px -4px,
-                rgba(34, 42, 53, 0.08) 0px 0px 0px 1px,
-                rgba(34, 42, 53, 0.08) 0px 8px 20px;
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-2: #232734;
+            --ink: #e4e6ed;
+            --ink-2: #989cad;
+            --muted: #6b7084;
+            --border: #2a2e3a;
+            --accent: #3b82f6;
+            --accent-subtle: rgba(59, 130, 246, 0.1);
+            --green: #22c55e;
+            --green-bg: rgba(34, 197, 94, 0.1);
+            --amber: #eab308;
+            --amber-bg: rgba(234, 179, 8, 0.1);
+            --red: #ef4444;
+            --red-bg: rgba(239, 68, 68, 0.1);
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        * {
-            box-sizing: border-box;
+        body.light-mode {
+            --bg: #f6f7f9;
+            --surface: #ffffff;
+            --surface-2: #f0f1f3;
+            --ink: #1a1c23;
+            --ink-2: #5a5f72;
+            --muted: #9196a8;
+            --border: #e2e4ea;
+            --accent: #2563eb;
+            --accent-subtle: rgba(37, 99, 235, 0.06);
+            --green: #16a34a;
+            --green-bg: rgba(22, 163, 74, 0.08);
+            --amber: #ca8a04;
+            --amber-bg: rgba(202, 138, 4, 0.08);
+            --red: #dc2626;
+            --red-bg: rgba(220, 38, 38, 0.08);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: var(--bg);
             color: var(--ink);
             min-height: 100vh;
-            background:
-                radial-gradient(55rem 28rem at 0% 0%, rgba(31, 122, 236, 0.18), transparent 65%),
-                radial-gradient(45rem 20rem at 100% 0%, rgba(14, 165, 233, 0.14), transparent 65%),
-                linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+            font-size: 15px;
+            line-height: 1.5;
         }
 
-        .shell {
-            max-width: 1240px;
-            margin: 0 auto;
-            padding: 1.4rem 1rem 2rem;
-        }
-
+        /* ── Topbar ── */
         .topbar {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(10px);
-            padding: 0.85rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            height: 56px;
+            padding: 0 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .topbar-main {
-            display: grid;
-            gap: 0.55rem;
-        }
-
-        .brand-row {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-
-        .brand-logo {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 0.62rem;
-            border: 1px solid rgba(31, 122, 236, 0.25);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 0.25rem;
-            box-shadow: rgba(31, 122, 236, 0.18) 0px 4px 10px;
-            object-fit: contain;
-        }
-
-        .brand-text {
-            display: grid;
-            line-height: 1.05;
-        }
-
-        .brand-name {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.02rem;
-            letter-spacing: 0.02em;
-        }
-
-        .brand-sub {
-            font-size: 0.75rem;
-            color: var(--muted);
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.35rem 0.6rem;
-            border-radius: 999px;
-            border: 1px solid rgba(31, 122, 236, 0.25);
-            background: rgba(255, 255, 255, 0.75);
-            color: #2459b8;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .title {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: clamp(1.3rem, 2vw, 1.9rem);
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            margin: 0.25rem 0 0;
-            color: var(--muted);
-            max-width: 55ch;
-            font-size: 0.94rem;
-        }
-
-        .actions {
+        .topbar-left {
             display: flex;
-            gap: 0.55rem;
-            flex-wrap: wrap;
-            justify-content: flex-end;
             align-items: center;
+            gap: 12px;
         }
 
-        .user-pill {
+        .topbar-logo {
+            width: 22px;
+            height: 22px;
+        }
+
+        .topbar-brand {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--ink);
+        }
+
+        .topbar-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .topbar-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
-            min-height: var(--control-height);
-            padding: 0.45rem 0.72rem;
-            border-radius: var(--chip-radius);
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, 0.72);
-            color: var(--muted);
-            font-size: 0.78rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .btn {
-            border: 1px solid var(--line);
-            background: var(--panel-solid);
-            border-radius: var(--control-radius);
-            min-height: var(--control-height);
-            padding: 0.52rem 0.95rem;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--ink-2);
+            font-size: 13.5px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
             text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .topbar-btn:hover {
+            background: var(--surface-2);
             color: var(--ink);
+            border-color: var(--accent);
+        }
+
+        .topbar-btn i { font-size: 13px; }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            color: var(--ink-2);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .topbar-logout { color: var(--red); }
+        .topbar-logout:hover {
+            background: var(--red-bg) !important;
+            border-color: var(--red) !important;
+            color: var(--red) !important;
+        }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 24px 48px;
+        }
+
+        /* ── Page Title ── */
+        .page-title {
+            margin-bottom: 20px;
+        }
+
+        .page-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-title h1 i { color: var(--accent); }
+
+        .page-title p {
+            font-size: 14px;
+            color: var(--ink-2);
+            margin-top: 2px;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card + .card { margin-top: 12px; }
+
+        .card-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-head h2 {
+            font-size: 15px;
             font-weight: 600;
-            font-size: 0.84rem;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 16px rgba(10, 24, 48, 0.08);
+        .card-head h2 i { color: var(--accent); }
+
+        .card-head-meta {
+            font-size: 13px;
+            color: var(--ink-2);
+            font-weight: 500;
         }
 
-        .btn.primary {
-            background: linear-gradient(120deg, var(--accent), var(--accent-2));
-            border-color: transparent;
-            color: #fff;
-        }
+        .card-body { padding: 16px; }
 
-        .metrics {
+        /* ── Stats Row ── */
+        .stats {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .escalation-strip {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
         }
 
-        .escalation-card {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: 0.75rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(10px);
-        }
-
-        .escalation-card .label {
-            color: var(--muted);
-            font-size: 0.76rem;
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            color: var(--ink-2);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 0.35rem;
-        }
-
-        .escalation-card .value {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.35rem;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.2rem;
-        }
-
-        .escalation-card .hint {
-            color: var(--muted);
-            font-size: 0.77rem;
-        }
-
-        .escalation-card.danger {
-            border-color: rgba(239, 68, 68, 0.25);
-            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), rgba(255, 255, 255, 0.88));
-        }
-
-        .escalation-card.warning {
-            border-color: rgba(245, 158, 11, 0.3);
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.09), rgba(255, 255, 255, 0.88));
-        }
-
-        .escalation-card.critical {
-            border-color: rgba(185, 28, 28, 0.3);
-            background: linear-gradient(180deg, rgba(185, 28, 28, 0.1), rgba(255, 255, 255, 0.88));
-        }
-
-        .metric {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: 0.9rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(10px);
-            animation: fadeSlide 0.45s ease both;
-        }
-
-        .metric.projects {
-            border-color: rgba(31, 122, 236, 0.28);
-            background: linear-gradient(180deg, rgba(31, 122, 236, 0.1), rgba(255, 255, 255, 0.88));
-        }
-
-        .metric.unassigned {
-            border-color: rgba(245, 158, 11, 0.3);
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(255, 255, 255, 0.88));
-        }
-
-        .metric.urgent {
-            border-color: rgba(239, 68, 68, 0.3);
-            background: linear-gradient(180deg, rgba(239, 68, 68, 0.12), rgba(255, 255, 255, 0.88));
-        }
-
-        .metric.new24h {
-            border-color: rgba(16, 185, 129, 0.3);
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.11), rgba(255, 255, 255, 0.88));
-        }
-
-        .metric:nth-child(2) {
-            animation-delay: 0.05s;
-        }
-
-        .metric:nth-child(3) {
-            animation-delay: 0.1s;
-        }
-
-        .metric:nth-child(4) {
-            animation-delay: 0.15s;
-        }
-
-        .metric .label {
-            color: var(--muted);
-            font-size: 0.8rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .metric .value {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.55rem;
             letter-spacing: -0.02em;
         }
 
-        .metric.projects .value {
-            color: #1e5cb8;
+        .stat.blue .stat-value { color: var(--accent); }
+        .stat.amber .stat-value { color: var(--amber); }
+        .stat.red .stat-value { color: var(--red); }
+        .stat.green .stat-value { color: var(--green); }
+
+        /* ── Alerts Row ── */
+        .alerts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .metric.unassigned .value {
-            color: #9a6700;
+        .alert-box {
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: var(--shadow);
         }
 
-        .metric.urgent .value {
-            color: #b91c1c;
+        .alert-box .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--ink-2);
+            margin-bottom: 2px;
         }
 
-        .metric.new24h .value {
-            color: #136c46;
+        .alert-box .value {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
+        .alert-box .hint {
+            font-size: 12px;
+            color: var(--ink-2);
+            margin-top: 2px;
+        }
+
+        .alert-box.red .value { color: var(--red); }
+        .alert-box.amber .value { color: var(--amber); }
+        .alert-box.critical .value { color: var(--red); }
+
+        /* ── Filters ── */
         .filters {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: 0.65rem;
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.55rem;
-            margin-bottom: 0.75rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 8px;
+            align-items: end;
+            flex-wrap: wrap;
         }
 
-        .filters select,
-        .filters button {
-            width: 100%;
-            min-height: var(--control-height);
-            border-radius: var(--control-radius);
-            border: 1px solid var(--line);
-            padding: 0.52rem 0.72rem;
-            font: inherit;
-            background: #fff;
-            color: var(--ink);
-        }
-
-        .filters select {
-            font-weight: 600;
-        }
-
-        .filters select:nth-child(1) {
-            border-color: rgba(31, 122, 236, 0.32);
-            background: linear-gradient(180deg, rgba(31, 122, 236, 0.08), #ffffff);
-        }
-
-        .filters select:nth-child(2) {
-            border-color: rgba(245, 158, 11, 0.35);
-            background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), #ffffff);
-        }
-
-        .filters select:nth-child(3) {
-            border-color: rgba(16, 185, 129, 0.32);
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), #ffffff);
-        }
-
-        .filters button {
-            background: linear-gradient(120deg, var(--accent), var(--accent-2));
-            color: #fff;
-            border-color: transparent;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1.65fr 1fr;
-            gap: 0.75rem;
-        }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 1rem;
-            padding: 0.85rem;
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel h2 {
-            margin: 0 0 0.7rem;
-            font-size: 1rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            letter-spacing: -0.01em;
-        }
-
-        .project-list {
+        .filter-field {
             display: flex;
             flex-direction: column;
-            gap: 0.65rem;
+            gap: 3px;
         }
 
-        .project-item {
-            border: 1px solid var(--line);
-            border-radius: 0.85rem;
-            padding: 0.75rem;
-            background: var(--panel-solid);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        .filter-field label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--ink-2);
         }
 
-        .project-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 18px rgba(16, 35, 71, 0.08);
+        .filter-field select,
+        .filter-field button {
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 500;
         }
 
-        .project-head {
+        .filter-field select option { color: #1a1c23; }
+
+        .filter-field button {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0 14px;
+        }
+
+        .filter-field button:hover { opacity: 0.92; }
+
+        /* ── Project List ── */
+        .project + .project { margin-top: 8px; }
+
+        .project {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 14px;
+            background: var(--bg);
+            transition: border-color 0.15s;
+        }
+
+        body.light-mode .project { background: var(--surface-2); }
+
+        .project:hover { border-color: var(--accent); }
+
+        .project-row1 {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 0.55rem;
-            margin-bottom: 0.48rem;
+            gap: 8px;
+            margin-bottom: 6px;
         }
 
         .project-name {
-            margin: 0;
-            font-size: 0.96rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .pill {
-            border-radius: var(--chip-radius);
-            font-size: 0.68rem;
-            padding: 0.28rem 0.52rem;
-            border: 1px solid transparent;
-            white-space: nowrap;
+            font-size: 15px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-        }
-
-        .pill.unassigned {
-            background: var(--warn-bg);
-            color: var(--warn-ink);
-            border-color: #ffd89a;
-        }
-
-        .pill.assigned {
-            background: var(--success-bg);
-            color: var(--success-ink);
-            border-color: #bfe4c0;
-        }
-
-        .project-meta {
-            color: var(--muted);
-            font-size: 0.81rem;
             display: flex;
-            gap: 0.55rem;
-            flex-wrap: wrap;
-            margin-bottom: 0.55rem;
+            align-items: center;
+            gap: 6px;
         }
 
-        .project-meta span {
-            background: #f4f8fd;
-            border: 1px solid #e5eefb;
-            border-radius: var(--chip-radius);
-            padding: 0.24rem 0.5rem;
-            font-size: 0.72rem;
+        .project-name i { color: var(--accent); font-size: 14px; }
+
+        .project-tag {
+            font-size: 12px;
             font-weight: 600;
-        }
-
-        .escalation-flags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-bottom: 0.55rem;
-        }
-
-        .escalation-flag {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.32rem;
-            border-radius: var(--chip-radius);
-            border: 1px solid transparent;
-            padding: 0.25rem 0.52rem;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-        }
-
-        .escalation-flag.danger {
-            background: rgba(239, 68, 68, 0.12);
-            color: #b91c1c;
-            border-color: rgba(239, 68, 68, 0.25);
-        }
-
-        .escalation-flag.warning {
-            background: rgba(245, 158, 11, 0.13);
-            color: #9a6700;
-            border-color: rgba(245, 158, 11, 0.28);
-        }
-
-        .escalation-flag.critical {
-            background: rgba(185, 28, 28, 0.14);
-            color: #7f1d1d;
-            border-color: rgba(185, 28, 28, 0.32);
-        }
-
-        .workload-row.overloaded td {
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .workload-row.balanced td {
-            background: rgba(245, 158, 11, 0.07);
-        }
-
-        .workload-row.underloaded td {
-            background: rgba(16, 185, 129, 0.07);
-        }
-
-        .load-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.32rem;
-            border-radius: var(--chip-radius);
-            padding: 0.2rem 0.48rem;
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            border: 1px solid transparent;
+            padding: 2px 8px;
+            border-radius: 4px;
             white-space: nowrap;
         }
 
-        .load-chip.overloaded {
-            background: rgba(239, 68, 68, 0.12);
-            color: #b91c1c;
-            border-color: rgba(239, 68, 68, 0.26);
+        .project-tag.assigned {
+            background: var(--green-bg);
+            color: var(--green);
         }
 
-        .load-chip.balanced {
-            background: rgba(245, 158, 11, 0.13);
-            color: #9a6700;
-            border-color: rgba(245, 158, 11, 0.28);
+        .project-tag.unassigned {
+            background: var(--amber-bg);
+            color: var(--amber);
         }
 
-        .load-chip.underloaded {
-            background: rgba(16, 185, 129, 0.11);
-            color: #136c46;
-            border-color: rgba(16, 185, 129, 0.25);
-        }
-
-        .util-track {
-            width: 100%;
-            min-width: 110px;
-            height: 0.4rem;
-            border-radius: 999px;
-            background: #e5edf8;
-            overflow: hidden;
-            margin-bottom: 0.2rem;
-        }
-
-        .util-fill {
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(120deg, var(--accent), var(--accent-2));
-        }
-
-        .util-label {
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 600;
-        }
-
-        .progress-wrap {
-            margin-bottom: 0.6rem;
-        }
-
-        .progress-head {
+        .project-row2 {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.32rem;
-            font-size: 0.76rem;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        .progress-track {
-            width: 100%;
-            height: 0.46rem;
-            border-radius: 999px;
-            background: #e5edf8;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(120deg, var(--accent), var(--accent-2));
-            transition: width 0.25s ease;
-        }
-
-        .progress-fill.complete {
-            background: linear-gradient(120deg, #13b86a, #38d39f);
-        }
-
-        .assign-row {
-            display: flex;
-            gap: 0.45rem;
+            gap: 6px;
             flex-wrap: wrap;
+            margin-bottom: 6px;
         }
 
-        .assign-row select,
-        .assign-row button {
-            min-height: var(--control-height);
-            border-radius: var(--control-radius);
-            border: 1px solid var(--line);
-            padding: 0.52rem 0.72rem;
-            font: inherit;
-            font-size: 0.84rem;
+        .project-badge {
+            font-size: 12px;
+            color: var(--ink-2);
+            background: var(--surface-2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        body.light-mode .project-badge { background: var(--surface); }
+
+        .project-flags {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
         }
 
-        .assign-row select {
+        .flag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .flag.danger { background: var(--red-bg); color: var(--red); }
+        .flag.warning { background: var(--amber-bg); color: var(--amber); }
+        .flag.critical { background: rgba(220, 38, 38, 0.15); color: var(--red); }
+
+        .project-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .project-progress-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-2);
+        }
+
+        .project-progress-bar {
             flex: 1;
-            min-width: 150px;
-            background: #fff;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
         }
 
-        .assign-row button {
-            background: #e6f1fe;
-            color: #104d9f;
+        .project-progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--accent);
+            transition: width 0.25s;
+        }
+
+        .project-progress-fill.done { background: var(--green); }
+
+        .project-progress-pct {
+            font-size: 13px;
             font-weight: 600;
-            cursor: pointer;
+            color: var(--ink-2);
+            min-width: 30px;
+            text-align: right;
         }
 
-        .assign-row button:hover {
-            background: #d8eaff;
+        .project-assign {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .project-assign select {
+            flex: 1;
+            height: 30px;
+            padding: 0 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .project-assign select option { color: #1a1c23; }
+
+        .project-assign button {
+            height: 30px;
+            padding: 0 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--accent-subtle);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .project-assign button:hover {
+            background: rgba(59, 130, 246, 0.18);
+        }
+
+        /* ── Team Capacity Table ── */
+        .table-scroll {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.88rem;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 0.55rem 0.4rem;
-            border-bottom: 1px solid #e9f0fa;
+            font-size: 14px;
         }
 
         th {
-            color: var(--muted);
+            text-align: left;
+            padding: 10px 8px;
+            font-size: 11px;
             font-weight: 600;
-            font-size: 0.78rem;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
+            color: var(--ink-2);
+            border-bottom: 1px solid var(--border);
         }
 
-        th.header-blue {
-            color: #1e5cb8;
-            background: rgba(31, 122, 236, 0.08);
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink-2);
         }
 
-        th.header-amber {
-            color: #9a6700;
-            background: rgba(245, 158, 11, 0.1);
+        td:first-child {
+            color: var(--ink);
+            font-weight: 600;
         }
 
-        th.header-red {
-            color: #b91c1c;
-            background: rgba(239, 68, 68, 0.1);
+        .load {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
 
-        th.header-green {
-            color: #136c46;
-            background: rgba(16, 185, 129, 0.1);
+        .load.overloaded { background: var(--red-bg); color: var(--red); }
+        .load.balanced { background: var(--amber-bg); color: var(--amber); }
+        .load.underloaded { background: var(--green-bg); color: var(--green); }
+
+        .cap-bar {
+            width: 100%;
+            min-width: 70px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 3px;
         }
 
-        @keyframes fadeSlide {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .cap-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: var(--accent);
         }
 
-        @media (max-width: 980px) {
-            .metrics {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .escalation-strip {
-                grid-template-columns: 1fr;
-            }
-            .filters {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .grid {
-                grid-template-columns: 1fr;
-            }
+        .cap-text {
+            font-size: 11px;
+            color: var(--ink-2);
+            font-weight: 500;
+        }
+
+        tr.overloaded td { background: rgba(239, 68, 68, 0.03); }
+        tr.balanced td { background: rgba(234, 179, 8, 0.03); }
+        tr.underloaded td { background: rgba(34, 197, 94, 0.03); }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .alerts { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 640px) {
-            .metrics,
-            .filters {
-                grid-template-columns: 1fr;
-            }
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .topbar-main {
-                width: 100%;
-            }
-            .actions {
-                width: 100%;
-            }
-            .user-pill {
-                width: 100%;
-                justify-content: center;
-            }
-            .actions .btn {
-                flex: 1;
-                text-align: center;
-            }
+            .stats { grid-template-columns: 1fr; }
+            .container { padding: 16px; }
+            .topbar { padding: 0 16px; }
+        }
+
+        
         }
     </style>
 </head>
-<body>
-    <main class="shell">
-        <header class="topbar">
-            <div class="topbar-main">
-                <div class="brand-row">
-                    <img class="brand-logo" src="/static/favicon.svg" alt="LDMS Logo">
-                    <div class="brand-text">
-                        <span class="brand-name">LDMS</span>
-                        <span class="brand-sub">Manager Center</span>
-                    </div>
-                </div>
-                <h1 class="title">Manager Command Center</h1>
-                <p class="subtitle">Assign inspector projects to developers and balance team workload.</p>
-            </div>
-            <div class="actions">
-                <span class="user-pill"><i class="fas fa-user"></i> {{ current_user.username }}</span>
-                <a class="btn primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
-                <a class="btn" href="{{ url_for('developer.admin_users') }}"><i class="fas fa-users-cog"></i> User Admin</a>
-                <a class="btn" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </div>
-        </header>
 
-        <section class="metrics">
-            <article class="metric projects">
-                <div class="label">All Projects</div>
-                <div class="value">{{ metrics.project_counts.all }}</div>
-            </article>
-            <article class="metric unassigned">
-                <div class="label">Unassigned</div>
-                <div class="value">{{ metrics.project_counts.unassigned }}</div>
-            </article>
-            <article class="metric urgent">
-                <div class="label">Urgent Defects</div>
-                <div class="value">{{ metrics.urgent_attention }}</div>
-            </article>
-            <article class="metric new24h">
-                <div class="label">New Defects (24h)</div>
-                <div class="value">{{ metrics.new_24h }}</div>
-            </article>
+<body>
+    <header class="topbar">
+        <div class="topbar-left">
+            <img class="topbar-logo" src="/static/favicon.svg" alt="">
+            <span class="topbar-brand">LDMS</span>
+            <span class="topbar-tag">Manager</span>
+        </div>
+        <div class="topbar-right">
+            <a href="{{ url_for('developer.admin_users') }}" class="topbar-btn"><i class="fas fa-users-cog"></i> User Management</a>
+            <button id="ldms-theme-btn" class="topbar-btn" type="button"><i class="fas fa-moon"></i> <span>Dark</span></button>
+            <a href="{{ url_for('auth.profile') }}" class="topbar-btn"><i class="fas fa-user"></i> {{ current_user.username }}</a>
+            <a href="{{ url_for('auth.logout') }}" class="topbar-btn topbar-logout" data-confirm="Sign out now?" data-confirm-btn="Sign out"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-sitemap"></i> Command Center</h1>
+            <p>Assign inspector projects to developers and balance team workload.</p>
+        </div>
+
+        <section class="ldms-page-note" style="margin-bottom:12px;">
+            <div>
+                <h3 style="font-size:0.98rem;">Portfolio overview</h3>
+                <p>This view spans every project, highlights urgent backlog, and shows where the team is under or over capacity.</p>
+            </div>
+            <div class="note-chips">
+                <span class="ldms-chip"><i class="fas fa-diagram-project"></i> All projects</span>
+                <span class="ldms-chip"><i class="fas fa-triangle-exclamation"></i> Escalations</span>
+                <span class="ldms-chip"><i class="fas fa-users"></i> Workload balance</span>
+            </div>
         </section>
 
-        <section class="escalation-strip">
-            <article class="escalation-card danger">
+        <div class="stats">
+            <div class="stat blue">
+                <div class="stat-label">All Projects</div>
+                <div class="stat-value">{{ metrics.project_counts.all }}</div>
+            </div>
+            <div class="stat amber">
+                <div class="stat-label">Unassigned</div>
+                <div class="stat-value">{{ metrics.project_counts.unassigned }}</div>
+            </div>
+            <div class="stat red">
+                <div class="stat-label">Urgent Defects</div>
+                <div class="stat-value">{{ metrics.urgent_attention }}</div>
+            </div>
+            <div class="stat green">
+                <div class="stat-label">New (24h)</div>
+                <div class="stat-value">{{ metrics.new_24h }}</div>
+            </div>
+        </div>
+
+        <div class="alerts">
+            <div class="alert-box red">
                 <div class="label">Urgent Hotspots</div>
                 <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
                 <div class="hint">Projects with 3+ urgent/high unresolved defects</div>
-            </article>
-            <article class="escalation-card warning">
+            </div>
+            <div class="alert-box amber">
                 <div class="label">Stale Reviews</div>
                 <div class="value">{{ escalation_summary.stale_reviews }}</div>
-                <div class="hint">Projects with 2+ items under review for over 7 days</div>
-            </article>
-            <article class="escalation-card critical">
+                <div class="hint">Items under review for over 7 days</div>
+            </div>
+            <div class="alert-box critical">
                 <div class="label">Overdue Backlog</div>
                 <div class="value">{{ escalation_summary.overdue_backlog }}</div>
                 <div class="hint">Projects with 3+ unresolved overdue defects</div>
-            </article>
-        </section>
+            </div>
+        </div>
 
-        <form class="filters" method="get" action="{{ url_for('developer.manager_dashboard') }}">
-            <select name="sort">
-                <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
-                <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
-            </select>
-            <select name="status_filter">
-                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All status</option>
-                <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
-                <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In progress</option>
-                <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
-            </select>
-            <select name="date_range">
-                <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All time</option>
-                <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 days</option>
-                <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 days</option>
-                <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 months</option>
-            </select>
-            <button type="submit">Apply Filters</button>
-        </form>
-
-        <section class="grid">
-            <article class="panel">
-                <h2>Projects From Inspectors</h2>
-                <div class="project-list">
-                    {% for scan, defect_count, reported, review, fixed in scans %}
-                    <div class="project-item">
-                        <div class="project-head">
-                            <h3 class="project-name">{{ scan.name }}</h3>
-                            {% if scan.assigned_to %}
-                            <span class="pill assigned">Assigned to {{ scan.assigned_to.username }}</span>
-                            {% else %}
-                            <span class="pill unassigned">Unassigned</span>
-                            {% endif %}
-                        </div>
-                        <div class="project-meta">
-                            <span>{{ defect_count }} defects</span>
-                            <span>{{ reported }} reported</span>
-                            <span>{{ review }} under review</span>
-                            <span>{{ fixed }} fixed</span>
-                        </div>
-                        {% set scan_escalation = project_escalations.get(scan.id) %}
-                        {% if scan_escalation and scan_escalation.flags %}
-                        <div class="escalation-flags">
-                            {% for flag in scan_escalation.flags %}
-                            <span class="escalation-flag {{ flag.level }}">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {{ flag.label }}: {{ flag.detail }}
-                            </span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% if defect_count > 0 %}
-                        {% set progress_percent = ((fixed / defect_count) * 100) | int %}
-                        <div class="progress-wrap">
-                            <div class="progress-head">
-                                <span>Progress</span>
-                                <span>{{ progress_percent }}%</span>
-                            </div>
-                            <div class="progress-track">
-                                <div class="progress-fill {% if progress_percent == 100 %}complete{% endif %}" style="width: {{ progress_percent }}%"></div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="progress-wrap">
-                            <div class="progress-head">
-                                <span>Progress</span>
-                                <span>0%</span>
-                            </div>
-                            <div class="progress-track">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        <form class="assign-row" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <select name="assigned_to_user_id" required>
-                                <option value="">Unassigned</option>
-                                {% for dev in developers %}
-                                <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="submit"><i class="fas fa-user-check"></i> Assign</button>
-                        </form>
+        <div class="card">
+            <div class="card-body">
+                <form class="filters" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+                    <div class="filter-field">
+                        <label>Sort</label>
+                        <select name="sort">
+                            <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                            <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+                        </select>
                     </div>
-                    {% else %}
-                    <div class="project-item">No projects match your filters.</div>
-                    {% endfor %}
-                </div>
-            </article>
+                    <div class="filter-field">
+                        <label>Status</label>
+                        <select name="status_filter">
+                            <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                            <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                            <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
+                            <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label>Date Range</label>
+                        <select name="date_range">
+                            <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
+                            <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
+                            <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
+                            <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label>&nbsp;</label>
+                        <button type="submit"><i class="fas fa-filter"></i> Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-            <article class="panel">
-                <h2>Developer Capacity Heatmap</h2>
+        <div class="card">
+            <div class="card-head">
+                <h2><i class="fas fa-cube"></i> Projects</h2>
+                <span class="card-head-meta">{{ scans|length }} projects</span>
+            </div>
+            <div class="card-body">
+                {% for scan, defect_count, reported, review, fixed in scans %}
+                <div class="project">
+                    <div class="project-row1">
+                        <div class="project-name"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                        {% if scan.assigned_to %}
+                        <span class="project-tag assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
+                        {% else %}
+                        <span class="project-tag unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
+                        {% endif %}
+                    </div>
+                    <div class="project-row2">
+                        <span class="project-badge">{{ defect_count }} defects</span>
+                        <span class="project-badge">{{ reported }} reported</span>
+                        <span class="project-badge">{{ review }} in review</span>
+                        <span class="project-badge">{{ fixed }} fixed</span>
+                    </div>
+                    {% set scan_escalation = project_escalations.get(scan.id) %}
+                    {% if scan_escalation and scan_escalation.flags %}
+                    <div class="project-flags">
+                        {% for flag in scan_escalation.flags %}
+                        <span class="flag {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if defect_count > 0 %}
+                    {% set pct = ((fixed / defect_count) * 100) | int %}
+                    <div class="project-progress">
+                        <span class="project-progress-label">Progress</span>
+                        <div class="project-progress-bar">
+                            <div class="project-progress-fill {% if pct == 100 %}done{% endif %}" style="width: {{ pct }}%"></div>
+                        </div>
+                        <span class="project-progress-pct">{{ pct }}%</span>
+                    </div>
+                    {% endif %}
+                    <form class="project-assign" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <select name="assigned_to_user_id">
+                            <option value="">Unassigned</option>
+                            {% for dev in developers %}
+                            <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit"><i class="fas fa-user-check"></i> Assign</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="ldms-empty">
+                    <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
+                    <h3>No projects match your filters</h3>
+                    <p>Try adjusting your search or filter criteria to find what you're looking for.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <h2><i class="fas fa-users"></i> Team Capacity</h2>
+            </div>
+            <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
-                            <th class="header-blue">Developer</th>
-                            <th class="header-amber">Projects</th>
-                            <th class="header-blue">Open Defects</th>
-                            <th class="header-red">Urgent</th>
-                            <th class="header-amber">Avg Age</th>
-                            <th class="header-red">Load</th>
-                            <th class="header-green">Capacity</th>
+                            <th>Developer</th>
+                            <th>Projects</th>
+                            <th>Open</th>
+                            <th>Urgent</th>
+                            <th>Avg Age</th>
+                            <th>Load</th>
+                            <th>Capacity</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in team_workload %}
-                        <tr class="workload-row {{ row.load_state }}">
+                        <tr class="{{ row.load_state }}">
                             <td>{{ row.developer.username }}</td>
                             <td>{{ row.assigned_projects }}</td>
                             <td>{{ row.open_defects }}</td>
                             <td>{{ row.urgent_open }}</td>
                             <td>{{ row.average_age_days }}d</td>
+                            <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
                             <td>
-                                <span class="load-chip {{ row.load_state }}">{{ row.load_state }}</span>
-                            </td>
-                            <td>
-                                <div class="util-track">
-                                    <div class="util-fill" style="width: {{ row.utilization_percent }}%"></div>
-                                </div>
-                                <div class="util-label">{{ row.utilization_percent }}%</div>
+                                <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
+                                <span class="cap-text">{{ row.utilization_percent }}%</span>
                             </td>
                         </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="7">No active developers available.</td>
-                        </tr>
+                        <tr><td colspan="7"><div class="empty">No active developers</div></td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </article>
-        </section>
+            </div>
+        </div>
     </main>
+
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
+    <script>
+        document.querySelectorAll('a[href]').forEach(function(link) {
+            if (link.hasAttribute('data-confirm')) return;
+            const href = link.getAttribute('href') || '';
+            if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
+                link.addEventListener('click', function() {
+                    var loader = document.getElementById('ldms-loader');
+                    if (loader) loader.classList.add('active');
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>

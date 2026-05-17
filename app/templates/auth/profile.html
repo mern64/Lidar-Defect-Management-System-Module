@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}LDMS — Profile{% endblock %}
+{% block body %}
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.08), transparent 50%),
+                linear-gradient(135deg, var(--ldms-dark-bg, #0b1020) 0%, #0f172a 100%);
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  body.light-mode {
+    background: radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.04), transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #0f172a;
+  }
+  .profile-wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 2rem; }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .profile-head h1 { font-size: 1.5rem; font-weight: 700; }
+  .profile-head p { color: #64748b; font-size: 0.875rem; margin-top: 4px; }
+  .profile-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+  body.light-mode .profile-card {
+    background: #fff;
+    border-color: rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  .profile-card h2 {
+    font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { margin-bottom: 0; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  body.light-mode .form-group label { color: #64748b; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 0.7rem 0.875rem;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2); color: #e2e8f0;
+    font-size: 0.9375rem; font-family: 'Inter', sans-serif;
+    outline: none; transition: border-color 0.15s;
+  }
+  body.light-mode .form-group input, body.light-mode .form-group select {
+    background: #f8fafc; border-color: rgba(0,0,0,0.12); color: #0f172a;
+  }
+  .form-group input:focus { border-color: #3b82f6; }
+  .form-group input:readonly { opacity: 0.6; cursor: not-allowed; }
+  .btn {
+    padding: 0.7rem 1.25rem; border-radius: 10px; border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-secondary { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+  body.light-mode .btn-secondary { background: #e2e8f0; color: #0f172a; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.25rem; }
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 1.5rem 0; }
+  body.light-mode .divider { border-top-color: rgba(0,0,0,0.08); }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 0.875rem; margin-bottom: 1.5rem; }
+  .back-link:hover { color: #e2e8f0; }
+  body.light-mode .back-link:hover { color: #0f172a; }
+  .field-hint { font-size: 0.75rem; margin-top: 0.25rem; min-height: 1.1rem; }
+  .form-group input.is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,0.2) !important; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .flash-message {
+    padding: 0.7rem 0.875rem; border-radius: 10px; margin-bottom: 1.25rem;
+    font-size: 0.8125rem; font-weight: 500; display: flex; align-items: flex-start; gap: 8px;
+  }
+  .flash-error { background: rgba(220,38,38,0.1); color: #fca5a5; border: 1px solid rgba(220,38,38,0.2); }
+  .flash-success { background: rgba(5,150,105,0.1); color: #6ee7b7; border: 1px solid rgba(5,150,105,0.2); }
+  body.light-mode .flash-error { background: rgba(220,38,38,0.06); color: #b91c1c; }
+  body.light-mode .flash-success { background: rgba(5,150,105,0.06); color: #065f46; }
+</style>
+
+<div class="profile-wrap">
+  <a href="{{ url_for('index') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+  <div class="flash-message flash-{{ category }}">
+    <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' }}"></i>
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endwith %}
+
+  <div class="profile-head">
+    <div class="profile-avatar">{{ (current_user.full_name or current_user.username)[:1] }}</div>
+    <div>
+      <h1>Profile Settings</h1>
+      <p>{{ current_user.full_name or current_user.username }} · {{ current_user.role | capitalize }}</p>
+    </div>
+  </div>
+
+  <form method="post" class="profile-card" x-data="{ email: '{{ current_user.email or '' }}', phone: '{{ current_user.phone_number or '' }}', emailTouched: false, phoneTouched: false }">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2><i class="fas fa-user"></i> Personal Information</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" value="{{ current_user.username }}" readonly>
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <input type="text" value="{{ current_user.role | capitalize }}" readonly>
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="full_name" value="{{ current_user.full_name or '' }}" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" x-model="email" x-on:blur="emailTouched = true" placeholder="your@email.com"
+          :class="{ 'is-invalid': emailTouched && email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) }">
+        <p class="field-hint" x-show="emailTouched && email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)" style="display:none;color:#b91c1c;">Enter a valid email address.</p>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone_number" x-model="phone" x-on:blur="phoneTouched = true" placeholder="+60xxxxxxxxx"
+          :class="{ 'is-invalid': phoneTouched && phone && !phone.match(/^\+?[0-9\s\-()]{8,20}$/) }">
+        <p class="field-hint" x-show="phoneTouched && phone && !phone.match(/^\+?[0-9\s\-()]{8,20}$/)" style="display:none;color:#b91c1c;">Use digits with optional +, spaces, or hyphens.</p>
+      </div>
+      <div class="form-group">
+        <label>Department</label>
+        <input type="text" name="department" value="{{ current_user.department or '' }}" placeholder="Department">
+      </div>
+      <div class="form-group">
+        <label>Job Title</label>
+        <input type="text" name="job_title" value="{{ current_user.job_title or '' }}" placeholder="Job title">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" name="action" value="update_profile"><i class="fas fa-save"></i> Save Changes</button>
+    </div>
+  </form>
+
+  <form method="post" class="profile-card" x-data="{ cur: '', newp: '', con: '', ptouched: {} }" x-on:submit="ptouched.cur = true; ptouched.newp = true; ptouched.con = true">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <h2><i class="fas fa-lock"></i> Change Password</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Current Password</label>
+        <div class="ldms-pw-wrap">
+          <input type="password" id="current_password" name="current_password" x-model="cur" x-on:blur="ptouched.cur = true" placeholder="Enter current password" required
+            :class="{ 'is-invalid': ptouched.cur && !cur }">
+          <button type="button" class="ldms-pw-toggle" onclick="ldmsTogglePw('current_password')" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+        </div>
+        <p class="field-hint" x-show="ptouched.cur && !cur" style="display:none;color:#b91c1c;">Current password is required.</p>
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <div class="ldms-pw-wrap">
+          <input type="password" id="new_password" name="new_password" x-model="newp" x-on:blur="ptouched.newp = true" placeholder="At least 6 characters" required minlength="6"
+            :class="{ 'is-invalid': ptouched.newp && newp.length < 6 }">
+          <button type="button" class="ldms-pw-toggle" onclick="ldmsTogglePw('new_password')" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+        </div>
+        <p class="field-hint" x-show="ptouched.newp && newp.length < 6" style="display:none;color:#b91c1c;">Password must be at least 6 characters.</p>
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <div class="ldms-pw-wrap">
+          <input type="password" id="confirm_password" name="confirm_password" x-model="con" x-on:blur="ptouched.con = true" placeholder="Confirm new password" required
+            :class="{ 'is-invalid': ptouched.con && con !== newp }">
+          <button type="button" class="ldms-pw-toggle" onclick="ldmsTogglePw('confirm_password')" tabindex="-1" aria-label="Toggle password visibility"><i class="fas fa-eye"></i></button>
+        </div>
+        <p class="field-hint" x-show="ptouched.con && con && con !== newp" style="display:none;color:#b91c1c;">Passwords do not match.</p>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" name="action" value="change_password" :disabled="!cur || newp.length < 6 || con !== newp"><i class="fas fa-key"></i> Update Password</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

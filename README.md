@@ -1,71 +1,43 @@
-# Lidar Defect Management System (LDMS)
+# LDMS — LiDAR Defect Management System
 
-A **Flask web application** for managing building defects detected from **LiDAR / Point Cloud Data (PCD)** scans. The system enables inspectors to upload 3D scan data, process it to identify defects, and allows developers and managers to review, assign, prioritise, and track those defects through their lifecycle.
+Flask web app for managing building defects from LiDAR/Point Cloud Data scans.
 
-> **Tech Stack**: Python · Flask · PostgreSQL · Docker · Gunicorn
+**Tech Stack**: Python 3.11 · Flask 3.x · PostgreSQL 16 · Docker · Gunicorn · SQLAlchemy · Flask-Migrate · HTMX 1.9.12 · Alpine.js 3.14.1 · SweetAlert2 · NProgress
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [System Architecture](#system-architecture)
-3. [Project Structure](#project-structure)
-4. [Module Breakdown](#module-breakdown)
-5. [Database Schema](#database-schema)
-6. [User Roles](#user-roles)
-7. [Tech Stack & Dependencies](#tech-stack--dependencies)
+2. [Project Structure](#project-structure)
+3. [Module Breakdown](#module-breakdown)
+4. [Database Schema](#database-schema)
+5. [User Roles](#user-roles)
+6. [UI/UX Features](#uiux-features)
+7. [Security](#security)
 8. [Quick Start](#quick-start)
-9. [Deployment](#deployment)
+9. [Configuration Reference](#configuration-reference)
 
 ---
+
+## Overview
 
 The LDMS application bridges the gap between raw LiDAR scan data and actionable defect management. The workflow is:
 
 ```
-Inspector uploads 3D PCD/GLB scan
+Inspector uploads 3D GLB scan + PDF report
         ↓
 AI Analysis (DBSCAN) extracts spatial clusters & defect points
         ↓
 Defects logged with coordinates, room location, type, severity & AI priority
         ↓
-Developer reviews via Premium Bento Grid Dashboard
+Developer reviews via Dashboard with defect cards, charts, and My Tasks queue
         ↓
-Defects are assigned, queued, and due-dated in My Tasks
+Defects are assigned, claimed, and tracked through status lifecycle
         ↓
-Status updates (Reported/Review/Fixed) tracked via activity logs
+Status updates (Reported/Under Review/Fixed) tracked via activity logs with idempotency
         ↓
-Analytics & PDF Reports generated for project close-out
-```
-
----
-
-## System Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                   Web Browser                        │
-│         (Inspector / Developer / Manager)            │
-└─────────────────┬───────────────────────────────────┘
-                  │ HTTP
-┌─────────────────▼───────────────────────────────────┐
-│              Flask Application (Gunicorn)            │
-│                                                      │
-│  ┌──────────┐ ┌───────────┐ ┌──────────┐ ┌──────┐  │
-│  │   auth   │ │upload_data│ │ process  │ │defect│  │
-│  │blueprint │ │ blueprint │ │  _data   │ │  s   │  │
-│  └──────────┘ └───────────┘ │blueprint │ │  bp  │  │
-│                              └──────────┘ └──────┘  │
-│                    ┌──────────────┐                  │
-│                    │  developer   │                  │
-│                    │  blueprint   │                  │
-│                    └──────────────┘                  │
-└─────────────────────────────┬───────────────────────┘
-                              │ SQLAlchemy ORM
-┌─────────────────────────────▼───────────────────────┐
-│                  PostgreSQL Database                 │
-│        (users · scans · defects · activity_logs)    │
-└─────────────────────────────────────────────────────┘
+Managers oversee portfolio, assign project owners, and monitor team workload
 ```
 
 ---
@@ -74,119 +46,107 @@ Analytics & PDF Reports generated for project close-out
 
 ```
 pcd/
-│
-├── app/                            # Core Flask application package
-│   ├── __init__.py                 # App factory (create_app), blueprint registration, CLI commands
-│   ├── config.py                   # Configuration class (SECRET_KEY, DATABASE_URL, etc.)
-│   ├── extensions.py               # Flask extension instances (db, login_manager, csrf)
-│   ├── models.py                   # SQLAlchemy database models
-│   ├── utils.py                    # Shared utility functions
-│   │
-│   ├── auth/                       # Authentication module (Blueprint)
-│   │   ├── __init__.py
-│   │   └── routes.py               # Login, logout, register routes
-│   │
-│   ├── upload_data/                # Inspector upload module (Blueprint)
-│   │   ├── routes.py               # Upload scan files, inspector dashboard
-│   │   └── pdf_utils.py            # PDF report generation utilities
-│   │
-│   ├── process_data/               # 3D data processing module (Blueprint)
-│   │   ├── routes.py               # PCD/GLB processing, defect detection endpoints
-│   │   └── glb_snapshot.py         # Renders snapshots from GLB 3D models
-│   │
-│   ├── defects/                    # Defect management module (Blueprint)
-│   │   └── routes.py               # CRUD operations for defects, status updates
-│   │
-│   ├── developer/                  # Developer dashboard module (Blueprint)
-│   │   └── routes.py               # Developer views, analytics, defect tracking
-│   │
-│   ├── templates/                  # Jinja2 HTML templates
-│   │   ├── auth/                   # Login page templates
-│   │   ├── upload_data/            # Inspector dashboard & upload templates
-│   │   ├── process_data/           # 3D viewer and processing templates
-│   │   ├── defects/                # Defect list and detail templates
-│   │   ├── developer/              # Developer dashboard templates
-│   │   └── errors/                 # 404 and 500 error pages
-│   │
-│   └── static/                     # Static assets
-│       ├── css/                    # Stylesheets
-│       ├── js/                     # JavaScript (3D viewer, UI interactions)
-│       └── img/                    # Images and icons
-│
-├── instance/                       # Instance-specific files (SQLite, local uploads)
-├── scripts/                        # Utility & maintenance scripts (e.g., fix_db.py)
-├── Dockerfile                      # Production Docker container definition
-├── docker-compose.yml              # Local Dev/Prod orchestration
-├── requirements.txt                # Python dependencies
-├── .env.example                    # Environment template
-├── DEPLOYMENT.md                   # Full production guide
-└── README.md                       # This file
+├── app/
+│   ├── __init__.py          # App factory, blueprint registration, 403/404/500 handlers, CLI commands
+│   ├── config.py            # Config: SECRET_KEY, DATABASE_URL, pool settings, email, Gemini, Maps
+│   ├── extensions.py        # Flask extensions: db, migrate, login_manager, csrf, mail
+│   ├── models.py            # User, Scan, Defect, ActivityLog (with DB indexes)
+│   ├── utils.py             # Shared path utilities
+│   ├── notifications.py     # Email notification system (critical alerts, status changes, bulk updates)
+│   ├── auth/                # Login, register, profile, forgot/reset password
+│   ├── upload_data/         # Upload GLB/PDF, PDF image extraction, UUID filenames, 100 MB limit
+│   ├── process_data/        # GLB snapshot engine, DBSCAN clustering, defect detection
+│   ├── defects/             # CRUD, CSV export (10k cap), global search API, origin validation
+│   ├── developer/           # Dashboard, scan detail, My Tasks queue, bulk assign, activity log, admin
+│   ├── services/            # developer_service.py
+│   ├── templates/
+│   │   ├── base.html        # Shared layout with SRI-hashed CDN links
+│   │   ├── includes/        # search_modal.html, shortcuts_modal.html, breadcrumbs.html
+│   │   ├── auth/            # login, register, profile, forgot_password, reset_password
+│   │   ├── errors/          # 403, 404, 500
+│   │   └── ...              # All other module templates
+│   └── static/
+│       ├── css/base.css     # Component styles (toast, loader, lightbox, search, skeleton, responsive)
+│       ├── js/base.js       # Client-side: toasts, theme, lightbox, confirm, clipboard, NProgress+HTMX, keyboard shortcuts
+│       └── favicon.svg
+├── migrations/              # Alembic migrations
+├── tests/                   # 50+ tests (auth flows, defect CRUD, upload/pipeline, admin, export, queue filters)
+├── Dockerfile               # Production container
+├── docker-compose.yml       # PostgreSQL + Flask
+├── gunicorn.conf.py         # Workers, threads, timeouts
+├── requirements.txt         # Pinned deps
+└── .env.example             # All config vars documented
 ```
+
+> Note: The `field_testing/` directory has been removed — it was used for academic research and is not part of the application.
 
 ---
 
 ## Module Breakdown
 
-### `auth` — Authentication
-Handles user login and logout using **Flask-Login** with session management.
+### Auth
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/login` | GET/POST | Login form, validates credentials |
-| `/logout` | GET | Logs out the current user |
+| /login | GET/POST | Login form |
+| /logout | GET | Logout |
+| /register | GET/POST | Register new user |
+| /profile | GET/POST | View/edit profile, change email/password |
+| /forgot-password | GET/POST | Request password reset email |
+| /reset-password/\<token\> | GET/POST | Reset password with token |
 
----
-
-### `upload_data` — Inspector Dashboard & File Upload
-The **inspector-facing** module. Inspectors upload scan files and manage submissions.
-
-| Route | Method | Description |
-|-------|--------|-------------|
-| `/upload` | POST | Upload a new PCD/GLB scan file + PDF Report |
-| `/view/<id>` | GET | View the 3D model and extracted images |
-
-Key file: `pdf_utils.py` — handles extraction of defect images from uploaded PDF inspection reports.
-
----
-
-### `process_data` — 3D Data Processing
-Processes uploaded scan files, extracts defect coordinates, and stores them in the database.
+### Upload Data
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/process/<scan_id>` | GET/POST | Run defect detection on an uploaded scan |
-| `/view/<scan_id>` | GET | 3D viewer for the GLB model |
-| `/snapshot/<scan_id>` | POST | Capture a 2D snapshot from the 3D model |
+| /inspector | GET | Inspector dashboard |
+| /upload-data | GET/POST | Upload GLB + PDF, UUID-prefixed, 100 MB limit, magic byte validation |
 
-Key file: `glb_snapshot.py` — renders GLB 3D model frames to generate snapshot images for defect records.
-
----
-
-### `defects` — Defect CRUD
-Manages individual defect records — viewing, editing, and status changes.
+### Process Data
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/defects` | GET | List all defects (filterable) |
-| `/defects/<id>` | GET | View a single defect detail |
-| `/defects/<id>/edit` | POST | Update defect fields (status, priority, notes) |
-| `/defects/<id>/delete` | POST | Delete a defect record |
+| /process-data | GET/POST | Run defect detection, save to DB |
+| /process-data.json | GET | JSON endpoint for defect data |
+| /process-data/image/\<id\> | GET | Serve extracted PDF images |
+| /process-data/assign-image | POST | Assign/unassign images to defects |
 
----
-
-### `developer` — Developer Dashboard & Analytics
-The **developer and manager** module. Provides personal work queues for developers and cross-project assignment oversight for managers.
+### Defects
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/developer` | GET | Developer dashboard — scans and defect summary |
-| `/manager/dashboard` | GET | Manager dashboard — all projects, assignment, and team workload |
-| `/developer/scan/<scan_id>` | GET | Scan detail view with defect cards, charts, and bulk updates |
-| `/developer/scan/<scan_id>/assign` | POST | Assign a project owner (manager access) |
-| `/developer/tasks` | GET | Personal task queue with Mine, Unassigned, Overdue, and All tabs |
-| `/developer/tasks/<defect_id>/update` | POST | Update task status, assignee, and due date |
-| `/developer/tasks/bulk-assign` | POST | Bulk claim, unassign, or assign selected tasks |
-| `/developer/recent-activity` | GET | Activity log for dashboard widgets |
+| /projects | GET | List all scans/projects |
+| /project/\<scan_id\> | GET | Project detail with severity/priority charts |
+| /scans/\<scan_id\>/visualize | GET | 3D viewer (Three.js) |
+| /scans/\<scan_id\>/defects | GET | JSON list of defects for scan |
+| /scans/\<scan_id\>/defects | POST | Create defect (origin validated) |
+| /defect/\<id\> | GET | JSON defect detail |
+| /defect/\<id\>/status | PUT | Update status (origin validated) |
+| /defect/\<id\> | DELETE | Delete defect (origin validated) |
+| /api/search | GET | Global search across scans, defects, users |
+
+### Developer
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| /developer | GET | Developer dashboard with scan list, metrics |
+| /developer/scan/\<id\> | GET | Scan detail with defect cards, charts, bulk actions, DBSCAN hotspots |
+| /developer/defect/\<id\>/update | POST | Update single defect status/notes |
+| /developer/scan/\<id\>/bulk-update | POST | Bulk status/assignee updates |
+| /developer/tasks | GET | My Tasks queue (Mine/Unassigned/All tabs) |
+| /developer/tasks/\<id\>/update | POST | Update task status |
+| /developer/tasks/bulk-assign | POST | Bulk claim/unassign/assign tasks |
+| /developer/tasks/export.csv | GET | Export tasks as CSV (10k cap) |
+| /developer/recent-activity | GET | Recent activity log |
+| /developer/admin/users | GET | User management |
+| /developer/admin/users/\<id\>/update | POST | Toggle active/available, change role, reset password, delete user |
+
+### Manager
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| /manager/dashboard | GET | Cross-project dashboard, team workload, escalations |
+| /developer/scan/\<id\>/assign | POST | Assign project owner |
 
 ---
 
@@ -218,7 +178,7 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
                          │ severity      │  ← Low/Medium/High/Critical
                          │ priority      │  ← Low/Medium/High/Urgent
                          │ status        │  ← Reported/Under Review/Fixed
-                         │ assigned_to_*  │  ← Developer task ownership
+                         │ assigned_to   │  ← Developer task ownership
                          │ due_date      │  ← Task deadline
                          │ description   │
                          │ image_path    │  ← Snapshot image
@@ -246,95 +206,105 @@ The application uses **4 database tables** managed via SQLAlchemy ORM.
 
 ---
 
-## User Roles & Permissions
+## User Roles
 
 | Role | Access | Responsibility |
 |------|--------|----------------|
-| `Inspector` | Upload, Run AI, Reports | Field personnel who capture scans and generate closing documents. |
-| `Developer` | Review, Status, Analytics, Tasks | Maintenance team who fix defects, claim work, and track resolution progress. |
-| `Manager` | Portfolio Oversight, Assignment, Team Workload | Coordinates project ownership across developers and monitors cross-project queues. |
-
-> [!NOTE]
-> **Data Integrity**: Developers can update defect **Status**, **Assignee**, and **Due Date**, while **Priority** is automatically managed by the AI system (DBSCAN/Risk Score) or restricted to Inspectors to prevent unauthorized priority shifting.
+| Inspector | Upload, Run AI, Priority Override | Field personnel who capture scans and manage uploads. |
+| Developer | Review, Status, Assign, My Tasks | Maintenance team who fix defects, claim work, and track resolution progress. |
+| Manager | Portfolio Oversight, Project Assignment, Team Workload, User Admin | Coordinates project ownership across developers and monitors cross-project queues. |
 
 ### My Tasks Workflow
 
 The developer queue adds a lightweight task-management layer on top of defects:
 
-* **Mine**: defects assigned to the current developer.
-* **Unassigned**: defects awaiting ownership.
-* **Overdue**: defects with a past due date that are not fixed.
-* **All**: full task queue for review or bulk action.
+- **Mine**: defects assigned to the current developer.
+- **Unassigned**: defects awaiting ownership.
+- **All**: full task queue for review or bulk action.
 
-From the task page, developers can claim tasks, unassign them, bulk-assign to another developer, and set due dates in one place.
+From the task page, developers can claim tasks, unassign them, bulk-assign to another developer, and export their queue as CSV.
 
 ### Endpoint Permission Matrix
 
 | Area | Inspector | Developer | Manager |
 |------|-----------|-----------|---------|
-| Upload/process scans | ✅ | ✅ | ❌ |
-| Defect assignment/status updates | ✅ | ✅ | ✅ |
-| My Tasks queue and bulk assignment | ❌ | ✅ | ❌ |
-| Developer dashboard and analytics | ❌ | ✅ | ❌ |
-| Manager dashboard and project assignment | ❌ | ❌ | ✅ |
-| User creation via register | ❌ | ✅ | ✅ |
+| Upload/process scans | Yes | Yes | No |
+| Defect status updates | Yes | Yes | Yes |
+| My Tasks queue and bulk assignment | No | Yes | No |
+| Developer dashboard and analytics | No | Yes | No |
+| Manager dashboard and project assignment | No | No | Yes |
+| User management | No | No | Yes |
 
 Implementation notes:
 
-* Role checks are enforced server-side on protected routes.
-* Disabled users cannot authenticate.
-* Assignment targets are limited to active and available developers.
-
+- Role checks are enforced server-side on protected routes.
+- Disabled users cannot authenticate.
+- Assignment targets are limited to active and available developers.
+- Priority override is restricted to Inspectors to prevent unauthorized shifting.
 
 ---
 
-## Tech Stack & Dependencies
+## UI/UX Features
 
-| Category | Technology |
-|----------|-----------|
-| **Web Framework** | Flask 3.x |
-| **ORM** | Flask-SQLAlchemy |
-| **Database** | PostgreSQL 16 (via Docker) |
-| **DB Driver** | psycopg2-binary |
-| **Authentication** | Flask-Login |
-| **Forms & CSRF** | Flask-WTF |
-| **3D File Handling** | pygltflib (GLB/glTF) |
-| **PDF Data Extraction** | pypdf |
-| **Image Processing** | Pillow |
-| **WSGI Server** | Gunicorn |
-| **Containerisation** | Docker + Docker Compose |
-| **Migrations** | Flask-Migrate |
+- **Global search modal** (Ctrl+K, `g s` shortcut) — searches across scans, defects, and users.
+- **Keyboard shortcuts** (`?` to show help modal) — quick navigation throughout the app.
+- **Theme toggle** — light and dark mode support.
+- **Toast notifications** — non-intrusive feedback via SweetAlert2.
+- **NProgress loading bar** — visual progress indicator for all HTMX requests.
+- **SRI integrity hashes** — all CDN assets loaded with integrity verification.
+
+---
+
+## Security
+
+- **CSRF protection** via Flask-WTF on all HTML forms.
+- **`_validate_origin()`** guard on CSRF-exempt JSON API endpoints.
+- **SRI integrity attributes** on all external scripts and stylesheets.
+- **UUID-prefixed filenames** prevent overwrite attacks on uploads.
+- **Magic byte validation** rejects non-GLB/non-PDF uploads at the network boundary.
+- **Path traversal protection** on image serving endpoints.
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/mern64/Lidar-Defect-Management-System-Module.git
-cd Lidar-Defect-Management-System-Module
-
-# 2. Configure environment
 cp .env.example .env
-# Edit .env — set SECRET_KEY and confirm DATABASE_URL
-
-# 3. Build and start
+# Edit .env — set SECRET_KEY, DATABASE_URL
 docker compose up --build
 
-# 4. Create your first user (in a new terminal)
+# In another terminal:
+docker exec flask_app flask db upgrade
 docker exec -it flask_app flask create-user
-
-# 5. Open the app
 open http://localhost:5100
+```
+
+### Running Tests
+
+All 50+ tests pass against the test suite:
+
+```bash
+docker exec flask_app pytest
 ```
 
 ---
 
-## Deployment
+## Configuration Reference
 
-See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the full guide, including:
-- PostgreSQL credential setup
-- Creating admin users
-- Database backup & restore
-- Pushing updates to GitHub
-- Troubleshooting common issues
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| SECRET_KEY | Yes | - | Flask secret key |
+| DATABASE_URL | Yes | sqlite:///ldms.db | PostgreSQL DSN |
+| FLASK_ENV | No | development | Environment |
+| DB_POOL_SIZE | No | 5 | SQLAlchemy pool size |
+| DB_POOL_RECYCLE | No | 300 | Connection recycle seconds |
+| DB_POOL_TIMEOUT | No | 10 | Pool timeout |
+| DB_MAX_OVERFLOW | No | 10 | Max overflow connections |
+| MAIL_USERNAME | No | - | Gmail SMTP username |
+| MAIL_PASSWORD | No | - | Gmail app password |
+| MAIL_DEFAULT_SENDER | No | - | From address |
+| NOTIFICATION_EMAILS | No | - | Comma-separated notify list |
+| GEMINI_API_KEY | No | - | Google Gemini API key |
+| GOOGLE_MAPS_API_KEY | No | - | Maps address autocomplete |
+
+> **Important**: The `.env` file stores secrets and is never committed. Migrations are handled by Alembic/Flask-Migrate. PostgreSQL runs via Docker.

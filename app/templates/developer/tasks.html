@@ -7,16 +7,15 @@
     <title>LDMS - My Tasks</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
         :root {
             --bg: #0f172a;
             --panel: rgba(255, 255, 255, 0.06);
             --edge: rgba(255, 255, 255, 0.12);
             --text: #e2e8f0;
             --muted: #94a3b8;
-            --primary: #0ea5e9;
+            --primary: #3b82f6;
             --ok: #10b981;
             --warn: #f59e0b;
             --danger: #ef4444;
@@ -243,6 +242,10 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        
+  .hero-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
     </style>
 </head>
 
@@ -254,12 +257,21 @@
                 <p style="margin: 6px 0 0; color: var(--muted);">Track defects by project ownership and update repair progress.</p>
             </div>
             <div class="actions">
-                <a class="btn" href="{{ url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
-                <a class="btn" href="{{ url_for('developer.export_tasks_csv', queue=queue) }}"><i class="fas fa-file-csv"></i> Export CSV</a>
-                {% if current_user.is_admin %}
-                <a class="btn" href="{{ url_for('developer.admin_users') }}"><i class="fas fa-users-cog"></i> User Admin</a>
-                {% endif %}
-                <a class="btn" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a class="btn" href="{{ url_for('developer.dashboard') }}" data-tooltip="Back to dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+                <a class="btn" href="{{ url_for('developer.export_tasks_csv', queue=queue) }}" data-tooltip="Download task list as CSV"><i class="fas fa-file-csv"></i> Export CSV</a>
+                <a class="btn" href="{{ url_for('auth.profile') }}" data-tooltip="Your profile"><i class="fas fa-user"></i> Profile</a>
+                <a class="btn" href="{{ url_for('auth.logout') }}" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </section>
+
+        <section class="ldms-page-note">
+            <div>
+                <h3 style="font-size:0.98rem;">Queue rules</h3>
+                <p>Mine shows your assigned defects, Unassigned is ready to claim, and All is for broader review before you export or bulk update work.</p>
+            </div>
+            <div class="note-chips">
+                <span class="ldms-chip"><i class="fas fa-user-tag"></i> Ownership aware</span>
+                <span class="ldms-chip"><i class="fas fa-filter"></i> Filter by scan/status</span>
             </div>
         </section>
 
@@ -301,7 +313,7 @@
                     </select>
                 </label>
                 <div></div>
-                <button class="btn primary" type="submit"><i class="fas fa-filter"></i> Apply Filters</button>
+                <button class="btn primary" type="submit" data-tooltip="Apply selected filters"><i class="fas fa-filter"></i> Apply Filters</button>
             </form>
         </section>
 
@@ -337,7 +349,7 @@
                         </select>
                     </label>
                     <div class="meta">Element: {{ task.element or 'N/A' }}</div>
-                    <button class="btn primary" type="submit"><i class="fas fa-floppy-disk"></i> Save</button>
+                    <button class="btn primary" type="submit" data-tooltip="Save task status update"><i class="fas fa-floppy-disk"></i> Save</button>
                 </form>
             </article>
             {% endfor %}
@@ -349,6 +361,10 @@
             {% endif %}
         </section>
     </main>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
+
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
 
 </body>
 

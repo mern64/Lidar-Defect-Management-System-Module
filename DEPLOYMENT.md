@@ -1,7 +1,9 @@
 # Deployment Guide — PCD Application
 
 > **System**: Flask · PostgreSQL · Docker  
-> **Last updated**: April 2026
+> **Python**: 3.10+  
+> **Migrations**: Flask-Migrate / Alembic  
+> **Last updated**: May 2026
 
 ---
 
@@ -85,6 +87,11 @@ docker compose up --build
 - First run will take a few minutes to download and build images.
 - Subsequent starts are much faster (layers are cached).
 - The database tables are created automatically on first startup.
+- **Run pending migrations** after the app starts:
+  ```bash
+  docker exec flask_app flask db upgrade
+  ```
+  This applies any schema changes tracked in `migrations/versions/`.
 
 **Run in background (detached mode):**
 ```bash

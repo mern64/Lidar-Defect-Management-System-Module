@@ -16,7 +16,6 @@ def app(tmp_path):
             "WTF_CSRF_ENABLED": False,
             "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_file}",
             "DATABASE_URL": f"sqlite:///{db_file}",
-            "SKIP_SCHEMA_EVOLUTION": True,
         }
     )
 

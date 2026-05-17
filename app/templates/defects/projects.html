@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
   <style>
     :root {
       --bg-from: #eef1f7;
@@ -261,21 +262,7 @@
     }
     .btn-primary:hover { background: var(--accent-h); }
 
-    /* Loading overlay */
-    #ldms-loader {
-      display: none; position: fixed; inset: 0; z-index: 99999;
-      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-    }
-    #ldms-loader.active { display: flex; }
-    .loader-spinner {
-      width: 34px; height: 34px;
-      border: 3px solid rgba(37, 99, 235, 0.15);
-      border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+     }
 
     .tour-backdrop {
       position: fixed;
@@ -357,10 +344,14 @@
       .projects-grid { grid-template-columns: 1fr; }
       .topbar-name { display: none; }
     }
+    
+      .top-bar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      .meta-grid { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
-  <div id="ldms-loader">
+  <div id="ldms-loader" class="ldms-loader">
     <div class="loader-spinner"></div>
     <span class="loader-text">Loading…</span>
   </div>
@@ -374,10 +365,12 @@
       <span class="topbar-name">Lidar Defect Management System</span>
     </a>
     <div class="topbar-right">
-      <a href="/upload-data" class="btn-new"><i class="fas fa-plus"></i> New Project</a>
-      <a href="{{ url_for('auth.logout') }}" class="user-pill">
+      <a href="{{ url_for('upload_data.upload_scan_data') }}" class="btn-new"><i class="fas fa-plus"></i> New Project</a>
+      <a href="{{ url_for('auth.profile') }}" class="user-pill">
         <i class="fas fa-user"></i>
         {{ current_user.username }}
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out">
         <i class="fas fa-sign-out-alt"></i>
       </a>
     </div>
@@ -416,7 +409,7 @@
     {% if projects %}
     <div class="projects-grid" id="projectsGrid">
       {% for project in projects %}
-      <a href="/scans/{{ project.id }}/visualize"
+      <a href="{{ url_for('defects.visualize_scan', scan_id=project.id) }}"
          class="project-card"
          data-name="{{ project.name|lower }}"
          data-date="{{ project.created_at.isoformat() if project.created_at else '' }}">
@@ -467,7 +460,7 @@
         <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
         <h3>No Projects Yet</h3>
         <p>Upload your first scan to get started with defect detection and visualization.</p>
-        <a href="/upload-data" class="btn-primary"><i class="fas fa-upload"></i> Upload First Scan</a>
+        <a href="{{ url_for('upload_data.upload_scan_data') }}" class="btn-primary"><i class="fas fa-upload"></i> Upload First Scan</a>
       </div>
     </div>
     {% endif %}
@@ -509,7 +502,7 @@
       cards.forEach(c => c.style.display = 'none');
       filtered.forEach(c => { c.style.display = 'block'; grid.appendChild(c); });
     }
-    document.querySelectorAll('a[href]').forEach(link => {
+    document.querySelectorAll('a[href]').forEach(link => { if (link.hasAttribute("data-confirm")) return; {
       const href = link.getAttribute('href') || '';
       if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
@@ -643,7 +636,11 @@
           setTimeout(function() { showStep(0); }, 350);
         }
       });
+      })();
     })();
   </script>
+  <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+  <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
 </body>
 </html>

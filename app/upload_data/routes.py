@@ -59,7 +59,8 @@ def upload_scan_data():
     Postcondition: Files are stored, and automated data processing is initiated.
     """
     if request.method == "GET":
-        return render_template("upload_data/upload.html")
+        google_maps_api_key = current_app.config.get('GOOGLE_MAPS_API_KEY', '')
+        return render_template("upload_data/upload.html", google_maps_api_key=google_maps_api_key)
 
     try:
         glb_file = request.files.get("glb_model")
@@ -95,8 +96,25 @@ def upload_scan_data():
         upload_id = f"upload_{timestamp}"
         image_dir = os.path.join(upload_root, f"{upload_id}_images")
 
-        glb_name = secure_filename(glb_file.filename)
-        pdf_name = secure_filename(pdf_file.filename)
+        glb_file.stream.seek(0, os.SEEK_END)
+        glb_size = glb_file.stream.tell()
+        glb_file.stream.seek(0)
+        max_size = 100 * 1024 * 1024  # 100 MB
+        if glb_size > max_size:
+            flash(f"GLB file is too large ({glb_size / 1024 / 1024:.1f} MB). Maximum is 100 MB.", "error")
+            return redirect(request.url)
+
+        pdf_file.stream.seek(0, os.SEEK_END)
+        pdf_size = pdf_file.stream.tell()
+        pdf_file.stream.seek(0)
+        if pdf_size > max_size:
+            flash(f"PDF file is too large ({pdf_size / 1024 / 1024:.1f} MB). Maximum is 100 MB.", "error")
+            return redirect(request.url)
+
+        import uuid
+        unique_id = uuid.uuid4().hex[:12]
+        glb_name = f"{unique_id}_{secure_filename(glb_file.filename)}"
+        pdf_name = f"{unique_id}_{secure_filename(pdf_file.filename)}"
 
         glb_path = os.path.join(upload_root, glb_name)
         pdf_path = os.path.join(upload_root, pdf_name)
@@ -161,6 +179,7 @@ def _start_automated_data_processing(glb_path: str, pdf_path: str, scan_date: st
     # Extract defects from GLB and save to processed folder
     if GLTF2 is None:
         current_app.logger.error("pygltflib is not installed; cannot process GLB defects")
+        flash("Automated processing skipped: pygltflib is not installed. Install it to extract defects from GLB files.", "error")
         return
     
     try:

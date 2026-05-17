@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, send_from_directory, abort, render_template, url_for, current_app
 from flask_login import login_required, current_user
 from app.extensions import db, csrf
-from app.models import Defect, Scan, ActivityLog
+from app.models import Defect, DefectStatus, DefectSeverity, Scan, ActivityLog, User
 from app.utils import load_upload_metadata
 import os
 from datetime import datetime
@@ -12,6 +12,35 @@ defects_bp = Blueprint('defects', __name__)
 
 # Exempt JSON API endpoints from CSRF since they are called via JavaScript fetch()
 # Forms that submit via HTML (with CSRF tokens) are NOT exempted
+
+
+def _validate_origin():
+    """Validate Origin/Referer header to prevent CSRF on exempt endpoints.
+    
+    Browsers always set Origin on cross-origin requests. If Origin is absent
+    (e.g., curl, Postman, tests), the request is not browser-based CSRF.
+    """
+    origin = request.headers.get('Origin') or request.headers.get('Referer') or ''
+    if not origin:
+        return True
+    from urllib.parse import urlparse
+    parsed = urlparse(origin)
+    allowed_hosts = current_app.config.get('SERVER_NAME') or 'localhost:5100'
+    allowed = {'localhost', '127.0.0.1', '0.0.0.0'}
+    host = parsed.hostname or ''
+    port = parsed.port
+    if host in allowed:
+        return True
+    host_part = allowed_hosts.split(':')[0] if ':' in allowed_hosts else allowed_hosts
+    if host == host_part:
+        configured_port = None
+        if ':' in allowed_hosts:
+            try: configured_port = int(allowed_hosts.split(':')[1])
+            except ValueError: pass
+        if configured_port and port and port != configured_port:
+            return False
+        return True
+    return False
 
 @defects_bp.route('/projects', methods=['GET'])
 @login_required
@@ -129,6 +158,8 @@ def get_defect_details(defect_id):
 @csrf.exempt
 @login_required
 def update_defect_status(defect_id):
+    if not _validate_origin():
+        abort(403)
     defect = db.session.get(Defect, defect_id)
     if defect is None:
         abort(404)
@@ -215,6 +246,8 @@ def update_defect_status(defect_id):
 @csrf.exempt
 @login_required
 def delete_defect(defect_id):
+    if not _validate_origin():
+        abort(403)
     defect = Defect.query.get_or_404(defect_id)
     db.session.delete(defect)
     db.session.commit()
@@ -224,6 +257,8 @@ def delete_defect(defect_id):
 @csrf.exempt
 @login_required
 def create_defect(scan_id):
+    if not _validate_origin():
+        abort(403)
     scan = Scan.query.get_or_404(scan_id)
     data = request.get_json()
     x = float(data.get('x', 0) or 0)
@@ -256,9 +291,9 @@ def create_defect(scan_id):
         element=element,
         location=data.get('location', ''),
         defect_type=defect_type,
-        severity=data.get('severity', 'Medium'),
+        severity=data.get('severity', DefectSeverity.MEDIUM.value),
         description=data.get('description', ''),
-        status=data.get('status', 'Reported'),
+        status=data.get('status', DefectStatus.REPORTED.value),
         notes=data.get('notes', ''),
         source_defect_key=source_defect_key,
         coord_key=coord_key,
@@ -271,8 +306,7 @@ def create_defect(scan_id):
     db.session.add(defect)
     db.session.commit()
 
-    # Send email alert for critical defects
-    if defect.severity == 'Critical':
+    if defect.severity == DefectSeverity.CRITICAL.value:
         try:
             from app.notifications import send_critical_defect_alert
             send_critical_defect_alert(defect)
@@ -315,4 +349,61 @@ def view_project(scan_id):
                           scan_id=scan_id, 
                           model_url=model_url, 
                           defects=defects,
+                          total_defects=len(defects),
                           upload_metadata=upload_metadata)
+
+
+@defects_bp.route('/api/search', methods=['GET'])
+@login_required
+def global_search():
+    q = request.args.get('q', '').strip().lower()
+    if not q or len(q) < 2:
+        return jsonify([])
+
+    results = []
+
+    scans = Scan.query.filter(Scan.name_normalized.ilike(f'%{q}%')).limit(5).all()
+    for s in scans:
+        results.append({
+            'title': s.name,
+            'subtitle': f'Scan #{s.id}',
+            'url': url_for('defects.view_project', scan_id=s.id),
+            'icon': 'fas fa-cube',
+            'type': 'Scan',
+        })
+
+    defects = Defect.query.filter(
+        db.or_(
+            Defect.location.ilike(f'%{q}%'),
+            Defect.defect_type.ilike(f'%{q}%'),
+            Defect.element.ilike(f'%{q}%'),
+            Defect.description.ilike(f'%{q}%'),
+        )
+    ).limit(8).all()
+
+    for d in defects:
+        results.append({
+            'title': f'{d.defect_type} — {d.location or "Unknown"}',
+            'subtitle': f'Scan #{d.scan_id} · {d.element or "N/A"}',
+            'url': url_for('defects.visualize_scan', scan_id=d.scan_id),
+            'icon': 'fas fa-exclamation-triangle',
+            'type': 'Defect',
+        })
+
+    users = User.query.filter(
+        db.or_(
+            User.username.ilike(f'%{q}%'),
+            User.full_name.ilike(f'%{q}%'),
+        )
+    ).limit(3).all()
+
+    for u in users:
+        results.append({
+            'title': u.full_name or u.username,
+            'subtitle': f'{u.role.capitalize()} · {u.department or "N/A"}',
+            'url': url_for('auth.profile'),
+            'icon': 'fas fa-user',
+            'type': 'User',
+        })
+
+    return jsonify(results)

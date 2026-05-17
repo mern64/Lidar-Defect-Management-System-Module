@@ -14,12 +14,15 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///ldms.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': int(os.environ.get('DB_POOL_SIZE', '5')),
+        'pool_recycle': int(os.environ.get('DB_POOL_RECYCLE', '300')),
+        'pool_timeout': int(os.environ.get('DB_POOL_TIMEOUT', '10')),
+        'max_overflow': int(os.environ.get('DB_MAX_OVERFLOW', '10')),
+    }
 
     # Maximum upload size: 100 MB
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024
-
-    # ── AI Image Analysis (Google Gemini) ──────────────────────────
-    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
     # ── Email Notifications (Flask-Mail) ───────────────────────────
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
@@ -29,3 +32,6 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     NOTIFICATION_EMAILS = os.environ.get('NOTIFICATION_EMAILS', '')
+
+    # ── Google Maps ───────────────────────────────────────────
+    GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')

@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
   <style>
     :root {
       --bg-from: #eef1f7;
@@ -221,25 +222,16 @@
     }
     .btn-save:hover { background: var(--accent-h); box-shadow: rgba(37,99,235,0.55) 0px 6px 20px 0px; }
 
-    /* Loading overlay */
-    #ldms-loader {
-      display: none; position: fixed; inset: 0; z-index: 99999;
-      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-    }
-    #ldms-loader.active { display: flex; }
-    .loader-spinner {
-      width: 34px; height: 34px; border: 3px solid rgba(37,99,235,0.15);
-      border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+     }
 
     @media (max-width: 768px) {
       .topbar { padding: 0 1rem; }
       .page-content { padding: 2rem 1rem 4rem; }
       .save-row { flex-direction: column; align-items: stretch; }
       .save-card input[type="text"] { flex: 1 1 auto; width: 100%; }
+      .bento-grid { grid-template-columns: 1fr !important; }
+      [class*="span-2"], [class*="span-3"] { grid-column: span 1 !important; }
+      .bento-card { padding: 1rem !important; }
     }
   </style>
 </head>
@@ -251,22 +243,24 @@
     })();
   </script>
 
-  <div id="ldms-loader">
+  <div id="ldms-loader" class="ldms-loader">
     <div class="loader-spinner"></div>
     <span class="loader-text">Processing…</span>
   </div>
 
   <header class="topbar">
     <div class="topbar-left">
-      <a href="/projects" class="back-link"><i class="fas fa-arrow-left"></i> Projects</a>
+      <a href="{{ url_for('defects.list_projects') }}" class="back-link"><i class="fas fa-arrow-left"></i> Projects</a>
     </div>
     <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand">
       <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
       Lidar Defect Management System
     </a>
-    <a href="{{ url_for('auth.logout') }}" class="user-pill">
+    <a href="{{ url_for('auth.profile') }}" class="user-pill">
       <i class="fas fa-user"></i>
       {{ current_user.username }}
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out">
       <i class="fas fa-sign-out-alt"></i>
     </a>
   </header>
@@ -394,10 +388,11 @@
     <div class="save-card">
       <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="save_to_db" value="yes">
         <div class="save-row">
           <label for="scan_name">Scan Name</label>
           <input type="text" id="scan_name" name="scan_name" value="{{ default_scan_name }}" required>
-          <button type="submit" name="save_to_db" value="yes" class="btn-save">
+          <button type="submit" class="btn-save">
             <i class="fas fa-save"></i> Save Defects to Database
           </button>
         </div>
@@ -409,11 +404,14 @@
 
   <script>
     document.querySelectorAll('form').forEach(f => f.addEventListener('submit', () => document.getElementById('ldms-loader').classList.add('active')));
-    document.querySelectorAll('a[href]').forEach(link => {
+    document.querySelectorAll('a[href]').forEach(link => { if (link.hasAttribute("data-confirm")) return; {
       const href = link.getAttribute('href') || '';
       if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
     });
   </script>
+  <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+  <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
 </body>
 </html>

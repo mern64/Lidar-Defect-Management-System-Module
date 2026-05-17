@@ -6,44 +6,92 @@
     <title>LDMS - User Admin</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
         :root {
-            --bg-from: #eef2f8;
-            --bg-to: #e7edf7;
-            --surface: #ffffff;
-            --surface-soft: #f8fbff;
-            --text: #13203a;
-            --text-muted: #5b6b86;
-            --border: rgba(35, 58, 102, 0.14);
-            --accent: #2563eb;
-            --accent-hover: #1d4ed8;
-            --danger: #dc2626;
-            --danger-soft: rgba(220, 38, 38, 0.1);
-            --shadow-card: rgba(37, 99, 235, 0.08) 0px 0px 0px 1px, rgba(15, 23, 42, 0.08) 0px 8px 24px;
-            --shadow-soft: rgba(15, 23, 42, 0.06) 0px 3px 12px;
+            --bg: #0b1020;
+            --panel: rgba(255, 255, 255, 0.05);
+            --ink: #e2e8f0;
+            --muted: #94a3b8;
+            --edge: rgba(255, 255, 255, 0.08);
+            --accent: #3b82f6;
+            --accent-2: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --control-radius: 0.72rem;
+            --control-height: 2.35rem;
+            --chip-radius: 999px;
+            --shadow-card: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.24) 0px 8px 20px;
         }
+
+        body.light-mode {
+            --bg: #f5f5f5;
+            --panel: rgba(0, 0, 0, 0.03);
+            --ink: #0f172a;
+            --muted: #475569;
+            --edge: rgba(0, 0, 0, 0.08);
+            --accent: #3b82f6;
+            --accent-2: #0ea5e9;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --danger-bg: rgba(220, 38, 38, 0.1);
+            --shadow-card: rgba(19, 19, 22, 0.2) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.08) 0px 8px 20px;
+        }
+
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: Inter, system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
-            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
+                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        body.light-mode {
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
 
         .wrap {
-            max-width: 1180px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 26px 18px 42px;
+            padding: 3rem 2rem 5rem;
             display: grid;
-            gap: 16px;
+            gap: 1rem;
+            align-items: start;
         }
 
         .card {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: var(--surface);
-            padding: 16px;
+            position: relative;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--edge);
             box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        body.light-mode .card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
+        }
+
+        body.light-mode .card::after {
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.08), transparent 55%);
         }
 
         .toolbar {
@@ -65,7 +113,7 @@
 
         .toolbar-subtitle {
             margin: 6px 0 0;
-            color: var(--text-muted);
+            color: var(--muted);
         }
 
         .toolbar-actions {
@@ -77,22 +125,24 @@
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
             justify-content: center;
-            color: var(--text);
-            text-decoration: none;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 8px 12px;
-            background: var(--surface-soft);
-            cursor: pointer;
+            gap: 4px;
+            padding: 6px 10px;
+            border-radius: var(--control-radius);
+            border: 1px solid var(--edge);
+            background: var(--panel);
+            color: var(--ink);
             font-weight: 600;
-            transition: all 0.18s ease;
-            box-shadow: var(--shadow-soft);
+            font-size: 12px;
+            cursor: pointer;
+            transition: box-shadow 0.1s, transform 0.1s;
+            text-decoration: none;
+            white-space: nowrap;
+            width: 100%;
         }
 
         .btn:hover {
-            border-color: rgba(37, 99, 235, 0.4);
+            border-color: var(--accent);
             transform: translateY(-1px);
         }
 
@@ -103,129 +153,18 @@
         }
 
         .btn-primary:hover {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-        }
-
-        .users {
-            display: grid;
-            gap: 12px;
-        }
-
-        .user {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
-            background: var(--surface);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .user-name {
-            font-size: 1.02rem;
-            font-weight: 700;
-        }
-
-        .meta {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .pill {
-            border-radius: 999px;
-            padding: 3px 8px;
-            border: 1px solid var(--border);
-            font-size: 12px;
-            font-weight: 700;
-            background: #fff;
-        }
-
-        .pill.good {
-            border-color: rgba(16, 185, 129, 0.35);
-            color: #065f46;
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .pill.bad {
-            border-color: rgba(220, 38, 38, 0.35);
-            color: #991b1b;
-            background: rgba(220, 38, 38, 0.1);
-        }
-
-        .pill.warn {
-            border-color: rgba(245, 158, 11, 0.38);
-            color: #92400e;
-            background: rgba(245, 158, 11, 0.13);
-        }
-
-        .actions {
-            margin-top: 10px;
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 8px;
-            align-items: end;
-        }
-
-        select,
-        input {
-            width: 100%;
-            border-radius: 9px;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--text);
-            padding: 8px;
-            font-weight: 600;
-        }
-
-        select:focus,
-        input:focus {
-            outline: none;
-            border-color: rgba(37, 99, 235, 0.5);
-            box-shadow: rgba(37, 99, 235, 0.12) 0px 0px 0px 3px;
-        }
-
-        .flashes {
-            display: grid;
-            gap: 8px;
-        }
-
-        .flash {
-            border-radius: 10px;
-            padding: 10px 12px;
-            font-weight: 600;
-        }
-
-        .flash.success {
-            border: 1px solid rgba(16, 185, 129, 0.35);
-            background: rgba(16, 185, 129, 0.12);
-            color: #065f46;
-        }
-
-        .flash.error {
-            border: 1px solid rgba(220, 38, 38, 0.35);
-            background: rgba(220, 38, 38, 0.12);
-            color: #991b1b;
+            background: #2563eb;
+            border-color: #2563eb;
         }
 
         .btn-danger {
-            border-color: rgba(220, 38, 38, 0.3);
-            background: var(--danger-soft);
-            color: #991b1b;
+            background: var(--danger-bg);
+            border-color: rgba(239, 68, 68, 0.25);
+            color: var(--danger);
         }
-
         .btn-danger:hover {
-            border-color: rgba(220, 38, 38, 0.5);
-            background: rgba(220, 38, 38, 0.16);
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
         }
 
         .btn:disabled {
@@ -234,8 +173,186 @@
             transform: none;
         }
 
-        @media (max-width: 980px) {
-            .actions { grid-template-columns: 1fr; }
+        .users {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 12px;
+        }
+
+        .user {
+            position: relative;
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--edge);
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .user::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.14), transparent 55%);
+        }
+
+        body.light-mode .user {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
+        }
+        body.light-mode .user::after {
+            background: radial-gradient(120% 120% at 100% 0%, rgba(59, 130, 246, 0.08), transparent 55%);
+        }
+
+        .head {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 12px;
+            row-gap: 2px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .pill {
+            position: relative;
+            z-index: 1;
+            border-radius: var(--chip-radius);
+            padding: 3px 8px;
+            border: 1px solid var(--edge);
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--panel);
+        }
+
+        .pill.good {
+            border-color: rgba(16, 185, 129, 0.35);
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .pill.bad {
+            border-color: rgba(239, 68, 68, 0.35);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .pill.warn {
+            border-color: rgba(245, 158, 11, 0.38);
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.13);
+        }
+
+        .actions {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            align-items: end;
+        }
+        .actions form:nth-child(3),
+        .actions form:nth-child(4) { grid-column: 1 / -1; }
+
+        select,
+        input {
+            width: 100%;
+            border-radius: var(--control-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            padding: 8px;
+            font-weight: 600;
+        }
+
+        body.light-mode select,
+        body.light-mode input {
+            background: #fff;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .create-user-card form {
+            position: relative;
+            z-index: 1;
+        }
+        .create-user-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .create-user-card .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .create-user-card .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+        .create-user-card select,
+        .create-user-card input {
+            padding: 8px 10px;
+            font-weight: 400;
+            font-size: 14px;
+        }
+        @media (max-width: 700px) {
+            .create-user-grid { grid-template-columns: 1fr; }
+        }
+
+        .flashes {
+            display: grid;
+            gap: 8px;
+        }
+
+        .flash {
+            position: relative;
+            z-index: 1;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+        }
+
+        .flash.success {
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+        }
+
+        .flash.error {
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+        }
+
+    @media (max-width: 768px) {
+            .users { grid-template-columns: 1fr; }
+            .actions { grid-template-columns: 1fr 1fr; }
+            .meta { gap: 2px; }
+            .wrap { padding: 1.5rem 1rem 3rem; }
         }
     </style>
 </head>
@@ -247,7 +364,6 @@
                 <p class="toolbar-subtitle">Manage role, account state, availability, and password resets.</p>
             </div>
             <div class="toolbar-actions">
-                <a class="btn btn-primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Create User</a>
                 <a class="btn" href="{{ url_for('developer.manager_dashboard') if current_user.is_manager else url_for('developer.dashboard') }}"><i class="fas fa-arrow-left"></i> Dashboard</a>
             </div>
         </section>
@@ -261,6 +377,55 @@
         </section>
         {% endif %}
         {% endwith %}
+
+        <section class="card create-user-card">
+            <h2 style="margin-top:0;margin-bottom:1rem;"><i class="fas fa-user-plus"></i> Create New User</h2>
+            <form method="post" action="{{ url_for('auth.register') }}" class="create-user-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ url_for('developer.admin_users') }}">
+                <div class="create-user-grid">
+                    <div class="form-group">
+                        <label for="cu_full_name">Full Name</label>
+                        <input type="text" id="cu_full_name" name="full_name" placeholder="e.g. Nur Afiqah" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_username">Username</label>
+                        <input type="text" id="cu_username" name="username" placeholder="e.g. afiqah.r" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_email">Work Email</label>
+                        <input type="email" id="cu_email" name="email" placeholder="name@company.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_phone">Phone</label>
+                        <input type="tel" id="cu_phone" name="phone_number" placeholder="+60 12-345 6789">
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_department">Department</label>
+                        <input type="text" id="cu_department" name="department" placeholder="e.g. Facilities">
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_job_title">Job Title</label>
+                        <input type="text" id="cu_job_title" name="job_title" placeholder="e.g. Inspector">
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_password">Password</label>
+                        <div class="ldms-pw-wrap">
+                            <input type="password" id="cu_password" name="password" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password">
+                            <button type="button" class="ldms-pw-toggle" onclick="ldmsTogglePw('cu_password')" tabindex="-1" aria-label="Toggle password"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cu_role">Role</label>
+                        <select id="cu_role" name="role">
+                            <option value="inspector">Inspector</option>
+                            <option value="developer">Developer</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:1rem;"><i class="fas fa-user-plus"></i> Create User</button>
+            </form>
+        </section>
 
         <section class="users">
             {% for user in users %}
@@ -299,28 +464,18 @@
 
                     <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}" style="display:grid; gap:6px;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="action" value="change_role">
-                        <select name="role">
-                            <option value="inspector" {{ 'selected' if user.role == 'inspector' else '' }}>Inspector</option>
-                            <option value="developer" {{ 'selected' if user.role == 'developer' else '' }}>Developer</option>
-                        </select>
-                        <button class="btn" type="submit">Change Role</button>
-                    </form>
-
-                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}" style="display:grid; gap:6px;">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="action" value="reset_password">
                         <input type="password" name="new_password" minlength="6" placeholder="New password" required>
                         <button class="btn" type="submit">Reset Password</button>
                     </form>
 
-                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}">
+                    <form method="post" action="{{ url_for('developer.admin_update_user', user_id=user.id) }}" class="delete-user-form">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="action" value="delete_user">
                         <button
                             class="btn btn-danger"
                             type="submit"
-                            onclick="return confirm('Delete user {{ user.username }}? This cannot be undone.')"
+                            data-confirm="Delete user {{ user.username }}? This cannot be undone."
                             {{ 'disabled' if user.id == current_user.id else '' }}
                             title="{{ 'You cannot delete your own account' if user.id == current_user.id else 'Delete user' }}"
                         >
@@ -332,5 +487,10 @@
             {% endfor %}
         </section>
     </main>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
+
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+
 </body>
 </html>

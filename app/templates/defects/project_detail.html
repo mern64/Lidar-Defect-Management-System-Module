@@ -7,9 +7,8 @@
     <title>LDMS — {{ scan.name }}</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +16,7 @@
         }
 
         body {
-            font-family: 'Space Grotesk', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, #0b1020 0%, #151d3b 50%, #0b1020 100%);
             color: #e2e8f0;
             min-height: 100vh;
@@ -41,6 +40,64 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 32px; height: 32px;
+            background: #3b82f6;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 0.85rem;
+            box-shadow: rgba(59, 130, 246, 0.35) 0px 2px 8px 0px;
+        }
+
+        body.light-mode .brand-icon {
+            box-shadow: rgba(37, 99, 235, 0.35) 0px 2px 8px 0px;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700; font-size: 0.875rem;
+            color: #e2e8f0; letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        body.light-mode .brand-name {
+            color: #1a2035;
+        }
+
+        .my-projects-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.8125rem; font-weight: 500;
+            color: #94a3b8; text-decoration: none;
+            transition: color 0.15s;
+            white-space: nowrap;
+        }
+
+        .my-projects-btn:hover {
+            color: #60a5fa;
+        }
+
+        body.light-mode .my-projects-btn {
+            color: #64748b;
+        }
+        body.light-mode .my-projects-btn:hover {
+            color: #2563eb;
         }
 
         .breadcrumb {
@@ -62,6 +119,35 @@
 
         .breadcrumb .sep {
             color: #475569;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        .user-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 0.35rem 0.85rem; border-radius: 9999px;
+            font-size: 0.8125rem; font-weight: 500;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            text-decoration: none;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        body.light-mode .user-pill {
+            color: #4b5675;
+            background: #fff;
+            box-shadow: rgba(37, 99, 235, 0.14) 0px 0px 0px 1px;
+        }
+
+        .user-pill:hover {
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
         }
 
         .logout-btn {
@@ -514,6 +600,10 @@
             color: #475569;
             border-color: rgba(0, 0, 0, 0.08);
         }
+        
+          .top-bar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+          .meta-grid { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 
@@ -532,14 +622,27 @@
     <div class="container" style="max-width: 1300px; padding: 2rem 1rem;">
         <!-- Top bar -->
         <div class="top-bar">
-            <div class="breadcrumb">
-                <a href="{{ url_for('defects.list_projects') }}"><i class="fas fa-folder-open"></i> Projects</a>
-                <span class="sep"><i class="fas fa-chevron-right"></i></span>
-                <span>{{ scan.name }}</span>
+            <div class="top-bar-left">
+                <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="brand-link">
+                    <div class="brand-icon"><i class="fas fa-hard-hat"></i></div>
+                    <span class="brand-name">LDMS</span>
+                </a>
+                <a href="{{ url_for('defects.list_projects') }}" class="my-projects-btn" data-tooltip="View all projects">
+                    <i class="fas fa-folder-open"></i> My Projects
+                </a>
+                <div class="breadcrumb">
+                    <span class="sep"><i class="fas fa-chevron-right"></i></span>
+                    <span>{{ scan.name }}</span>
+                </div>
             </div>
-            <a href="{{ url_for('auth.logout') }}" class="logout-btn">
-                <i class="fas fa-user"></i> {{ current_user.username }} <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <div class="top-bar-right">
+                <a href="{{ url_for('auth.profile') }}" class="user-pill" data-tooltip="Your profile">
+                    <i class="fas fa-user"></i> {{ current_user.username }}
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
         </div>
 
         <main class="bento-grid">
@@ -573,6 +676,13 @@
 
 
             <!-- Severity Card -->
+            {% set _critical = namespace(count=0) %}{% set _high = namespace(count=0) %}{% set _medium = namespace(count=0) %}{% set _low = namespace(count=0) %}
+            {% for d in defects %}{% set s = d.severity or 'Medium' %}
+                {% if s == 'Critical' %}{% set _critical.count = _critical.count + 1 %}{% endif %}
+                {% if s == 'High' %}{% set _high.count = _high.count + 1 %}{% endif %}
+                {% if s == 'Medium' %}{% set _medium.count = _medium.count + 1 %}{% endif %}
+                {% if s == 'Low' %}{% set _low.count = _low.count + 1 %}{% endif %}
+            {% endfor %}
             <section class="bento-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 class="insights-h2">Severity</h2>
@@ -685,6 +795,7 @@
             {% if p == 'Low' %}{% set _low_p.count = _low_p.count + 1 %}{% endif %}
         {% endfor %}
 
+        {% if defects %}
         <div class="severity-breakdown">
             <h2>Priority Breakdown</h2>
             
@@ -711,6 +822,7 @@
                 </div>
             </div>
 
+        </div>
         {% endif %}
             <!-- Table Card -->
             <section class="bento-card span-2 table-card" style="padding: 0;">
@@ -719,7 +831,7 @@
                     <span class="chip">{{ defects|length }} Total Reports</span>
                 </div>
                 
-                <div style="overflow-x: auto;">
+                <div class="ldms-table-wrap">
                     <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
                         <thead>
                             <tr style="background: rgba(0,0,0,0.2);">
@@ -757,11 +869,11 @@
 
                 <!-- Action Footer inside card -->
                 <div style="padding: 1.5rem 2rem; background: rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
-                    <a href="{{ url_for('defects.list_projects') }}" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+                    <a href="{{ url_for('defects.list_projects') }}" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 600;" data-tooltip="Return to project list">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
                     <div style="display: flex; gap: 1rem;">
-                        <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 700;">
+                        <a href="{{ url_for('defects.visualize_scan', scan_id=scan_id) }}" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 12px; font-weight: 700;" data-tooltip="Open 3D viewer with Three.js">
                             <i class="fas fa-cube"></i> Launch AI 3D Model
                         </a>
                     </div>
@@ -769,4 +881,8 @@
             </section>
         </main>
     </div>
+    <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
+    <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
+</body>
 </html>

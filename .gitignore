@@ -11,6 +11,7 @@ instance/
 # Ignore virtual environment directories
 env/
 venv/
+venv314/
 .venv/
 env.bak/
 

@@ -379,6 +379,184 @@
             background: linear-gradient(160deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.04));
         }
 
+        .hero {
+            display: grid;
+            gap: 1rem;
+            padding: 1.35rem;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.16), transparent 32%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.16), transparent 30%),
+                linear-gradient(145deg, rgba(10, 15, 28, 0.88), rgba(17, 24, 39, 0.92));
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: rgba(0, 0, 0, 0.26) 0px 20px 40px -20px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px inset;
+        }
+
+        body.light-mode .hero {
+            background:
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.10), transparent 32%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.10), transparent 30%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.96));
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(34, 211, 238, 0.14);
+            color: var(--ink);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 0.85rem;
+        }
+
+        body.light-mode .hero-kicker {
+            background: rgba(37, 99, 235, 0.10);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .hero-panel {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .hero-panel-title h1 {
+            font-size: clamp(2rem, 2.8vw, 3.35rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+            margin: 0;
+        }
+
+        .hero-panel-title h1 i {
+            color: #22d3ee;
+        }
+
+        .hero-panel-title .subtitle {
+            max-width: 62ch;
+            margin-bottom: 0;
+            font-size: 0.98rem;
+        }
+
+        .hero-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .hero-summary-card {
+            border-radius: 18px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-height: 112px;
+            display: grid;
+            align-content: space-between;
+            gap: 0.6rem;
+        }
+
+        body.light-mode .hero-summary-card {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        .hero-summary-card .label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .hero-summary-card .value {
+            font-size: 2rem;
+            line-height: 1;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-summary-card .detail {
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .hero-summary-card.projects .value { color: #60a5fa; }
+        .hero-summary-card.review .value { color: #f59e0b; }
+        .hero-summary-card.fixed .value { color: #34d399; }
+
+        .hero-side {
+            border-radius: 20px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: grid;
+            gap: 0.85rem;
+            align-content: start;
+        }
+
+        body.light-mode .hero-side {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        .hero-side h3 {
+            font-size: 0.98rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0.2rem;
+        }
+
+        .hero-side h3 i { color: #22d3ee; }
+
+        .hero-side-list {
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .hero-side-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 0.7rem 0.8rem;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        body.light-mode .hero-side-item {
+            background: rgba(248, 250, 252, 0.9);
+            border-color: rgba(15, 23, 42, 0.06);
+        }
+
+        .hero-side-item .k {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .hero-side-item .v {
+            font-size: 0.98rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .hero-side-item .v.good { color: #34d399; }
+        .hero-side-item .v.warn { color: #f59e0b; }
+        .hero-side-item .v.danger { color: #f87171; }
         .stat-fixed {
             background: linear-gradient(160deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
             border-color: rgba(16, 185, 129, 0.25);
@@ -900,10 +1078,6 @@
                 </div>
                 <div class="hero-tools" id="tour-dev-tools">
                     <span class="eyebrow"><i class="fas fa-bolt"></i> Live status</span>
-                    <a href="{{ url_for('developer.admin_users') }}" class="theme-toggle">
-                        <i class="fas fa-users-cog"></i>
-                        <span>User Admin</span>
-                    </a>
                     <button class="tour-btn" id="tourReplayDeveloper" type="button"><i class="fas fa-compass"></i> Tutorial</button>
                     <button class="tour-btn tour-btn-reset" id="tourResetDeveloper" type="button"><i class="fas fa-rotate-left"></i> Reset Tour</button>
                     <button id="themeToggle" class="theme-toggle" type="button">
@@ -918,15 +1092,63 @@
                 </div>
             </div>
 
-            <div>
-                <h1><i class="fas fa-code"></i> Developer Workspace</h1>
-                <p class="subtitle">Monitor every scan, filter by status, and glide through project progress with a
-                    bento-inspired overview.</p>
-                <div class="hero-metrics" id="tour-dev-hero-metrics">
-                    <span class="metric-chip"><i class="fas fa-building"></i> {{ scans|length }} projects</span>
-                    <span class="metric-chip metric-chip-fixed"><i
-                            class="fas fa-check-circle"></i> {{ total_fixed }} fixed</span>
+            <div class="hero-grid">
+                <div class="hero-panel">
+                    <div class="hero-panel-title">
+                        <div>
+                            <div class="hero-kicker"><i class="fas fa-diagram-project"></i> Focus queue</div>
+                            <h1><i class="fas fa-code"></i> Developer Workspace</h1>
+                            <p class="subtitle">Monitor every scan, filter by status, and glide through project progress with a bento-inspired overview.</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-summary" id="tour-dev-hero-metrics">
+                        <article class="hero-summary-card projects">
+                            <span class="label">Assigned Projects</span>
+                            <span class="value">{{ scans|length }}</span>
+                            <span class="detail">Currently in your queue</span>
+                        </article>
+                        <article class="hero-summary-card review">
+                            <span class="label">Open Review</span>
+                            <span class="value">{{ metrics.stale_reviews }}</span>
+                            <span class="detail">Older than seven days</span>
+                        </article>
+                        <article class="hero-summary-card fixed">
+                            <span class="label">Fixed</span>
+                            <span class="value">{{ total_fixed }}</span>
+                            <span class="detail">Completed across assigned scans</span>
+                        </article>
+                    </div>
+
+                    <section class="ldms-page-note" style="margin-top:0.25rem;">
+                        <div>
+                            <h3 style="font-size:0.98rem;">Personal project view</h3>
+                            <p>This dashboard only shows scans assigned to you. Use the manager dashboard for the full portfolio and team reassignment.</p>
+                        </div>
+                        <div class="note-chips">
+                            <span class="ldms-chip"><i class="fas fa-user-check"></i> Assigned work only</span>
+                            <span class="ldms-chip"><i class="fas fa-clock"></i> Queue first</span>
+                        </div>
+                    </section>
                 </div>
+
+                <aside class="hero-side">
+                    <h3><i class="fas fa-sparkles"></i> Today at a glance</h3>
+                    <div class="hero-side-list">
+                        <div class="hero-side-item">
+                            <span class="k">Urgent attention</span>
+                            <span class="v danger">{{ metrics.urgent_attention }}</span>
+                        </div>
+                        <div class="hero-side-item">
+                            <span class="k">Stale reviews</span>
+                            <span class="v warn">{{ metrics.stale_reviews }}</span>
+                        </div>
+                        <div class="hero-side-item">
+                            <span class="k">New in 24h</span>
+                            <span class="v good">{{ metrics.new_24h }}</span>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
             <div class="hero-actions" id="tour-dev-filters">

@@ -3,7 +3,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set, Tuple
 
 from flask import (
@@ -160,16 +160,16 @@ def _load_defects() -> Tuple[List[DefectRecord], Optional[str], str]:
             if defects:
                 return defects, glb_file, "glb"
             current_app.logger.warning("No snapshot metadata found in %s", glb_file)
-        except Exception as exc:  # noqa: BLE001
-            current_app.logger.exception("Failed to parse GLB defects from %s: %s", glb_file, exc)
+        except Exception:  # noqa: BLE001
+            current_app.logger.exception("Failed to parse GLB defects from %s", glb_file)
 
     json_file = _load_metaroom_defect_file()
     if json_file:
         try:
             defects = _parse_defects_from_file(json_file)
             return defects, json_file, "json"
-        except Exception as exc:  # noqa: BLE001
-            current_app.logger.exception("Failed to parse JSON defects from %s: %s", json_file, exc)
+        except Exception:  # noqa: BLE001
+            current_app.logger.exception("Failed to parse JSON defects from %s", json_file)
 
     return [], None, "none"
 
@@ -355,7 +355,7 @@ def process_defect_file():
         source_upload_id = str((metadata or {}).get("id") or "").strip() or None
         project_name = (metadata or {}).get("project_name") or scan_name
         scan_fingerprint = Scan.build_fingerprint(model_path, project_name, source_upload_id)
-        import_batch_id = source_upload_id or f"import-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        import_batch_id = source_upload_id or f"import-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
 
         scan = None
         if source_upload_id:
@@ -489,6 +489,8 @@ def process_defect_file():
         return _render_error(
             "No GLB/JSON defect file found. Ensure the processed folder contains either a Snapshot-enabled GLB or defects.json."
         )
+
+
 
     for entry in image_entries:
         entry["url"] = url_for("process_data.serve_extracted_image", image_id=entry["id"])
@@ -637,9 +639,10 @@ def assign_image_to_defect():
 
 
 def _update_defect_image_in_db(snapshot_name: str, image_path: Optional[str]):
-    """Update defect image_path in database by matching snapshot name in description."""
-    # Find defects whose description contains this snapshot name
-    defects = Defect.query.filter(Defect.description.contains(snapshot_name)).all()
+    """Update defect image_path in database by matching snapshot name in source_defect_key."""
+    defects = Defect.query.filter(Defect.source_defect_key == snapshot_name).all()
+    if not defects:
+        defects = Defect.query.filter(Defect.description.contains(snapshot_name)).all()
     for defect in defects:
         defect.image_path = image_path
     if defects:

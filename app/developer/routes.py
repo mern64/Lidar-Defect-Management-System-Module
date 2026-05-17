@@ -3,13 +3,14 @@ import os
 import uuid
 import csv
 import io
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, make_response
 from flask_login import login_required, current_user
 from app.extensions import db
-from app.models import Scan, Defect, DefectStatus, DefectPriority, User, ActivityLog
+from app.models import Scan, Defect, DefectStatus, DefectPriority, DefectSeverity, User, ActivityLog
 from app.utils import load_upload_metadata
+from app.services import developer_service
 
 developer_bp = Blueprint("developer", __name__)
 
@@ -29,54 +30,19 @@ def _ensure_manager_access():
         abort(403)
 
 
-def _default_due_date_for_defect(defect: Defect) -> datetime:
-    """Apply a simple SLA policy from severity/type when due date is missing."""
-    severity_days = {
-        'Critical': 2,
-        'High': 5,
-        'Medium': 10,
-        'Low': 20,
-    }
-    type_days = {
-        'structural': 3,
-        'electrical': 4,
-        'water': 4,
-        'crack': 6,
-        'plumbing': 8,
-        'mechanical': 8,
-        'finish': 14,
-    }
-
-    severity_days_value = severity_days.get(defect.severity or 'Medium', 10)
-    defect_type = (defect.defect_type or '').lower()
-    type_days_value = min((days for key, days in type_days.items() if key in defect_type), default=10)
-    due_days = min(severity_days_value, type_days_value)
-    return datetime.utcnow() + timedelta(days=due_days)
 
 
 def _valid_assignment_target(user_id: int | None) -> User | None:
     if not user_id:
         return None
-    return User.query.filter_by(
-        id=user_id,
-        role='developer',  # Can only assign to developers, not managers
-        is_active=True,
-        is_available=True,
+    return User.query.filter(
+        User.id == user_id,
+        User.role.in_(['developer', 'inspector']),
+        User.is_active.is_(True),
+        User.is_available.is_(True),
     ).first()
 
 
-def _parse_due_date(raw_value):
-    if raw_value in (None, ""):
-        return None
-    text = str(raw_value).strip()
-    if not text:
-        return None
-    try:
-        if "T" in text:
-            return datetime.fromisoformat(text)
-        return datetime.fromisoformat(f"{text}T00:00:00")
-    except ValueError:
-        return None
 
 
 def _log_activity(defect, action, old_value, new_value, request_id):
@@ -94,7 +60,7 @@ def _log_activity(defect, action, old_value, new_value, request_id):
     ))
 
 
-@developer_bp.route("/developer", methods=["GET"])
+@developer_bp.route("/developer", methods=["GET"], strict_slashes=False)
 @login_required
 def dashboard():
     """Developer dashboard - focused personal work queue."""
@@ -102,66 +68,18 @@ def dashboard():
     sort = request.args.get("sort", "recent")
     status_filter = request.args.get("status_filter", "all")
     date_range = request.args.get("date_range", "all")
-    order_clause = Scan.created_at.desc() if sort == "recent" else Scan.created_at.asc()
 
-    # Get all scans with defect counts
-    query = db.session.query(
-        Scan,
-        db.func.count(Defect.id).label('defect_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Reported', 1), else_=0)), 0).label('reported_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Under Review', 1), else_=0)), 0).label('review_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Fixed', 1), else_=0)), 0).label('fixed_count')
-    ).outerjoin(Defect).group_by(Scan.id).order_by(order_clause)
-    
-    # Developers only see their own assigned projects.
-    query = query.filter(Scan.assigned_to_user_id == current_user.id)
-    
-    # Apply date range filter
-    if date_range == "week":
-        cutoff = datetime.now() - timedelta(days=7)
-        query = query.filter(Scan.created_at >= cutoff)
-    elif date_range == "month":
-        cutoff = datetime.now() - timedelta(days=30)
-        query = query.filter(Scan.created_at >= cutoff)
-    elif date_range == "3months":
-        cutoff = datetime.now() - timedelta(days=90)
-        query = query.filter(Scan.created_at >= cutoff)
-    
-    scans = query.all()
-    
-    # Apply status filter in Python (simpler than SQL HAVING clause)
-    if status_filter != "all":
-        filtered_scans = []
-        for scan_data in scans:
-            scan, defect_count, reported, review, fixed = scan_data
-            if status_filter == "complete" and defect_count > 0 and fixed == defect_count:
-                filtered_scans.append(scan_data)
-            elif status_filter == "in_progress" and review > 0:
-                filtered_scans.append(scan_data)
-            elif status_filter == "started" and reported > 0 and review == 0 and fixed == 0:
-                filtered_scans.append(scan_data)
-        scans = filtered_scans
+    scans = developer_service.get_scans_with_defect_counts(
+        user_id=current_user.id,
+        sort=sort,
+        date_range=date_range,
+        status_filter=status_filter,
+    )
 
     total_defects = sum(row.defect_count for row in scans)
     total_reported = sum(row.reported_count for row in scans)
     total_review = sum(row.review_count for row in scans)
     total_fixed = sum(row.fixed_count for row in scans)
-
-    # --- Dashboard "At a Glance" Metrics ---
-    urgent_attention = Defect.query.filter(
-        Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
-        Defect.status != DefectStatus.FIXED,
-    ).count()
-
-    now_utc = datetime.utcnow()
-    seven_days_ago = now_utc - timedelta(days=7)
-    stale_reviews = Defect.query.filter(
-        Defect.status == DefectStatus.UNDER_REVIEW,
-        Defect.created_at < seven_days_ago,
-    ).count()
-
-    last_24h = now_utc - timedelta(hours=24)
-    new_defects_24h = Defect.query.filter(Defect.created_at >= last_24h).count()
 
     return render_template(
         "developer/dashboard.html",
@@ -173,11 +91,7 @@ def dashboard():
         sort=sort,
         status_filter=status_filter,
         date_range=date_range,
-        metrics={
-            'urgent_attention': urgent_attention,
-            'stale_reviews': stale_reviews,
-            'new_24h': new_defects_24h,
-        },
+        metrics=developer_service.get_dashboard_metrics(),
     )
 
 
@@ -189,208 +103,44 @@ def manager_dashboard():
     sort = request.args.get("sort", "recent")
     status_filter = request.args.get("status_filter", "all")
     date_range = request.args.get("date_range", "all")
-    order_clause = Scan.created_at.desc() if sort == "recent" else Scan.created_at.asc()
 
-    query = db.session.query(
-        Scan,
-        db.func.count(Defect.id).label('defect_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Reported', 1), else_=0)), 0).label('reported_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Under Review', 1), else_=0)), 0).label('review_count'),
-        db.func.coalesce(db.func.sum(db.case((Defect.status == 'Fixed', 1), else_=0)), 0).label('fixed_count')
-    ).outerjoin(Defect).group_by(Scan.id).order_by(order_clause)
-
-    if date_range == "week":
-        cutoff = datetime.now() - timedelta(days=7)
-        query = query.filter(Scan.created_at >= cutoff)
-    elif date_range == "month":
-        cutoff = datetime.now() - timedelta(days=30)
-        query = query.filter(Scan.created_at >= cutoff)
-    elif date_range == "3months":
-        cutoff = datetime.now() - timedelta(days=90)
-        query = query.filter(Scan.created_at >= cutoff)
-
-    scans = query.all()
-
-    if status_filter != "all":
-        filtered_scans = []
-        for scan_data in scans:
-            _, defect_count, reported, review, fixed = scan_data
-            if status_filter == "complete" and defect_count > 0 and fixed == defect_count:
-                filtered_scans.append(scan_data)
-            elif status_filter == "in_progress" and review > 0:
-                filtered_scans.append(scan_data)
-            elif status_filter == "started" and reported > 0 and review == 0 and fixed == 0:
-                filtered_scans.append(scan_data)
-        scans = filtered_scans
+    scans = developer_service.get_scans_with_defect_counts(
+        is_manager=True, sort=sort, date_range=date_range, status_filter=status_filter,
+    )
 
     total_defects = sum(row.defect_count for row in scans)
     total_reported = sum(row.reported_count for row in scans)
     total_review = sum(row.review_count for row in scans)
     total_fixed = sum(row.fixed_count for row in scans)
 
-    now_utc = datetime.utcnow()
-    seven_days_ago = now_utc - timedelta(days=7)
-    urgent_attention = Defect.query.filter(
-        Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
-        Defect.status != DefectStatus.FIXED,
-    ).count()
-    stale_reviews = Defect.query.filter(
-        Defect.status == DefectStatus.UNDER_REVIEW,
-        Defect.created_at < seven_days_ago,
-    ).count()
-    new_defects_24h = Defect.query.filter(Defect.created_at >= (now_utc - timedelta(hours=24))).count()
-
-    project_counts = {
+    metrics = developer_service.get_dashboard_metrics()
+    metrics['project_counts'] = {
         'mine': Scan.query.filter(Scan.assigned_to_user_id == current_user.id).count(),
         'unassigned': Scan.query.filter(Scan.assigned_to_user_id.is_(None)).count(),
         'all': Scan.query.count(),
     }
 
-    developers = User.query.filter_by(role='developer', is_active=True, is_available=True).order_by(User.username.asc()).all()
+    developers = User.query.filter_by(
+        role='developer', is_active=True, is_available=True,
+    ).order_by(User.username.asc()).all()
 
-    scan_ids = [scan.id for scan, _, _, _, _ in scans]
-    escalation_summary = {
-        'urgent_hotspots': 0,
-        'stale_reviews': 0,
-        'overdue_backlog': 0,
-    }
+    scan_ids = [s[0].id for s in scans]
+    escalation_counts = developer_service.get_escalation_data(scan_ids)
+
+    escalation_summary = {'urgent_hotspots': 0, 'stale_reviews': 0, 'overdue_backlog': 0}
     project_escalations = {}
-    escalation_counts_by_scan = {}
-
-    if scan_ids:
-        escalation_rows = db.session.query(
-            Defect.scan_id,
-            db.func.coalesce(
-                db.func.sum(
-                    db.case(
-                        (
-                            db.and_(
-                                Defect.priority.in_([DefectPriority.URGENT, DefectPriority.HIGH]),
-                                Defect.status != DefectStatus.FIXED,
-                                Defect.is_active.is_(True),
-                            ),
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ),
-                0,
-            ).label('urgent_open_count'),
-            db.func.coalesce(
-                db.func.sum(
-                    db.case(
-                        (
-                            db.and_(
-                                Defect.status == DefectStatus.UNDER_REVIEW,
-                                Defect.created_at < seven_days_ago,
-                                Defect.is_active.is_(True),
-                            ),
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ),
-                0,
-            ).label('stale_review_count'),
-            db.func.coalesce(
-                db.func.sum(
-                    db.case(
-                        (
-                            db.and_(
-                                Defect.due_date.isnot(None),
-                                Defect.due_date < now_utc,
-                                Defect.status != DefectStatus.FIXED,
-                                Defect.is_active.is_(True),
-                            ),
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ),
-                0,
-            ).label('overdue_open_count'),
-        ).filter(
-            Defect.scan_id.in_(scan_ids)
-        ).group_by(Defect.scan_id).all()
-
-        for row in escalation_rows:
-            escalation_counts_by_scan[row.scan_id] = {
-                'urgent_open_count': int(row.urgent_open_count or 0),
-                'stale_review_count': int(row.stale_review_count or 0),
-                'overdue_open_count': int(row.overdue_open_count or 0),
-            }
-
-    for scan, _, _, _, _ in scans:
-        counts = escalation_counts_by_scan.get(scan.id, {
-            'urgent_open_count': 0,
-            'stale_review_count': 0,
-            'overdue_open_count': 0,
+    for row in scans:
+        scan = row[0]
+        counts = escalation_counts.get(scan.id, {
+            'urgent_open_count': 0, 'stale_review_count': 0, 'overdue_open_count': 0,
         })
-        flags = []
+        result = developer_service.build_escalation_flags(scan, counts)
+        project_escalations[scan.id] = result
+        if result['flags']:
+            for flag in result['flags']:
+                escalation_summary[flag['type']] = escalation_summary.get(flag['type'], 0) + 1
 
-        if counts['urgent_open_count'] >= 3:
-            flags.append({
-                'type': 'urgent_hotspots',
-                'label': 'Urgent Hotspot',
-                'detail': f"{counts['urgent_open_count']} urgent/high open",
-                'level': 'danger',
-            })
-            escalation_summary['urgent_hotspots'] += 1
-        if counts['stale_review_count'] >= 2:
-            flags.append({
-                'type': 'stale_reviews',
-                'label': 'Stale Review',
-                'detail': f"{counts['stale_review_count']} reviews older than 7d",
-                'level': 'warning',
-            })
-            escalation_summary['stale_reviews'] += 1
-        if counts['overdue_open_count'] >= 3:
-            flags.append({
-                'type': 'overdue_backlog',
-                'label': 'Overdue Backlog',
-                'detail': f"{counts['overdue_open_count']} overdue unresolved",
-                'level': 'critical',
-            })
-            escalation_summary['overdue_backlog'] += 1
-
-        project_escalations[scan.id] = {
-            'flags': flags,
-            'counts': counts,
-        }
-
-    team_workload = []
-    for dev in developers:
-        assigned_projects = Scan.query.filter_by(assigned_to_user_id=dev.id).count()
-        open_defect_rows = Defect.query.join(Scan, Scan.id == Defect.scan_id).filter(
-            Scan.assigned_to_user_id == dev.id,
-            Defect.status != DefectStatus.FIXED,
-            Defect.is_active.is_(True),
-        ).all()
-        open_defects = len(open_defect_rows)
-        urgent_open = sum(1 for defect in open_defect_rows if defect.priority in (DefectPriority.URGENT, DefectPriority.HIGH))
-        average_age_days = 0.0
-        if open_defect_rows:
-            age_days_values = [max((now_utc - (defect.created_at or now_utc)).total_seconds() / 86400, 0) for defect in open_defect_rows]
-            average_age_days = round(sum(age_days_values) / len(age_days_values), 1)
-
-        if open_defects >= 20 or urgent_open >= 8:
-            load_state = 'overloaded'
-        elif open_defects >= 8 or urgent_open >= 3:
-            load_state = 'balanced'
-        else:
-            load_state = 'underloaded'
-
-        utilization_percent = min(int((open_defects / 20) * 100), 100) if open_defects > 0 else 0
-
-        team_workload.append({
-            'developer': dev,
-            'assigned_projects': assigned_projects,
-            'open_defects': open_defects,
-            'urgent_open': urgent_open,
-            'average_age_days': average_age_days,
-            'load_state': load_state,
-            'utilization_percent': utilization_percent,
-        })
+    team_workload = developer_service.get_team_workload(developers)
 
     return render_template(
         "manager/dashboard.html",
@@ -402,12 +152,7 @@ def manager_dashboard():
         sort=sort,
         status_filter=status_filter,
         date_range=date_range,
-        metrics={
-            'urgent_attention': urgent_attention,
-            'stale_reviews': stale_reviews,
-            'new_24h': new_defects_24h,
-            'project_counts': project_counts,
-        },
+        metrics=metrics,
         developers=developers,
         team_workload=team_workload,
         escalation_summary=escalation_summary,
@@ -447,7 +192,7 @@ def assign_project(scan_id):
             return redirect(request.referrer or url_for('developer.manager_dashboard'))
 
         scan.assigned_to_user_id = assignee.id
-        scan.assigned_at = datetime.utcnow()
+        scan.assigned_at = datetime.now(timezone.utc).replace(tzinfo=None)
         new_owner = assignee.username
 
     defects = Defect.query.filter(
@@ -457,7 +202,6 @@ def assign_project(scan_id):
     for defect in defects:
         defect.assigned_to_user_id = scan.assigned_to_user_id
         defect.assigned_at = scan.assigned_at
-        defect.due_date = None
 
     if old_owner != new_owner:
         db.session.add(ActivityLog(
@@ -507,25 +251,22 @@ def view_scan(scan_id):
     if sort_by == 'created_asc':
         query = query.order_by(Defect.created_at.asc())
     elif sort_by == 'priority':
-        # Custom sort for priority: Urgent > High > Medium > Low
-        # We map them to integers for sorting
         query = query.order_by(
             db.case(
-                (Defect.priority == 'Urgent', 4),
-                (Defect.priority == 'High', 3),
-                (Defect.priority == 'Medium', 2),
-                (Defect.priority == 'Low', 1),
+                (Defect.priority == DefectPriority.URGENT.value, 4),
+                (Defect.priority == DefectPriority.HIGH.value, 3),
+                (Defect.priority == DefectPriority.MEDIUM.value, 2),
+                (Defect.priority == DefectPriority.LOW.value, 1),
                 else_=0
             ).desc()
         )
     elif sort_by == 'severity':
-        # Custom sort for severity
         query = query.order_by(
             db.case(
-                (Defect.severity == 'Critical', 4),
-                (Defect.severity == 'High', 3),
-                (Defect.severity == 'Medium', 2),
-                (Defect.severity == 'Low', 1),
+                (Defect.severity == DefectSeverity.CRITICAL.value, 4),
+                (Defect.severity == DefectSeverity.HIGH.value, 3),
+                (Defect.severity == DefectSeverity.MEDIUM.value, 2),
+                (Defect.severity == DefectSeverity.LOW.value, 1),
                 else_=0
             ).desc()
         )
@@ -558,22 +299,17 @@ def view_scan(scan_id):
             unique_labels = set(labels)
             for k in unique_labels:
                 if k == -1:
-                    continue  # Noise
+                    continue
                 
-                # Get indices of points in this cluster
                 class_member_mask = (labels == k)
                 cluster_defects = [defects[i] for i in range(len(defects)) if class_member_mask[i]]
                 
                 if cluster_defects:
-                    # Calculate centroid
                     cx = sum(d.x for d in cluster_defects) / len(cluster_defects)
                     cy = sum(d.y for d in cluster_defects) / len(cluster_defects)
                     cz = sum(d.z for d in cluster_defects) / len(cluster_defects)
                     
-                    # Count Critical defects in this hotspot
                     critical_count = sum(1 for d in cluster_defects if d.severity == 'Critical')
-                    
-                    # Collect unique locations for this cluster
                     cluster_locations = list(set(d.location for d in cluster_defects if d.location))
 
                     hotspots.append({
@@ -586,15 +322,18 @@ def view_scan(scan_id):
                         'locations': cluster_locations
                     })
             
-            # Sort hottest spots first
             hotspots.sort(key=lambda x: (x['critical_count'], x['count']), reverse=True)
-        except Exception as e:
-            current_app.logger.error("DBSCAN Clustering Failed: %s", e)
+        except Exception:  # noqa: BLE001
+            current_app.logger.exception("DBSCAN Clustering Failed")
+
+    from app.models import User
+    developers = User.query.filter_by(role='developer', is_active=True).order_by(User.username).all()
 
     return render_template(
         "developer/scan_detail.html", 
         scan=scan, 
         defects=defects, 
+        developers=developers,
         upload_metadata=upload_metadata,
         search_query=search_query,
         sort_by=sort_by,
@@ -767,19 +506,12 @@ def bulk_update_defects(scan_id):
             if new_status:
                 defect.status = new_status
 
-            if bulk_action == 'claim_me':
-                defect.assigned_to_user_id = current_user.id
-                defect.assigned_at = datetime.utcnow()
-                if not defect.due_date:
-                    defect.due_date = _default_due_date_for_defect(defect)
-            elif bulk_action == 'unassign':
+            if bulk_action == 'unassign':
                 defect.assigned_to_user_id = None
                 defect.assigned_at = None
             elif bulk_action == 'assign_to_user' and target_assignee:
                 defect.assigned_to_user_id = target_assignee.id
-                defect.assigned_at = datetime.utcnow()
-                if not defect.due_date:
-                    defect.due_date = _default_due_date_for_defect(defect)
+                defect.assigned_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             new_assignee = defect.assigned_to.username if defect.assigned_to else 'Unassigned'
             _log_activity(defect, 'assignee updated (bulk)', old_assignee, new_assignee, request_id)
@@ -824,22 +556,22 @@ def get_charts_data(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
 
-    # Status distribution
     status_counts = {}
     for d in defects:
         status_counts[d.status] = status_counts.get(d.status, 0) + 1
 
-    # Priority distribution
     priority_counts = {}
     for d in defects:
-        priority = d.priority or 'Medium'
+        priority = d.priority or DefectPriority.MEDIUM.value
         priority_counts[priority] = priority_counts.get(priority, 0) + 1
 
-    # Severity distribution (ordered Critical → Low)
-    severity_order = ['Critical', 'High', 'Medium', 'Low']
+    severity_order = [
+        DefectSeverity.CRITICAL.value, DefectSeverity.HIGH.value,
+        DefectSeverity.MEDIUM.value, DefectSeverity.LOW.value,
+    ]
     severity_counts = {}
     for d in defects:
-        severity = d.severity or 'Medium'
+        severity = d.severity or DefectSeverity.MEDIUM.value
         severity_counts[severity] = severity_counts.get(severity, 0) + 1
     ordered_severity = {k: severity_counts[k] for k in severity_order if k in severity_counts}
 
@@ -859,18 +591,19 @@ def get_heatmap_data(scan_id):
     scan = Scan.query.get_or_404(scan_id)
     defects = Defect.query.filter_by(scan_id=scan_id).all()
     
-    # Count defects by location
     location_counts = {}
     for d in defects:
         location = d.location or 'Unknown'
         location_counts[location] = location_counts.get(location, 0) + 1
-    
-    # Priority weight (for intensity)
-    priority_weight = {'Urgent': 4, 'High': 3, 'Medium': 2, 'Low': 1}
+
+    priority_weight = {
+        DefectPriority.URGENT.value: 4, DefectPriority.HIGH.value: 3,
+        DefectPriority.MEDIUM.value: 2, DefectPriority.LOW.value: 1,
+    }
     location_priority = {}
     for d in defects:
         location = d.location or 'Unknown'
-        priority = d.priority or 'Medium'
+        priority = d.priority or DefectPriority.MEDIUM.value
         weight = priority_weight.get(priority, 2)
         location_priority[location] = location_priority.get(location, 0) + weight
     
@@ -1030,17 +763,12 @@ def bulk_assign_tasks():
     updated = 0
     for defect in tasks:
         old_assignee = defect.assigned_to.username if defect.assigned_to else "Unassigned"
-        if action == "claim_me":
-            defect.assigned_to_user_id = current_user.id
-            defect.assigned_at = datetime.utcnow()
-        elif action == "unassign":
+        if action == "unassign":
             defect.assigned_to_user_id = None
             defect.assigned_at = None
         elif action == "assign_to_user" and target_assignee:
             defect.assigned_to_user_id = target_assignee.id
-            defect.assigned_at = datetime.utcnow()
-            if not defect.due_date:
-                defect.due_date = _default_due_date_for_defect(defect)
+            defect.assigned_at = datetime.now(timezone.utc).replace(tzinfo=None)
         else:
             continue
 
@@ -1059,7 +787,6 @@ def export_tasks_csv():
     """Export queue with assignment fields for reporting."""
     _ensure_developer_access()
 
-    now_utc = datetime.utcnow()
     queue = request.args.get("queue", "all")
     query = Defect.query.join(Scan).filter(Defect.is_active.is_(True))
 
@@ -1067,19 +794,13 @@ def export_tasks_csv():
         query = query.filter(Defect.assigned_to_user_id == current_user.id)
     elif queue == 'unassigned':
         query = query.filter(Defect.assigned_to_user_id.is_(None))
-    elif queue == 'overdue':
-        query = query.filter(
-            Defect.due_date.isnot(None),
-            Defect.due_date < now_utc,
-            Defect.status != DefectStatus.FIXED,
-        )
 
-    tasks = query.order_by(Defect.created_at.desc()).all()
+    tasks = query.order_by(Defect.created_at.desc()).limit(10000).all()
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow([
         'defect_id', 'scan_id', 'scan_name', 'status', 'severity', 'priority',
-        'assignee', 'assignee_id', 'assigned_at', 'due_date', 'location', 'defect_type',
+        'assignee', 'assignee_id', 'assigned_at', 'location', 'defect_type',
         'x', 'y', 'z', 'created_at',
     ])
     for d in tasks:
@@ -1093,7 +814,6 @@ def export_tasks_csv():
             d.assigned_to.username if d.assigned_to else '',
             d.assigned_to_user_id or '',
             d.assigned_at.isoformat() if d.assigned_at else '',
-            d.due_date.isoformat() if d.due_date else '',
             d.location or '',
             d.defect_type or '',
             d.x,
@@ -1104,7 +824,7 @@ def export_tasks_csv():
 
     response = make_response(buffer.getvalue())
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
-    response.headers['Content-Disposition'] = f'attachment; filename=ldms_tasks_{queue}_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.csv'
+    response.headers['Content-Disposition'] = f'attachment; filename=ldms_tasks_{queue}_{datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")}.csv'
     return response
 
 
@@ -1112,7 +832,7 @@ def export_tasks_csv():
 @login_required
 def admin_users():
     """Light admin page to manage users and account states."""
-    _ensure_admin_access()
+    _ensure_manager_access()
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template('developer/admin_users.html', users=users)
 
@@ -1121,7 +841,7 @@ def admin_users():
 @login_required
 def admin_update_user(user_id):
     """Apply account/role/password updates from admin page."""
-    _ensure_admin_access()
+    _ensure_manager_access()
     user = db.session.get(User, user_id)
     if user is None:
         abort(404)

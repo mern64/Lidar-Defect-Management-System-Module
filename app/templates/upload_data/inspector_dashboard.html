@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
   <style>
     :root {
       --bg-from: #eef1f7;
@@ -70,6 +71,13 @@
       color: var(--ink); letter-spacing: -0.01em;
       white-space: nowrap;
     }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8125rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
 
     .user-pill {
       display: inline-flex; align-items: center; gap: 6px;
@@ -333,27 +341,16 @@
     /* Ensure content floats above */
     .main { position: relative; z-index: 1; }
 
-    /* Loading overlay */
-    #ldms-loader {
-      display: none; position: fixed; inset: 0; z-index: 99999;
-      background: rgba(238, 241, 247, 0.88); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; flex-direction: column; gap: 14px;
-    }
-    #ldms-loader.active { display: flex; }
-    .loader-spinner {
-      width: 34px; height: 34px;
-      border: 3px solid rgba(37, 99, 235, 0.15);
-      border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    .loader-text { color: var(--muted); font-weight: 500; font-size: 0.875rem; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+     }
 
     @media (max-width: 640px) {
       .hero-heading { font-size: 1.75rem; }
       .main { padding: 3rem 1.25rem 4rem; }
       .cards { grid-template-columns: 1fr; }
       .bg-icon i { font-size: 12rem; }
+    }
+
+    
     }
   </style>
 </head>
@@ -365,7 +362,7 @@
     })();
   </script>
 
-  <div id="ldms-loader">
+  <div id="ldms-loader" class="ldms-loader">
     <div class="loader-spinner"></div>
     <span class="loader-text">Loading…</span>
   </div>
@@ -376,16 +373,23 @@
   </div>
 
   <header class="topbar" id="tour-inspector-topbar">
-    <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand" id="tour-inspector-brand">
-      <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
-      <span class="topbar-name">Lidar Defect Management System</span>
-    </a>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <a href="{{ url_for('upload_data.inspector_dashboard') }}" class="topbar-brand" id="tour-inspector-brand">
+        <div class="topbar-icon"><i class="fas fa-hard-hat"></i></div>
+        <span class="topbar-name">Lidar Defect Management System</span>
+      </a>
+      <a href="{{ url_for('defects.list_projects') }}" class="back-link" data-tooltip="View all projects">
+        <i class="fas fa-folder-open"></i> My Projects
+      </a>
+    </div>
     <div class="topbar-right" id="tour-inspector-actions">
-      <button class="tour-btn" id="tourReplayInspector" type="button"><i class="fas fa-compass"></i> Tutorial</button>
-      <button class="tour-btn tour-btn-reset" id="tourResetInspector" type="button"><i class="fas fa-rotate-left"></i> Reset Tour</button>
-      <a href="{{ url_for('auth.logout') }}" class="user-pill">
+      <button class="tour-btn" id="tourReplayInspector" type="button" data-tooltip="Replay tutorial"><i class="fas fa-compass"></i> Tutorial</button>
+      <button class="tour-btn tour-btn-reset" id="tourResetInspector" type="button" data-tooltip="Reset tutorial tour"><i class="fas fa-rotate-left"></i> Reset Tour</button>
+      <a href="{{ url_for('auth.profile') }}" class="user-pill" data-tooltip="Your profile">
         <i class="fas fa-user"></i>
         {{ current_user.username }}
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">
         <i class="fas fa-sign-out-alt"></i>
       </a>
     </div>
@@ -438,7 +442,7 @@
   </div>
 
   <script>
-    document.querySelectorAll('a[href]').forEach(link => {
+    document.querySelectorAll('a[href]').forEach(link => { if (link.hasAttribute("data-confirm")) return; {
       const href = link.getAttribute('href') || '';
       if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
@@ -596,5 +600,7 @@
       });
     })();
   </script>
+  <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
+  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
 </body>
 </html>

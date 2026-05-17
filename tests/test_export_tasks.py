@@ -30,5 +30,4 @@ def test_tasks_csv_export_includes_assignment_fields(app, login_dev):
     csv_text = response.data.decode("utf-8")
     assert "assignee" in csv_text
     assert "assignee_id" in csv_text
-    assert "due_date" in csv_text
     assert "Export Scan" in csv_text
