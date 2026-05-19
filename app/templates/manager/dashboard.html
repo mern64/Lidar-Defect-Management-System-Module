@@ -600,7 +600,9 @@
             <span class="topbar-tag">Manager</span>
         </div>
         <div class="topbar-right">
+            {% if current_user.username == 'manager' %}
             <a href="{{ url_for('developer.admin_users') }}" class="topbar-btn"><i class="fas fa-users-cog"></i> User Management</a>
+            {% endif %}
             <button id="ldms-theme-btn" class="topbar-btn" type="button"><i class="fas fa-moon"></i> <span>Dark</span></button>
             <a href="{{ url_for('auth.profile') }}" class="topbar-btn"><i class="fas fa-user"></i> {{ current_user.username }}</a>
             <a href="{{ url_for('auth.logout') }}" class="topbar-btn topbar-logout" data-confirm="Sign out now?" data-confirm-btn="Sign out"><i class="fas fa-sign-out-alt"></i></a>
@@ -748,6 +750,11 @@
                         </select>
                         <button type="submit"><i class="fas fa-user-check"></i> Assign</button>
                     </form>
+                    {% if current_user.username in ('manager', 'Afiq_M') %}
+                    <button class="btn-delete-project" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px;">
+                        <i class="fas fa-trash"></i> Delete Project
+                    </button>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="ldms-empty">
@@ -797,12 +804,95 @@
                 </table>
             </div>
         </div>
+
+        {% if current_user.username in ('manager', 'Afiq_M') %}
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-head">
+                <h2><i class="fas fa-trash"></i> Clear User Projects</h2>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--ink-2); margin-bottom: 12px;">Delete all projects and defects assigned to a specific user.</p>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <select id="clear-user-select" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); min-width: 180px;">
+                        <option value="">Select a user...</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="clearUserProjects()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-trash"></i> Clear All Projects
+                    </button>
+                </div>
+                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--surface); border-radius: 6px; display: none;"></div>
+            </div>
+        </div>
+        {% endif %}
     </main>
 
     <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
     <script <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT" crossorigin="anonymous"></script>
   <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
     <script>
+        // Delete single project
+        function deleteProject(scanId, scanName) {
+            if (!confirm('Are you sure you want to delete project "' + scanName + '"? This will also delete all related defects. This action cannot be undone.')) {
+                return;
+            }
+            
+            fetch('/developer/scan/' + scanId, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Project "' + scanName + '" deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting project. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        }
+
+        // Clear all projects for a user
+        function clearUserProjects() {
+            const userSelect = document.getElementById('clear-user-select');
+            const userId = userSelect.value;
+            const userName = userSelect.options[userSelect.selectedIndex].text;
+            
+            if (!userId) {
+                alert('Please select a user first.');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete all projects and defects for user "' + userName + '"? This action cannot be undone.')) {
+                return;
+            }
+            
+            fetch('/developer/clear-user-projects/' + userId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('clear-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i> ' + data.message;
+                setTimeout(() => location.reload(), 2000);
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById('clear-result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Error: ' + error;
+            });
+        }
+
         document.querySelectorAll('a[href]').forEach(function(link) {
             if (link.hasAttribute('data-confirm')) return;
             const href = link.getAttribute('href') || '';

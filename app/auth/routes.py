@@ -158,3 +158,28 @@ def register():
         return _redirect_by_role(current_user)
 
     return render_template('auth/register.html')
+
+
+# Route to create test manager user
+@auth_bp.route('/create-test-manager')
+def create_test_manager():
+    from werkzeug.security import generate_password_hash
+    from app.extensions import db
+    
+    # Check if Afiq_M already exists
+    existing = User.query.filter_by(username='Afiq_M').first()
+    if existing:
+        return f"User Afiq_M already exists with role: {existing.role}"
+    
+    # Create new test manager
+    test_manager = User(
+        username='Afiq_M',
+        role='manager',
+        is_active=True,
+        is_available=True
+    )
+    test_manager.set_password('abc12345')
+    db.session.add(test_manager)
+    db.session.commit()
+    
+    return "Test manager user Afiq_M created successfully! Login with Afiq_M / abc12345"

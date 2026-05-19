@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app, abort, make_response
 from flask_login import login_required, current_user
-from app.extensions import db
+from app.extensions import db, csrf
 from app.models import Scan, Defect, DefectStatus, DefectPriority, DefectSeverity, User, ActivityLog
 from app.utils import load_upload_metadata
 from app.services import developer_service
@@ -28,6 +28,11 @@ def _ensure_admin_access():
 def _ensure_manager_access():
     if not current_user.is_manager:
         abort(403)
+
+
+def _is_manager():
+    """Check if current user has manager access (manager or Afiq_M usernames)."""
+    return current_user.username in ('manager', 'Afiq_M')
 
 
 
@@ -142,6 +147,8 @@ def manager_dashboard():
 
     team_workload = developer_service.get_team_workload(developers)
 
+    users = User.query.filter(User.id != current_user.id).order_by(User.username.asc()).all()
+
     return render_template(
         "manager/dashboard.html",
         scans=scans,
@@ -157,6 +164,7 @@ def manager_dashboard():
         team_workload=team_workload,
         escalation_summary=escalation_summary,
         project_escalations=project_escalations,
+        users=users,
     )
 
 
@@ -936,3 +944,63 @@ def admin_update_user(user_id):
     db.session.commit()
     flash(f'Updated user {user.username}.', 'success')
     return redirect(url_for('developer.admin_users'))
+
+
+# Delete single project (scan) - including all related defects
+@developer_bp.route('/developer/scan/<int:scan_id>', methods=['DELETE'])
+@csrf.exempt
+@login_required
+def delete_project(scan_id):
+    """Delete a single project including all its defects."""
+    try:
+        if not _is_manager():
+            return jsonify({'error': 'Access denied'}), 403
+        
+        scan = Scan.query.get_or_404(scan_id)
+        scan_name = scan.name
+        
+        # Delete all related defects first
+        defects = Defect.query.filter_by(scan_id=scan_id).all()
+        defect_count = len(defects)
+        for defect in defects:
+            db.session.delete(defect)
+    
+        # Delete the scan
+        db.session.delete(scan)
+        db.session.commit()
+        
+        return jsonify({'message': f'Project "{scan_name}" and {defect_count} defects deleted successfully'})
+    except Exception as e:
+        current_app.logger.error(f"Error deleting project: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+# Clear all projects for a specific user
+@developer_bp.route('/developer/clear-user-projects/<int:user_id>', methods=['POST'])
+@csrf.exempt
+@login_required
+def clear_user_projects(user_id):
+    """Delete all projects assigned to a specific user."""
+    if not _is_manager():
+        abort(403)
+    
+    user = User.query.get_or_404(user_id)
+    
+    # Get all scans assigned to this user
+    scans = Scan.query.filter_by(assigned_to_user_id=user_id).all()
+    project_count = len(scans)
+    total_defects = 0
+    
+    for scan in scans:
+        # Delete all defects for this scan
+        defects = Defect.query.filter_by(scan_id=scan.id).all()
+        total_defects += len(defects)
+        for defect in defects:
+            db.session.delete(defect)
+        # Delete the scan
+        db.session.delete(scan)
+    
+    db.session.commit()
+    
+    flash(f'Cleared {project_count} projects and {total_defects} defects for user {user.username}.', 'success')
+    return jsonify({'message': f'Cleared {project_count} projects'})
