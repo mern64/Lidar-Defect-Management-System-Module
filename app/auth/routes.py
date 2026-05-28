@@ -99,6 +99,42 @@ def profile():
     return render_template('auth/profile.html')
 
 
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    """Edit the current user's profile."""
+    user = current_user
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        phone_number = request.form.get('phone_number', '').strip()
+        department = request.form.get('department', '').strip()
+        job_title = request.form.get('job_title', '').strip()
+
+        if not full_name or not email:
+            flash('Full name and email are required.', 'error')
+            return render_template('auth/profile.html', user=user)
+
+        import re
+        if not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+            flash('Please provide a valid email address.', 'error')
+            return render_template('auth/profile.html', user=user)
+
+        user.full_name = full_name
+        user.email = email
+        user.phone_number = phone_number or None
+        user.department = department or None
+        user.job_title = job_title or None
+
+        from app.extensions import db
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('auth/profile.html', user=user)
+
+
 @auth_bp.route('/logout')
 @login_required
 def logout():

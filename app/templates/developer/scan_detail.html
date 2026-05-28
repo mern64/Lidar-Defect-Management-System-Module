@@ -1316,6 +1316,21 @@
             });
 
             toggleAssignee();
+
+            // Show loading spinner on form submit
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function () {
+                    document.getElementById('spinner').classList.add('active');
+                    document.getElementById('spinner-backdrop').classList.add('active');
+                });
+            });
+        });
+
+        // Close lightbox with ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeLightbox();
+>>>>>>> 07a82da (feat: add profile edit page, fix tour backdrop, remove admin button, clean up JS errors)
         });
 
         // Bulk Actions Functions

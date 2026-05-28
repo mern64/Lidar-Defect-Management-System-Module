@@ -259,6 +259,11 @@
       border-radius: 12px;
     }
 
+    .tour-active .topbar-right {
+      position: relative;
+      z-index: 1300;
+    }
+
     .tour-backdrop {
       position: fixed;
       inset: 0;
@@ -389,7 +394,11 @@
         <i class="fas fa-user"></i>
         {{ current_user.username }}
       </a>
-      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">
+      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">        <i class="fas fa-user"></i>
+        {{ current_user.username }}
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="user-pill" title="Logout">
+>>>>>>> 07a82da (feat: add profile edit page, fix tour backdrop, remove admin button, clean up JS errors)
         <i class="fas fa-sign-out-alt"></i>
       </a>
     </div>

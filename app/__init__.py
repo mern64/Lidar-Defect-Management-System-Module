@@ -81,7 +81,7 @@ def create_app(config_overrides=None):
     @app.cli.command('create-user')
     @click.option('--username', prompt=True, help='Username')
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='Password')
-    @click.option('--role', type=click.Choice(['inspector', 'developer']), prompt=True, help='User role')
+    @click.option('--role', type=click.Choice(['inspector', 'developer', 'manager']), prompt=True, help='User role')
     @click.option('--email', default='', help='Email address for notifications')
     def create_user(username, password, role, email):
         """Create a new user (inspector or developer)."""
