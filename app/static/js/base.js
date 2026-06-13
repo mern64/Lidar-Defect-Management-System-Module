@@ -211,7 +211,8 @@
     var lb = document.getElementById('ldms-lightbox');
     if (lb) lb.addEventListener('click', ldmsCloseLightbox);
     document.querySelectorAll('form').forEach(function (f) {
-      f.addEventListener('submit', function () {
+      f.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
         ldmsShowLoader('Submitting and processing…');
         f.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (btn) {
           btn.disabled = true;
@@ -237,6 +238,7 @@
         };
         ldmsConfirm(opts).then(function (result) {
           if (result.isConfirmed) {
+            ldmsShowLoader('Submitting and processing…');
             if (el.tagName === 'A') window.location.href = el.href;
             else if (el.tagName === 'BUTTON' || el.tagName === 'INPUT') {
               var form = el.closest('form');
