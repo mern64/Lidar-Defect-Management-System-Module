@@ -9,54 +9,56 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for("static", filename="css/base.css") }}?v={{ cache_bust }}">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface-2: #232734;
-            --ink: #e4e6ed;
-            --ink-2: #989cad;
-            --muted: #6b7084;
-            --border: #2a2e3a;
-            --accent: #3b82f6;
-            --accent-subtle: rgba(59, 130, 246, 0.1);
-            --green: #22c55e;
-            --green-bg: rgba(34, 197, 94, 0.1);
-            --amber: #eab308;
-            --amber-bg: rgba(234, 179, 8, 0.1);
-            --red: #ef4444;
-            --red-bg: rgba(239, 68, 68, 0.1);
-            --radius: 8px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --bg: #0b1020;
+            --panel: rgba(255, 255, 255, 0.05);
+            --ink: #e2e8f0;
+            --muted: #94a3b8;
+            --edge: rgba(255, 255, 255, 0.08);
+            --accent: #1f7aec;
+            --accent-2: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --control-radius: 0.72rem;
+            --control-height: 2.35rem;
+            --chip-radius: 999px;
+            --shadow-card-dark: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.24) 0px 8px 20px;
+            --shadow-card-light: rgba(19, 19, 22, 0.2) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.08) 0px 8px 20px;
         }
 
         body.light-mode {
-            --bg: #f6f7f9;
-            --surface: #ffffff;
-            --surface-2: #f0f1f3;
-            --ink: #1a1c23;
-            --ink-2: #5a5f72;
-            --muted: #9196a8;
-            --border: #e2e4ea;
-            --accent: #2563eb;
-            --accent-subtle: rgba(37, 99, 235, 0.06);
-            --green: #16a34a;
-            --green-bg: rgba(22, 163, 74, 0.08);
-            --amber: #ca8a04;
-            --amber-bg: rgba(202, 138, 4, 0.08);
-            --red: #dc2626;
-            --red-bg: rgba(220, 38, 38, 0.08);
-            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --bg: #f5f5f5;
+            --panel: rgba(0, 0, 0, 0.03);
+            --ink: #0f172a;
+            --muted: #475569;
+            --edge: rgba(0, 0, 0, 0.08);
+            --accent: #1f7aec;
+            --accent-2: #0ea5e9;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            background: var(--bg);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
+                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
             color: var(--ink);
             min-height: 100vh;
             font-size: 15px;
             line-height: 1.5;
+        }
+
+        body.light-mode {
+            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
 
         /* ── Topbar ── */
@@ -66,11 +68,16 @@
             justify-content: space-between;
             height: 56px;
             padding: 0 24px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            background: rgba(11, 16, 32, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--edge);
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        body.light-mode .topbar {
+            background: rgba(255, 255, 255, 0.85);
         }
 
         .topbar-left {
@@ -85,6 +92,7 @@
         }
 
         .topbar-brand {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
             font-size: 16px;
             color: var(--ink);
@@ -92,502 +100,1057 @@
 
         .topbar-tag {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             padding: 2px 8px;
             border-radius: 4px;
-            background: var(--accent-subtle);
+            background: rgba(31, 122, 236, 0.15);
             color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .topbar-right {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .topbar-btn {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--ink-2);
-            font-size: 13.5px;
-            font-weight: 500;
-            font-family: inherit;
+            min-height: var(--control-height);
+            padding: 0.45rem 0.95rem;
+            border-radius: var(--chip-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.84rem;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.15s;
+            transition: all 0.2s ease;
         }
 
         .topbar-btn:hover {
-            background: var(--surface-2);
-            color: var(--ink);
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-mode .topbar-btn {
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        body.light-mode .topbar-btn:hover {
+            background: rgba(255, 255, 255, 0.95);
             border-color: var(--accent);
         }
 
-        .topbar-btn i { font-size: 13px; }
-
-        .topbar-user {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            color: var(--ink-2);
-            font-size: 13px;
-            font-weight: 500;
+        .topbar-logout {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
 
-        .topbar-logout { color: var(--red); }
+        body.light-mode .topbar-logout {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
         .topbar-logout:hover {
-            background: var(--red-bg) !important;
-            border-color: var(--red) !important;
-            color: var(--red) !important;
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: var(--danger) !important;
+            color: #fff !important;
         }
 
-        /* ── Layout ── */
-        .container {
-            max-width: 1100px;
+        /* ── Split Layout ── */
+        .dashboard-split {
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 24px 24px 48px;
-        }
-
-        /* ── Page Title ── */
-        .page-title {
-            margin-bottom: 20px;
-        }
-
-        .page-title h1 {
-            font-size: 22px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .page-title h1 i { color: var(--accent); }
-
-        .page-title p {
-            font-size: 14px;
-            color: var(--ink-2);
-            margin-top: 2px;
-        }
-
-        /* ── Cards ── */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .card + .card { margin-top: 12px; }
-
-        .card-head {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-head h2 {
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-head h2 i { color: var(--accent); }
-
-        .card-head-meta {
-            font-size: 13px;
-            color: var(--ink-2);
-            font-weight: 500;
-        }
-
-        .card-body { padding: 16px; }
-
-        /* ── Stats Row ── */
-        .stats {
+            padding: 2rem 2rem 5rem;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 12px;
+            grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+            gap: 1.5rem;
+            align-items: start;
         }
 
-        .stat {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            box-shadow: var(--shadow);
+        @media (max-width: 992px) {
+            .dashboard-split {
+                grid-template-columns: 1fr;
+                padding: 1.5rem 1.5rem 3rem;
+            }
         }
 
-        .stat-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--ink-2);
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .stat.blue .stat-value { color: var(--accent); }
-        .stat.amber .stat-value { color: var(--amber); }
-        .stat.red .stat-value { color: var(--red); }
-        .stat.green .stat-value { color: var(--green); }
-
-        /* ── Alerts Row ── */
-        .alerts {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .alert-box {
-            padding: 12px 14px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            background: var(--surface);
-            box-shadow: var(--shadow);
-        }
-
-        .alert-box .label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--ink-2);
-            margin-bottom: 2px;
-        }
-
-        .alert-box .value {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .alert-box .hint {
-            font-size: 12px;
-            color: var(--ink-2);
-            margin-top: 2px;
-        }
-
-        .alert-box.red .value { color: var(--red); }
-        .alert-box.amber .value { color: var(--amber); }
-        .alert-box.critical .value { color: var(--red); }
-
-        /* ── Filters ── */
-        .filters {
-            display: flex;
-            gap: 8px;
-            align-items: end;
-            flex-wrap: wrap;
-        }
-
-        .filter-field {
+        .left-panel, .right-panel {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 1.5rem;
         }
 
-        .filter-field label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--ink-2);
+        /* ── Hero / Command Center Header ── */
+        .hero {
+            display: grid;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.14), transparent 32%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.14), transparent 30%),
+                linear-gradient(145deg, rgba(10, 15, 28, 0.88), rgba(17, 24, 39, 0.92));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: rgba(0, 0, 0, 0.26) 0px 20px 40px -20px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px inset;
         }
 
-        .filter-field select,
-        .filter-field button {
-            height: 32px;
-            padding: 0 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--ink);
-            font-family: inherit;
-            font-size: 13.5px;
-            font-weight: 500;
+        body.light-mode .hero {
+            background:
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.08), transparent 32%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent 30%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.96));
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-card-light);
         }
 
-        .filter-field select option { color: #1a1c23; }
-
-        .filter-field button {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0 14px;
-        }
-
-        .filter-field button:hover { opacity: 0.92; }
-
-        /* ── Project List ── */
-        .project + .project { margin-top: 8px; }
-
-        .project {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px 14px;
-            background: var(--bg);
-            transition: border-color 0.15s;
-        }
-
-        body.light-mode .project { background: var(--surface-2); }
-
-        .project:hover { border-color: var(--accent); }
-
-        .project-row1 {
+        .hero-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 6px;
         }
 
-        .project-name {
-            font-size: 15px;
-            font-weight: 600;
+        .breadcrumbs {
+            color: var(--muted);
             display: flex;
             align-items: center;
-            gap: 6px;
-        }
-
-        .project-name i { color: var(--accent); font-size: 14px; }
-
-        .project-tag {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-
-        .project-tag.assigned {
-            background: var(--green-bg);
-            color: var(--green);
-        }
-
-        .project-tag.unassigned {
-            background: var(--amber-bg);
-            color: var(--amber);
-        }
-
-        .project-row2 {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .project-badge {
-            font-size: 12px;
-            color: var(--ink-2);
-            background: var(--surface-2);
-            padding: 2px 8px;
-            border-radius: 4px;
+            gap: 0.5rem;
+            font-size: 0.9rem;
             font-weight: 500;
         }
-        body.light-mode .project-badge { background: var(--surface); }
 
-        .project-flags {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
+        .breadcrumbs i {
+            color: var(--accent-2);
         }
 
-        .flag {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 6px;
-            border-radius: 4px;
+        .hero-kicker {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 8px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(31, 122, 236, 0.15);
+            color: var(--ink);
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
         }
 
-        .flag.danger { background: var(--red-bg); color: var(--red); }
-        .flag.warning { background: var(--amber-bg); color: var(--amber); }
-        .flag.critical { background: rgba(220, 38, 38, 0.15); color: var(--red); }
+        body.light-mode .hero-kicker {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent);
+        }
 
-        .project-progress {
+        .hero h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            color: var(--ink);
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 12px;
         }
 
-        .project-progress-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--ink-2);
+        .hero h1 i {
+            color: var(--accent-2);
         }
 
-        .project-progress-bar {
-            flex: 1;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
+        .hero p.subtitle {
+            color: var(--muted);
+            font-size: 0.96rem;
+            margin-top: 0.25rem;
+        }
+
+        /* ── Bento & Glass Cards ── */
+        .bento-card {
+            position: relative;
+            padding: 1.5rem;
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--edge);
+            box-shadow: var(--shadow-card-dark);
             overflow: hidden;
         }
 
-        .project-progress-fill {
-            height: 100%;
-            border-radius: 2px;
-            background: var(--accent);
-            transition: width 0.25s;
+        body.light-mode .bento-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
+            box-shadow: var(--shadow-card-light);
+            border-color: rgba(15, 23, 42, 0.08);
         }
 
-        .project-progress-fill.done { background: var(--green); }
+        .bento-card h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.25rem;
+        }
 
-        .project-progress-pct {
-            font-size: 13px;
+        .bento-card h2 i {
+            color: var(--accent-2);
+            margin-right: 6px;
+        }
+
+        /* ── Projects Area Header ── */
+        .projects-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .pill {
+            padding: 0.35rem 0.65rem;
+            border-radius: var(--chip-radius);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--edge);
+            box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 8px;
+        }
+
+        .pill-auto {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--ink);
+            border-color: rgba(34, 211, 238, 0.25);
+        }
+
+        body.light-mode .pill-auto {
+            background: rgba(34, 211, 238, 0.1);
+            color: #0891b2;
+            border-color: rgba(34, 211, 238, 0.2);
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: var(--control-height);
+            padding: 0.45rem 0.95rem;
+            border-radius: var(--chip-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
             font-weight: 600;
-            color: var(--ink-2);
-            min-width: 30px;
+            font-size: 0.84rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-mode .theme-toggle {
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--shadow-card-light);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        /* ── Collapsible Filters Panel ── */
+        .filter-drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 7, 16, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .filter-drawer-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .filter-drawer {
+            position: fixed;
+            top: 0;
+            right: -360px;
+            width: 340px;
+            height: 100vh;
+            background: rgba(11, 16, 32, 0.95);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--edge);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.light-mode .filter-drawer {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: -10px 0 40px rgba(15, 23, 42, 0.08);
+            border-left: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .filter-drawer.active {
+            right: 0;
+        }
+
+        .filter-drawer-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--edge);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-drawer-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-drawer-header h3 i {
+            color: var(--accent-2);
+        }
+
+        .filter-drawer-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.15s;
+        }
+
+        .filter-drawer-close:hover {
+            color: var(--ink);
+        }
+
+        .filter-drawer-body {
+            padding: 1.5rem 1.25rem;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .filter-drawer-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .filter-drawer-field label {
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+        }
+
+        .filter-drawer-field select {
+            min-height: var(--control-height);
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--control-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--ink);
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.9rem;
+            box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px inset;
+            cursor: pointer;
+        }
+
+        body.light-mode .filter-drawer-field select {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(15, 23, 42, 0.08);
+            color: var(--ink);
+        }
+
+        .filter-drawer-field select option {
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        body.light-mode .filter-drawer-field select option {
+            background: #fff;
+            color: #000;
+        }
+
+        .filter-drawer-submit {
+            margin-top: 0.5rem;
+            min-height: var(--control-height);
+            padding: 0.52rem 0.95rem;
+            border-radius: var(--control-radius);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            box-shadow: rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .filter-drawer-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsive Mobile Drawer styling */
+        @media (max-width: 768px) {
+            .filter-drawer {
+                right: 0;
+                bottom: -100%;
+                top: auto;
+                width: 100%;
+                height: auto;
+                max-height: 85vh;
+                border-left: none;
+                border-top: 1px solid var(--edge);
+                border-radius: 20px 20px 0 0;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+                transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            body.light-mode .filter-drawer {
+                border-top: 1px solid rgba(15, 23, 42, 0.08);
+            }
+            .filter-drawer.active {
+                bottom: 0;
+            }
+        }
+
+        /* ── Project Cards ── */
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .project-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--edge);
+            border-radius: 14px;
+            padding: 1.25rem;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        body.light-mode .project-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-color: rgba(15, 23, 42, 0.06);
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: var(--shadow-card-dark);
+        }
+
+        body.light-mode .project-card:hover {
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .project-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .project-title i {
+            color: var(--accent);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.7rem;
+            border-radius: var(--chip-radius);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid var(--edge);
+        }
+
+        .status-badge.assigned {
+            background: rgba(16, 185, 129, 0.14);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        body.light-mode .status-badge.assigned {
+            background: rgba(16, 185, 129, 0.08);
+            color: #059669;
+            border-color: rgba(16, 185, 129, 0.18);
+        }
+
+        .status-badge.unassigned {
+            background: rgba(245, 158, 11, 0.14);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        body.light-mode .status-badge.unassigned {
+            background: rgba(245, 158, 11, 0.08);
+            color: #d97706;
+            border-color: rgba(245, 158, 11, 0.18);
+        }
+
+        .project-meta-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .project-meta-pill {
+            font-size: 0.76rem;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.3rem 0.65rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 1px solid var(--edge);
+        }
+
+        body.light-mode .project-meta-pill {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(15, 23, 42, 0.05);
+        }
+
+        /* ── Project Escalation Flags ── */
+        .project-flags {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .flag-card {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--edge);
+        }
+
+        .flag-card.danger, .flag-card.critical {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        body.light-mode .flag-card.danger, body.light-mode .flag-card.critical {
+            background: rgba(220, 38, 38, 0.06);
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.15);
+        }
+
+        .flag-card.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        body.light-mode .flag-card.warning {
+            background: rgba(217, 119, 6, 0.06);
+            color: #d97706;
+            border-color: rgba(217, 119, 6, 0.15);
+        }
+
+        /* ── Progress Indicators ── */
+        .progress-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-box-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            min-width: 60px;
+        }
+
+        .progress-box-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        body.light-mode .progress-box-bar {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .progress-box-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            transition: width 0.3s;
+        }
+
+        .progress-box-fill.complete {
+            background: linear-gradient(90deg, #10b981, #0ea472);
+        }
+
+        .progress-box-pct {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink);
+            min-width: 32px;
             text-align: right;
         }
 
-        .project-assign {
+        /* ── Assignment Form Widget ── */
+        .assign-form {
             display: flex;
-            gap: 6px;
+            gap: 0.5rem;
             align-items: center;
+            margin-top: 0.25rem;
         }
 
-        .project-assign select {
+        .assign-select {
             flex: 1;
-            height: 30px;
-            padding: 0 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--surface);
+            min-height: var(--control-height);
+            padding: 0 0.75rem;
+            border-radius: var(--control-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-family: inherit;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .project-assign select option { color: #1a1c23; }
+        body.light-mode .assign-select {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
 
-        .project-assign button {
-            height: 30px;
-            padding: 0 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--accent-subtle);
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 13px;
+        .assign-select option {
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        body.light-mode .assign-select option {
+            background: #fff;
+            color: #000;
+        }
+
+        .assign-btn {
+            min-height: var(--control-height);
+            padding: 0 1rem;
+            border-radius: var(--control-radius);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-2);
+            font-weight: 700;
+            font-size: 0.82rem;
             cursor: pointer;
             font-family: inherit;
             white-space: nowrap;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .project-assign button:hover {
-            background: rgba(59, 130, 246, 0.18);
+        body.light-mode .assign-btn {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent);
+            border-color: rgba(37, 99, 235, 0.18);
         }
 
-        /* ── Team Capacity Table ── */
+        .assign-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .project-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.25rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed var(--edge);
+        }
+
+        .btn-delete-project-custom {
+            min-height: 1.85rem;
+            padding: 0 0.75rem;
+            background: rgba(239, 68, 68, 0.12);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.76rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        body.light-mode .btn-delete-project-custom {
+            background: rgba(220, 38, 38, 0.06);
+            color: var(--danger);
+            border-color: rgba(220, 38, 38, 0.15);
+        }
+
+        .btn-delete-project-custom:hover {
+            background: var(--danger);
+            color: #fff;
+            border-color: var(--danger);
+        }
+
+        /* Empty state */
+        .ldms-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            border: 1px dashed var(--edge);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .ldms-empty-icon {
+            font-size: 2.2rem;
+            color: var(--muted);
+            margin-bottom: 0.8rem;
+        }
+
+        .ldms-empty h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .ldms-empty p {
+            font-size: 0.86rem;
+            color: var(--muted);
+        }
+
+        /* ── Right Panel Sidebar KPI Cards ── */
+        .kpi-sidebar-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .hero-summary-card {
+            border-radius: 14px;
+            padding: 1.1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--edge);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card-dark);
+            transition: transform 0.15s ease;
+        }
+
+        body.light-mode .hero-summary-card {
+            background: rgba(255, 255, 255, 0.88);
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .hero-summary-card:hover {
+            transform: translateX(4px);
+        }
+
+        .hero-summary-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .hero-summary-card.projects::after { background-color: #60a5fa; }
+        .hero-summary-card.unassigned::after { background-color: var(--warning); }
+        .hero-summary-card.urgent::after { background-color: var(--danger); }
+        .hero-summary-card.new24h::after { background-color: var(--success); }
+
+        .hero-summary-card.hotspot::after { background-color: var(--danger); }
+        .hero-summary-card.stale::after { background-color: var(--warning); }
+        .hero-summary-card.overdue::after { background-color: var(--danger); }
+
+        .hero-summary-card .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            padding-left: 6px;
+        }
+
+        .hero-summary-card .label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .hero-summary-card .detail {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .hero-summary-card .value {
+            font-size: 1.8rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: right;
+            padding-right: 4px;
+        }
+
+        .hero-summary-card.projects .value { color: #60a5fa; }
+        .hero-summary-card.unassigned .value { color: var(--warning); }
+        .hero-summary-card.urgent .value { color: var(--danger); }
+        .hero-summary-card.new24h .value { color: var(--success); }
+
+        .hero-summary-card.hotspot .value { color: var(--danger); }
+        .hero-summary-card.stale .value { color: var(--warning); }
+        .hero-summary-card.overdue .value { color: var(--danger); }
+
+        /* ── Team Workload & Table ── */
         .table-scroll {
             overflow-x: auto;
+            margin-top: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--edge);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 0.86rem;
+            text-align: left;
         }
 
         th {
-            text-align: left;
-            padding: 10px 8px;
-            font-size: 11px;
-            font-weight: 600;
+            padding: 10px 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--ink-2);
-            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--edge);
+        }
+
+        body.light-mode th {
+            background: rgba(0, 0, 0, 0.01);
+            border-bottom-color: rgba(15, 23, 42, 0.08);
         }
 
         td {
-            padding: 10px 8px;
-            border-bottom: 1px solid var(--border);
-            color: var(--ink-2);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--edge);
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        body.light-mode td {
+            border-bottom-color: rgba(15, 23, 42, 0.05);
         }
 
         td:first-child {
-            color: var(--ink);
-            font-weight: 600;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .load {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 8px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 6px;
             border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--edge);
         }
 
-        .load.overloaded { background: var(--red-bg); color: var(--red); }
-        .load.balanced { background: var(--amber-bg); color: var(--amber); }
-        .load.underloaded { background: var(--green-bg); color: var(--green); }
+        .load.overloaded {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        body.light-mode .load.overloaded {
+            background: rgba(220, 38, 38, 0.06);
+            color: var(--danger);
+            border-color: rgba(220, 38, 38, 0.15);
+        }
+
+        .load.balanced {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        body.light-mode .load.balanced {
+            background: rgba(217, 119, 6, 0.06);
+            color: #d97706;
+            border-color: rgba(217, 119, 6, 0.15);
+        }
+
+        .load.underloaded {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        body.light-mode .load.underloaded {
+            background: rgba(16, 185, 129, 0.06);
+            color: #059669;
+            border-color: rgba(16, 185, 129, 0.15);
+        }
 
         .cap-bar {
             width: 100%;
-            min-width: 70px;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
+            min-width: 60px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
             overflow: hidden;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+        }
+
+        body.light-mode .cap-bar {
+            background: rgba(0, 0, 0, 0.06);
         }
 
         .cap-fill {
             height: 100%;
-            border-radius: 2px;
-            background: var(--accent);
+            border-radius: 3px;
+            background: linear-gradient(90deg, #3b82f6, #22d3ee);
         }
 
         .cap-text {
-            font-size: 11px;
-            color: var(--ink-2);
-            font-weight: 500;
+            font-size: 0.68rem;
+            color: var(--muted);
+            font-weight: 700;
         }
 
-        tr.overloaded td { background: rgba(239, 68, 68, 0.03); }
-        tr.balanced td { background: rgba(234, 179, 8, 0.03); }
-        tr.underloaded td { background: rgba(34, 197, 94, 0.03); }
+        tr.overloaded td { background: rgba(239, 68, 68, 0.015); }
+        tr.balanced td { background: rgba(245, 158, 11, 0.015); }
+        tr.underloaded td { background: rgba(16, 185, 129, 0.015); }
 
-        /* ── Responsive ── */
-        @media (max-width: 900px) {
-            .stats { grid-template-columns: repeat(2, 1fr); }
-            .alerts { grid-template-columns: 1fr; }
+        /* User delete clear widget */
+        .clear-user-widget {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.8rem;
         }
 
-        @media (max-width: 640px) {
-            .stats { grid-template-columns: 1fr; }
-            .container { padding: 16px; }
-            .topbar { padding: 0 16px; }
+        .clear-user-select {
+            flex: 1;
+            min-height: var(--control-height);
+            padding: 0 0.75rem;
+            border-radius: var(--control-radius);
+            border: 1px solid var(--edge);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            min-width: 180px;
         }
 
-        
+        body.light-mode .clear-user-select {
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        .clear-user-select option {
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        body.light-mode .clear-user-select option {
+            background: #fff;
+            color: #000;
+        }
+
+        .clear-user-btn {
+            min-height: var(--control-height);
+            padding: 0 1.1rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: var(--control-radius);
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .clear-user-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .meta-label {
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -609,287 +1172,397 @@
         </div>
     </header>
 
-    <main class="container">
-        <div class="page-title">
-            <h1><i class="fas fa-sitemap"></i> Command Center</h1>
-            <p>Assign inspector projects to developers and balance team workload.</p>
-        </div>
+    <main class="dashboard-split">
+        <!-- Left Panel: Command Center Hero & Projects List -->
+        <div class="left-panel">
+            <header class="hero">
+                <div class="hero-top">
+                    <div class="breadcrumbs">
+                        <i class="fas fa-home"></i>
+                        <span>Manager Workspace</span>
+                    </div>
+                </div>
+                <div class="hero-panel-title" style="margin-top:0.5rem;">
+                    <div class="hero-kicker"><i class="fas fa-sitemap"></i> Command Center</div>
+                    <h1><i class="fas fa-sitemap"></i> Command Center</h1>
+                    <p class="subtitle">Assign inspector projects to developers and balance team workload.</p>
+                </div>
+                
+                <section class="ldms-page-note" style="margin-top:0.5rem;">
+                    <div>
+                        <h3 style="font-size:0.98rem;">Portfolio overview</h3>
+                        <p>This view spans every project, highlights urgent backlog, and shows where the team is under or over capacity.</p>
+                    </div>
+                    <div class="note-chips">
+                        <span class="ldms-chip"><i class="fas fa-diagram-project"></i> All projects</span>
+                        <span class="ldms-chip"><i class="fas fa-triangle-exclamation"></i> Escalations</span>
+                        <span class="ldms-chip"><i class="fas fa-users"></i> Workload balance</span>
+                    </div>
+                </section>
+            </header>
 
-        <section class="ldms-page-note" style="margin-bottom:12px;">
-            <div>
-                <h3 style="font-size:0.98rem;">Portfolio overview</h3>
-                <p>This view spans every project, highlights urgent backlog, and shows where the team is under or over capacity.</p>
-            </div>
-            <div class="note-chips">
-                <span class="ldms-chip"><i class="fas fa-diagram-project"></i> All projects</span>
-                <span class="ldms-chip"><i class="fas fa-triangle-exclamation"></i> Escalations</span>
-                <span class="ldms-chip"><i class="fas fa-users"></i> Workload balance</span>
-            </div>
-        </section>
+            <div class="bento-card">
+                <div class="projects-header">
+                    <h2><i class="fas fa-cube"></i> Projects</h2>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="pill pill-auto">{{ scans|length }} projects</span>
+                        <button class="theme-toggle" id="filter-toggle-btn" type="button">
+                            <i class="fas fa-filter"></i> Filters
+                        </button>
+                    </div>
+                </div>
 
-        <div class="stats">
-            <div class="stat blue">
-                <div class="stat-label">All Projects</div>
-                <div class="stat-value">{{ metrics.project_counts.all }}</div>
-            </div>
-            <div class="stat amber">
-                <div class="stat-label">Unassigned</div>
-                <div class="stat-value">{{ metrics.project_counts.unassigned }}</div>
-            </div>
-            <div class="stat red">
-                <div class="stat-label">Urgent Defects</div>
-                <div class="stat-value">{{ metrics.urgent_attention }}</div>
-            </div>
-            <div class="stat green">
-                <div class="stat-label">New (24h)</div>
-                <div class="stat-value">{{ metrics.new_24h }}</div>
-            </div>
-        </div>
-
-        <div class="alerts">
-            <div class="alert-box red">
-                <div class="label">Urgent Hotspots</div>
-                <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
-                <div class="hint">Projects with 3+ urgent/high unresolved defects</div>
-            </div>
-            <div class="alert-box amber">
-                <div class="label">Stale Reviews</div>
-                <div class="value">{{ escalation_summary.stale_reviews }}</div>
-                <div class="hint">Items under review for over 7 days</div>
-            </div>
-            <div class="alert-box critical">
-                <div class="label">Overdue Backlog</div>
-                <div class="value">{{ escalation_summary.overdue_backlog }}</div>
-                <div class="hint">Projects with 3+ unresolved overdue defects</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <form class="filters" method="get" action="{{ url_for('developer.manager_dashboard') }}">
-                    <div class="filter-field">
-                        <label>Sort</label>
-                        <select name="sort">
-                            <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
-                            <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
-                        </select>
-                    </div>
-                    <div class="filter-field">
-                        <label>Status</label>
-                        <select name="status_filter">
-                            <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
-                            <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
-                            <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
-                            <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
-                        </select>
-                    </div>
-                    <div class="filter-field">
-                        <label>Date Range</label>
-                        <select name="date_range">
-                            <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
-                            <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
-                            <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
-                            <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
-                        </select>
-                    </div>
-                    <div class="filter-field">
-                        <label>&nbsp;</label>
-                        <button type="submit"><i class="fas fa-filter"></i> Apply</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-head">
-                <h2><i class="fas fa-cube"></i> Projects</h2>
-                <span class="card-head-meta">{{ scans|length }} projects</span>
-            </div>
-            <div class="card-body">
-                {% for scan, defect_count, reported, review, fixed in scans %}
-                <div class="project">
-                    <div class="project-row1">
-                        <div class="project-name"><i class="fas fa-cube"></i> {{ scan.name }}</div>
-                        {% if scan.assigned_to %}
-                        <span class="project-tag assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
-                        {% else %}
-                        <span class="project-tag unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
-                        {% endif %}
-                    </div>
-                    <div class="project-row2">
-                        <span class="project-badge">{{ defect_count }} defects</span>
-                        <span class="project-badge">{{ reported }} reported</span>
-                        <span class="project-badge">{{ review }} in review</span>
-                        <span class="project-badge">{{ fixed }} fixed</span>
-                    </div>
-                    {% set scan_escalation = project_escalations.get(scan.id) %}
-                    {% if scan_escalation and scan_escalation.flags %}
-                    <div class="project-flags">
-                        {% for flag in scan_escalation.flags %}
-                        <span class="flag {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if defect_count > 0 %}
-                    {% set pct = ((fixed / defect_count) * 100) | int %}
-                    <div class="project-progress">
-                        <span class="project-progress-label">Progress</span>
-                        <div class="project-progress-bar">
-                            <div class="project-progress-fill {% if pct == 100 %}done{% endif %}" style="width: {{ pct }}%"></div>
+                <div class="projects-list">
+                    {% for scan, defect_count, reported, review, fixed in scans %}
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                            {% if scan.assigned_to %}
+                            <span class="status-badge assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
+                            {% else %}
+                            <span class="status-badge unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
+                            {% endif %}
                         </div>
-                        <span class="project-progress-pct">{{ pct }}%</span>
-                    </div>
-                    {% endif %}
-                    <form class="project-assign" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <select name="assigned_to_user_id">
-                            <option value="">Unassigned</option>
-                            {% for dev in developers %}
-                            <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                        <div class="project-meta-grid">
+                            <span class="project-meta-pill">{{ defect_count }} defects</span>
+                            <span class="project-meta-pill">{{ reported }} reported</span>
+                            <span class="project-meta-pill">{{ review }} in review</span>
+                            <span class="project-meta-pill">{{ fixed }} fixed</span>
+                        </div>
+                        
+                        {% set scan_escalation = project_escalations.get(scan.id) %}
+                        {% if scan_escalation and scan_escalation.flags %}
+                        <div class="project-flags">
+                            {% for flag in scan_escalation.flags %}
+                            <div class="flag-card {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</div>
                             {% endfor %}
-                        </select>
-                        <button type="submit"><i class="fas fa-user-check"></i> Assign</button>
-                    </form>
-                    {% if current_user.username in ('manager', 'Afiq_M') %}
-                    <button class="btn-delete-project" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px;">
-                        <i class="fas fa-trash"></i> Delete Project
-                    </button>
-                    {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if defect_count > 0 %}
+                        {% set pct = ((fixed / defect_count) * 100) | int %}
+                        <div class="progress-box">
+                            <span class="progress-box-label">Progress</span>
+                            <div class="progress-box-bar">
+                                <div class="progress-box-fill {% if pct == 100 %}complete{% endif %}" style="width: {{ pct }}%"></div>
+                            </div>
+                            <span class="progress-box-pct">{{ pct }}%</span>
+                        </div>
+                        {% endif %}
+
+                        <div class="project-card-actions">
+                            <form class="assign-form" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <select class="assign-select" name="assigned_to_user_id">
+                                    <option value="">Unassigned</option>
+                                    {% for dev in developers %}
+                                    <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Assign</button>
+                            </form>
+                            
+                            {% if current_user.username in ('manager', 'Afiq_M') %}
+                            <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="ldms-empty">
+                        <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3>No projects match your filters</h3>
+                        <p>Try adjusting your search or filter criteria to find what you're looking for.</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="ldms-empty">
-                    <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
-                    <h3>No projects match your filters</h3>
-                    <p>Try adjusting your search or filter criteria to find what you're looking for.</p>
-                </div>
-                {% endfor %}
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-head">
+        <!-- Right Panel: KPIs and Workload Table -->
+        <div class="right-panel">
+            <h3 class="meta-label">System Performance</h3>
+            <div class="kpi-sidebar-grid">
+                <article class="hero-summary-card projects">
+                    <div class="card-info">
+                        <span class="label">All Projects</span>
+                        <span class="detail">Total registered</span>
+                    </div>
+                    <span class="value">{{ metrics.project_counts.all }}</span>
+                </article>
+                
+                <article class="hero-summary-card unassigned">
+                    <div class="card-info">
+                        <span class="label">Unassigned</span>
+                        <span class="detail">Needs assignment</span>
+                    </div>
+                    <span class="value">{{ metrics.project_counts.unassigned }}</span>
+                </article>
+
+                <article class="hero-summary-card urgent">
+                    <div class="card-info">
+                        <span class="label">Urgent Defects</span>
+                        <span class="detail">Critical attention</span>
+                    </div>
+                    <span class="value">{{ metrics.urgent_attention }}</span>
+                </article>
+
+                <article class="hero-summary-card new24h">
+                    <div class="card-info">
+                        <span class="label">New (24h)</span>
+                        <span class="detail">Added in last day</span>
+                    </div>
+                    <span class="value">{{ metrics.new_24h }}</span>
+                </article>
+            </div>
+
+            <h3 class="meta-label">Escalations</h3>
+            <div class="kpi-sidebar-grid">
+                <article class="hero-summary-card hotspot">
+                    <div class="card-info">
+                        <span class="label">Urgent Hotspots</span>
+                        <span class="detail">Projects with 3+ high defects</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.urgent_hotspots }}</span>
+                </article>
+
+                <article class="hero-summary-card stale">
+                    <div class="card-info">
+                        <span class="label">Stale Reviews</span>
+                        <span class="detail">Review stage > 7 days</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.stale_reviews }}</span>
+                </article>
+
+                <article class="hero-summary-card overdue">
+                    <div class="card-info">
+                        <span class="label">Overdue Backlog</span>
+                        <span class="detail">Projects with 3+ overdue defects</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.overdue_backlog }}</span>
+                </article>
+            </div>
+
+            <div class="bento-card">
                 <h2><i class="fas fa-users"></i> Team Capacity</h2>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Developer</th>
+                                <th>Projects</th>
+                                <th>Open</th>
+                                <th>Urgent</th>
+                                <th>Avg Age</th>
+                                <th>Load</th>
+                                <th>Capacity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in team_workload %}
+                            <tr class="{{ row.load_state }}">
+                                <td>{{ row.developer.username }}</td>
+                                <td>{{ row.assigned_projects }}</td>
+                                <td>{{ row.open_defects }}</td>
+                                <td>{{ row.urgent_open }}</td>
+                                <td>{{ row.average_age_days }}d</td>
+                                <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
+                                <td>
+                                    <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
+                                    <span class="cap-text">{{ row.utilization_percent }}%</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="7"><div class="empty">No active developers</div></td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="table-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Developer</th>
-                            <th>Projects</th>
-                            <th>Open</th>
-                            <th>Urgent</th>
-                            <th>Avg Age</th>
-                            <th>Load</th>
-                            <th>Capacity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in team_workload %}
-                        <tr class="{{ row.load_state }}">
-                            <td>{{ row.developer.username }}</td>
-                            <td>{{ row.assigned_projects }}</td>
-                            <td>{{ row.open_defects }}</td>
-                            <td>{{ row.urgent_open }}</td>
-                            <td>{{ row.average_age_days }}d</td>
-                            <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
-                            <td>
-                                <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
-                                <span class="cap-text">{{ row.utilization_percent }}%</span>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr><td colspan="7"><div class="empty">No active developers</div></td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        {% if current_user.username in ('manager', 'Afiq_M') %}
-        <div class="card" style="margin-top: 20px;">
-            <div class="card-head">
+            {% if current_user.username in ('manager', 'Afiq_M') %}
+            <div class="bento-card">
                 <h2><i class="fas fa-trash"></i> Clear User Projects</h2>
-            </div>
-            <div class="card-body">
-                <p style="color: var(--ink-2); margin-bottom: 12px;">Delete all projects and defects assigned to a specific user.</p>
-                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <select id="clear-user-select" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); min-width: 180px;">
+                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.86rem;">Delete all projects and defects assigned to a user.</p>
+                <div class="clear-user-widget">
+                    <select id="clear-user-select" class="clear-user-select">
                         <option value="">Select a user...</option>
                         {% for user in users %}
                         <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
                         {% endfor %}
                     </select>
-                    <button type="button" onclick="clearUserProjects()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                        <i class="fas fa-trash"></i> Clear All Projects
+                    <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
+                        <i class="fas fa-trash"></i> Clear
                     </button>
                 </div>
-                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--surface); border-radius: 6px; display: none;"></div>
+                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; display: none; font-size: 0.86rem;"></div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
     </main>
+
+    <!-- Collapsible Filter Drawer -->
+    <div class="filter-drawer-backdrop" id="filter-backdrop"></div>
+    <div class="filter-drawer" id="filter-drawer">
+        <div class="filter-drawer-header">
+            <h3><i class="fas fa-filter"></i> Filters</h3>
+            <button class="filter-drawer-close" id="filter-close-btn" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form class="filter-drawer-body" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+            <div class="filter-drawer-field">
+                <label>Sort</label>
+                <select name="sort">
+                    <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                    <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+                </select>
+            </div>
+            <div class="filter-drawer-field">
+                <label>Status</label>
+                <select name="status_filter">
+                    <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                    <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                    <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
+                    <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+                </select>
+            </div>
+            <div class="filter-drawer-field">
+                <label>Date Range</label>
+                <select name="date_range">
+                    <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
+                    <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
+                    <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
+                    <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
+                </select>
+            </div>
+            <button type="submit" class="filter-drawer-submit">
+                <i class="fas fa-check"></i> Apply Filters
+            </button>
+        </form>
+    </div>
 
     <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
+    <script src="{{ url_for("static", filename="js/base.js") }}?v={{ cache_bust }}"></script>
     <script>
-        // Delete single project
-        function deleteProject(scanId, scanName) {
-            if (!confirm('Are you sure you want to delete project "' + scanName + '"? This will also delete all related defects. This action cannot be undone.')) {
-                return;
+        // Theme button state updater
+        function updateThemeButton() {
+            const btn = document.getElementById('ldms-theme-btn');
+            if (!btn) return;
+            const icon = btn.querySelector('i');
+            const label = btn.querySelector('span');
+            const isLight = document.body.classList.contains('light-mode');
+            if (isLight) {
+                icon.className = 'fas fa-sun';
+                if (label) label.textContent = 'Light';
+            } else {
+                icon.className = 'fas fa-moon';
+                if (label) label.textContent = 'Dark';
             }
-            
-            fetch('/developer/scan/' + scanId, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Project "' + scanName + '" deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Error deleting project. Please try again.');
-                }
-            })
-            .catch(error => {
-                alert('Error: ' + error);
+        }
+
+        // Filter Drawer Toggling
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const filterDrawer = document.getElementById('filter-drawer');
+        const filterBackdrop = document.getElementById('filter-backdrop');
+        const filterCloseBtn = document.getElementById('filter-close-btn');
+
+        if (filterToggleBtn && filterDrawer && filterBackdrop) {
+            filterToggleBtn.addEventListener('click', function() {
+                filterDrawer.classList.add('active');
+                filterBackdrop.classList.add('active');
+                document.body.style.overflow = 'hidden';
             });
         }
 
-        // Clear all projects for a user
+        function closeDrawer() {
+            if (filterDrawer && filterBackdrop) {
+                filterDrawer.classList.remove('active');
+                filterBackdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (filterCloseBtn) {
+            filterCloseBtn.addEventListener('click', closeDrawer);
+        }
+        if (filterBackdrop) {
+            filterBackdrop.addEventListener('click', closeDrawer);
+        }
+
+        // Delete single project (SweetAlert confirmed)
+        function deleteProject(scanId, scanName) {
+            ldmsConfirm({
+                title: 'Delete Project?',
+                text: 'Are you sure you want to delete project "' + scanName + '"? This will also delete all related defects. This action cannot be undone.',
+                icon: 'error',
+                confirmText: 'Delete',
+                confirmColor: '#ef4444'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    ldmsShowLoader('Deleting project...');
+                    fetch('/developer/scan/' + scanId, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        ldmsHideLoader();
+                        if (response.ok) {
+                            ldmsToast('Project "' + scanName + '" deleted successfully!', 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            ldmsToast('Error deleting project. Please try again.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        ldmsHideLoader();
+                        ldmsToast('Error: ' + error, 'error');
+                    });
+                }
+            });
+        }
+
+        // Clear all projects for a user (SweetAlert confirmed)
         function clearUserProjects() {
             const userSelect = document.getElementById('clear-user-select');
             const userId = userSelect.value;
             const userName = userSelect.options[userSelect.selectedIndex].text;
             
             if (!userId) {
-                alert('Please select a user first.');
+                ldmsToast('Please select a user first.', 'error');
                 return;
             }
             
-            if (!confirm('Are you sure you want to delete all projects and defects for user "' + userName + '"? This action cannot be undone.')) {
-                return;
-            }
-            
-            fetch('/developer/clear-user-projects/' + userId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            ldmsConfirm({
+                title: 'Clear User Projects?',
+                text: 'Are you sure you want to delete all projects and defects for user "' + userName + '"? This action cannot be undone.',
+                icon: 'warning',
+                confirmText: 'Clear All',
+                confirmColor: '#ef4444'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    ldmsShowLoader('Clearing projects...');
+                    fetch('/developer/clear-user-projects/' + userId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        ldmsHideLoader();
+                        ldmsToast(data.message, 'success');
+                        setTimeout(() => location.reload(), 2000);
+                    })
+                    .catch(error => {
+                        ldmsHideLoader();
+                        ldmsToast('Error: ' + error, 'error');
+                    });
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const resultDiv = document.getElementById('clear-result');
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i> ' + data.message;
-                setTimeout(() => location.reload(), 2000);
-            })
-            .catch(error => {
-                const resultDiv = document.getElementById('clear-result');
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Error: ' + error;
             });
         }
 
@@ -898,8 +1571,17 @@
             const href = link.getAttribute('href') || '';
             if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
                 link.addEventListener('click', function() {
-                    var loader = document.getElementById('ldms-loader');
-                    if (loader) loader.classList.add('active');
+                    ldmsShowLoader('Loading...');
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateThemeButton();
+            const btn = document.getElementById('ldms-theme-btn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    setTimeout(updateThemeButton, 50);
                 });
             }
         });
