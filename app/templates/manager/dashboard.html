@@ -22,8 +22,8 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --control-radius: 8px;
-            --control-height: 2.2rem;
+            --control-radius: 6px;
+            --control-height: 2.1rem;
             --chip-radius: 999px;
             --shadow-card-dark: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
             --shadow-card-light: 0 4px 20px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.08);
@@ -49,7 +49,7 @@
             background: var(--bg);
             color: var(--ink);
             min-height: 100vh;
-            font-size: 15px;
+            font-size: 14.5px;
             line-height: 1.5;
         }
 
@@ -111,14 +111,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            min-height: 2.1rem;
-            padding: 0 0.85rem;
+            min-height: 2rem;
+            padding: 0 0.8rem;
             border-radius: var(--chip-radius);
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-weight: 600;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.15s ease;
@@ -159,25 +159,24 @@
 
         /* ── Container Workspace ── */
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 2.5rem 1.5rem 5rem;
+            padding: 2rem 1.5rem 4rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.25rem;
         }
 
         /* ── Header ── */
         .page-header {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
+            gap: 0.2rem;
         }
 
         .page-header h1 {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             letter-spacing: -0.03em;
             color: var(--ink);
@@ -192,15 +191,14 @@
 
         .page-header p {
             color: var(--muted);
-            font-size: 0.94rem;
+            font-size: 0.9rem;
         }
 
         /* ── Tab Navigation Bar ── */
         .tab-navigation {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             border-bottom: 1px solid var(--edge);
-            margin-bottom: 0.5rem;
             padding-bottom: 2px;
         }
 
@@ -209,7 +207,7 @@
             border: none;
             color: var(--muted);
             padding: 8px 16px;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             font-weight: 600;
             font-family: 'Plus Jakarta Sans', sans-serif;
             cursor: pointer;
@@ -231,12 +229,12 @@
 
         .tab-btn.active {
             color: var(--accent-2);
-            background: rgba(34, 211, 238, 0.1);
+            background: rgba(34, 211, 238, 0.08);
         }
 
         body.light-mode .tab-btn.active {
             color: var(--accent);
-            background: rgba(37, 99, 235, 0.06);
+            background: rgba(37, 99, 235, 0.05);
         }
 
         /* ── Tab Panels ── */
@@ -245,16 +243,35 @@
         }
 
         .tab-panel.active {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            display: block;
+        }
+
+        /* ── Split Layout Grids ── */
+        .tab-grid-70-30 {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        .tab-grid-65-35 {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+            gap: 1.25rem;
+            align-items: start;
+        }
+
+        @media (max-width: 950px) {
+            .tab-grid-70-30, .tab-grid-65-35 {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* ── Glass Cards ── */
         .bento-card {
             position: relative;
-            padding: 1.5rem;
-            border-radius: 14px;
+            padding: 1.15rem;
+            border-radius: 12px;
             background: var(--panel);
             border: 1px solid var(--edge);
             box-shadow: var(--shadow-card-dark);
@@ -266,7 +283,7 @@
 
         .bento-card h2 {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: var(--ink);
             margin-bottom: 0.75rem;
@@ -283,17 +300,17 @@
             color: var(--accent);
         }
 
-        /* ── Horizontal Filter Toolbar ── */
+        /* ── Compact Filter Toolbar ── */
         .filter-toolbar {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 12px;
             align-items: center;
-            padding: 1rem;
+            padding: 0.85rem;
             background: rgba(255, 255, 255, 0.01);
             border: 1px solid var(--edge);
             border-radius: 10px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         body.light-mode .filter-toolbar {
@@ -308,7 +325,7 @@
         }
 
         .filter-group label {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -316,14 +333,14 @@
         }
 
         .filter-select {
-            min-height: 2.1rem;
-            padding: 0 0.75rem;
+            min-height: 1.95rem;
+            padding: 0 0.5rem;
             border-radius: 6px;
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-family: inherit;
-            font-size: 0.86rem;
+            font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
         }
@@ -344,14 +361,14 @@
         }
 
         .filter-submit-btn {
-            min-height: 2.1rem;
-            padding: 0 1.1rem;
+            min-height: 1.95rem;
+            padding: 0 1rem;
             border-radius: 6px;
             border: 1px solid rgba(59, 130, 246, 0.3);
-            background: rgba(59, 130, 246, 0.15);
+            background: rgba(59, 130, 246, 0.12);
             color: var(--accent-2);
             font-weight: 700;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -360,17 +377,17 @@
         }
 
         body.light-mode .filter-submit-btn {
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(37, 99, 235, 0.06);
             color: var(--accent);
-            border-color: rgba(37, 99, 235, 0.18);
+            border-color: rgba(37, 99, 235, 0.15);
         }
 
         .filter-submit-btn:hover {
-            background: rgba(59, 130, 246, 0.25);
+            background: rgba(59, 130, 246, 0.2);
             transform: translateY(-1px);
         }
 
-        /* ── Project Rows Feed ── */
+        /* ── Compact Project Rows Feed ── */
         .projects-list {
             display: flex;
             flex-direction: column;
@@ -378,13 +395,13 @@
         }
 
         .project-item {
-            background: rgba(255, 255, 255, 0.01);
+            background: var(--panel);
             border: 1px solid var(--edge);
             border-radius: 10px;
-            padding: 1.15rem;
+            padding: 1rem 1.15rem;
             display: flex;
             flex-direction: column;
-            gap: 0.8rem;
+            gap: 0.75rem;
             transition: all 0.15s ease;
         }
 
@@ -394,12 +411,7 @@
         }
 
         .project-item:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        body.light-mode .project-item:hover {
-            background: rgba(0,0,0,0.005);
+            border-color: rgba(59, 130, 246, 0.35);
         }
 
         .project-row {
@@ -417,7 +429,7 @@
         }
 
         .project-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--ink);
@@ -437,10 +449,10 @@
         }
 
         .project-badge {
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 6px;
+            padding: 1px 6px;
+            border-radius: 4px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--edge);
             color: var(--muted);
@@ -452,9 +464,9 @@
         }
 
         .status-badge {
-            padding: 0.3rem 0.7rem;
+            padding: 0.25rem 0.65rem;
             border-radius: var(--chip-radius);
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -465,27 +477,27 @@
         }
 
         .status-badge.assigned {
-            background: rgba(16, 185, 129, 0.12);
+            background: rgba(16, 185, 129, 0.1);
             color: #34d399;
-            border-color: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.18);
         }
 
         body.light-mode .status-badge.assigned {
-            background: rgba(16, 185, 129, 0.06);
+            background: rgba(16, 185, 129, 0.04);
             color: #059669;
-            border-color: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.12);
         }
 
         .status-badge.unassigned {
-            background: rgba(245, 158, 11, 0.12);
+            background: rgba(245, 158, 11, 0.1);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.18);
         }
 
         body.light-mode .status-badge.unassigned {
-            background: rgba(245, 158, 11, 0.06);
+            background: rgba(245, 158, 11, 0.04);
             color: #d97706;
-            border-color: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.12);
         }
 
         /* ── Project Escalation Flags ── */
@@ -496,10 +508,10 @@
         }
 
         .flag-card {
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 600;
-            padding: 0.45rem 0.75rem;
-            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            border-radius: 5px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -507,47 +519,47 @@
         }
 
         .flag-card.danger, .flag-card.critical {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.08);
             color: #f87171;
-            border-color: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.18);
         }
 
         body.light-mode .flag-card.danger, body.light-mode .flag-card.critical {
-            background: rgba(220, 38, 38, 0.04);
+            background: rgba(220, 38, 38, 0.03);
             color: #dc2626;
-            border-color: rgba(220, 38, 38, 0.12);
+            border-color: rgba(220, 38, 38, 0.1);
         }
 
         .flag-card.warning {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(245, 158, 11, 0.08);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.18);
         }
 
         body.light-mode .flag-card.warning {
-            background: rgba(217, 119, 6, 0.04);
+            background: rgba(217, 119, 6, 0.03);
             color: #d97706;
-            border-color: rgba(217, 119, 6, 0.12);
+            border-color: rgba(217, 119, 6, 0.1);
         }
 
         /* ── Progress Indicators ── */
         .progress-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .progress-box-label {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
             color: var(--muted);
-            min-width: 60px;
+            min-width: 50px;
         }
 
         .progress-box-bar {
             flex: 1;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.06);
+            height: 5px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
             overflow: hidden;
         }
@@ -568,7 +580,7 @@
         }
 
         .progress-box-pct {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 700;
             color: var(--ink);
             min-width: 32px;
@@ -580,29 +592,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 0.15rem;
-            padding-top: 0.75rem;
+            margin-top: 0.1rem;
+            padding-top: 0.65rem;
             border-top: 1px dashed var(--edge);
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
 
         .assign-form {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .assign-select {
-            min-height: 2rem;
-            padding: 0 0.5rem;
+            min-height: 1.85rem;
+            padding: 0 0.4rem;
             border-radius: 6px;
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-family: inherit;
-            font-size: 0.84rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
         }
@@ -623,14 +635,14 @@
         }
 
         .assign-btn {
-            min-height: 2rem;
-            padding: 0 0.85rem;
+            min-height: 1.85rem;
+            padding: 0 0.75rem;
             border-radius: 6px;
             border: 1px solid rgba(59, 130, 246, 0.25);
-            background: rgba(59, 130, 246, 0.12);
+            background: rgba(59, 130, 246, 0.1);
             color: var(--accent-2);
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
@@ -639,25 +651,25 @@
         }
 
         body.light-mode .assign-btn {
-            background: rgba(37, 99, 235, 0.06);
+            background: rgba(37, 99, 235, 0.05);
             color: var(--accent);
-            border-color: rgba(37, 99, 235, 0.15);
+            border-color: rgba(37, 99, 235, 0.12);
         }
 
         .assign-btn:hover {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.18);
             transform: translateY(-1px);
         }
 
         .btn-delete-project-custom {
-            min-height: 1.85rem;
-            padding: 0 0.75rem;
-            background: rgba(239, 68, 68, 0.1);
+            min-height: 1.8rem;
+            padding: 0 0.65rem;
+            background: rgba(239, 68, 68, 0.08);
             color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.18);
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
@@ -666,9 +678,9 @@
         }
 
         body.light-mode .btn-delete-project-custom {
-            background: rgba(220, 38, 38, 0.04);
+            background: rgba(220, 38, 38, 0.03);
             color: var(--danger);
-            border-color: rgba(220, 38, 38, 0.12);
+            border-color: rgba(220, 38, 38, 0.1);
         }
 
         .btn-delete-project-custom:hover {
@@ -676,6 +688,86 @@
             color: #fff;
             border-color: var(--danger);
         }
+
+        /* ── Compact Sidebar KPI Cards ── */
+        .kpi-sidebar-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .hero-summary-card {
+            border-radius: 10px;
+            padding: 0.85rem;
+            background: var(--panel);
+            border: 1px solid var(--edge);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card-dark);
+            transition: transform 0.15s ease;
+        }
+
+        body.light-mode .hero-summary-card {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.06);
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .hero-summary-card:hover {
+            transform: translateX(3px);
+        }
+
+        .hero-summary-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .hero-summary-card.projects::after { background-color: #60a5fa; }
+        .hero-summary-card.unassigned::after { background-color: var(--warning); }
+        .hero-summary-card.urgent::after { background-color: var(--danger); }
+        .hero-summary-card.new24h::after { background-color: var(--success); }
+
+        .hero-summary-card .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+            padding-left: 4px;
+        }
+
+        .hero-summary-card .label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .hero-summary-card .detail {
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        .hero-summary-card .value {
+            font-size: 1.5rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            text-align: right;
+            padding-right: 2px;
+        }
+
+        .hero-summary-card.projects .value { color: #60a5fa; }
+        .hero-summary-card.unassigned .value { color: var(--warning); }
+        .hero-summary-card.urgent .value { color: var(--danger); }
+        .hero-summary-card.new24h .value { color: var(--success); }
 
         /* ── Team Workload & Table ── */
         .table-scroll {
@@ -687,13 +779,13 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             text-align: left;
         }
 
         th {
-            padding: 10px 12px;
-            font-size: 0.7rem;
+            padding: 8px 10px;
+            font-size: 0.68rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -708,7 +800,7 @@
         }
 
         td {
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-bottom: 1px solid var(--edge);
             color: var(--ink);
             font-weight: 500;
@@ -727,9 +819,9 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             font-weight: 700;
-            padding: 2px 6px;
+            padding: 1px 5px;
             border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 0.02em;
@@ -737,46 +829,46 @@
         }
 
         .load.overloaded {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.08);
             color: #f87171;
-            border-color: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.18);
         }
 
         body.light-mode .load.overloaded {
-            background: rgba(220, 38, 38, 0.04);
+            background: rgba(220, 38, 38, 0.03);
             color: var(--danger);
-            border-color: rgba(220, 38, 38, 0.12);
+            border-color: rgba(220, 38, 38, 0.1);
         }
 
         .load.balanced {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(245, 158, 11, 0.08);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.18);
         }
 
         body.light-mode .load.balanced {
-            background: rgba(217, 119, 6, 0.04);
+            background: rgba(217, 119, 6, 0.03);
             color: #d97706;
-            border-color: rgba(217, 119, 6, 0.12);
+            border-color: rgba(217, 119, 6, 0.1);
         }
 
         .load.underloaded {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(16, 185, 129, 0.08);
             color: #34d399;
-            border-color: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.18);
         }
 
         body.light-mode .load.underloaded {
-            background: rgba(16, 185, 129, 0.04);
+            background: rgba(16, 185, 129, 0.03);
             color: #059669;
-            border-color: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.1);
         }
 
         .cap-bar {
             width: 100%;
             min-width: 60px;
             height: 5px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 3px;
             overflow: hidden;
             margin-bottom: 2px;
@@ -793,35 +885,35 @@
         }
 
         .cap-text {
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             color: var(--muted);
             font-weight: 700;
         }
 
-        tr.overloaded td { background: rgba(239, 68, 68, 0.008); }
-        tr.balanced td { background: rgba(245, 158, 11, 0.008); }
-        tr.underloaded td { background: rgba(16, 185, 129, 0.008); }
+        tr.overloaded td { background: rgba(239, 68, 68, 0.005); }
+        tr.balanced td { background: rgba(245, 158, 11, 0.005); }
+        tr.underloaded td { background: rgba(16, 185, 129, 0.005); }
 
         /* User delete clear widget */
         .clear-user-widget {
             display: flex;
-            gap: 0.6rem;
+            gap: 0.5rem;
             align-items: center;
             flex-wrap: wrap;
-            margin-top: 0.5rem;
+            margin-top: 0.4rem;
         }
 
         .clear-user-select {
-            min-height: 2.1rem;
-            padding: 0 0.75rem;
+            min-height: 1.95rem;
+            padding: 0 0.5rem;
             border-radius: var(--control-radius);
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-family: inherit;
-            font-size: 0.86rem;
+            font-size: 0.82rem;
             font-weight: 600;
-            min-width: 180px;
+            min-width: 160px;
         }
 
         body.light-mode .clear-user-select {
@@ -840,13 +932,13 @@
         }
 
         .clear-user-btn {
-            min-height: 2.1rem;
-            padding: 0 1.1rem;
+            min-height: 1.95rem;
+            padding: 0 1rem;
             background: var(--danger);
             color: white;
             border: none;
             border-radius: var(--control-radius);
-            font-size: 0.86rem;
+            font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
             display: inline-flex;
@@ -868,13 +960,13 @@
         }
 
         .kpi-card {
-            border-radius: 12px;
-            padding: 1.25rem;
+            border-radius: 10px;
+            padding: 1.15rem;
             background: var(--panel);
             border: 1px solid var(--edge);
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
+            gap: 0.35rem;
             position: relative;
             overflow: hidden;
             box-shadow: var(--shadow-card-dark);
@@ -900,7 +992,7 @@
         .kpi-card.green::after { background-color: var(--success); }
 
         .kpi-label {
-            font-size: 0.74rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--muted);
@@ -908,7 +1000,7 @@
         }
 
         .kpi-value {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 800;
             letter-spacing: -0.04em;
@@ -922,18 +1014,19 @@
         .kpi-card.green .kpi-value { color: var(--success); }
 
         .kpi-desc {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--muted);
         }
 
         .escalation-header {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: var(--muted);
-            margin-top: 1rem;
+            margin-top: 0.8rem;
+            margin-bottom: 0.4rem;
         }
 
         .escalation-grid {
@@ -943,13 +1036,13 @@
         }
 
         .escalation-box {
-            padding: 1.15rem;
-            border-radius: 12px;
+            padding: 1.1rem;
+            border-radius: 10px;
             background: var(--panel);
             border: 1px solid var(--edge);
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
+            gap: 0.35rem;
             box-shadow: var(--shadow-card-dark);
             border-left: 4px solid var(--danger);
         }
@@ -963,7 +1056,7 @@
         .escalation-box.critical { border-left-color: #ef4444; }
 
         .escalation-box .label {
-            font-size: 0.74rem;
+            font-size: 0.7rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -971,7 +1064,7 @@
         }
 
         .escalation-box .value {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 800;
             font-family: 'Plus Jakarta Sans', sans-serif;
             letter-spacing: -0.02em;
@@ -982,9 +1075,23 @@
         .escalation-box.critical .value { color: var(--danger); }
 
         .escalation-box .hint {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             color: var(--muted);
-            margin-top: 2px;
+        }
+
+        /* ── Guidelines List ── */
+        .guidelines-list {
+            margin-top: 0.5rem;
+            padding-left: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.86rem;
+            color: var(--muted);
+        }
+
+        .guidelines-list li strong {
+            color: var(--ink);
         }
 
         /* Empty state */
@@ -1011,6 +1118,14 @@
         .ldms-empty p {
             font-size: 0.86rem;
             color: var(--muted);
+        }
+
+        .meta-label {
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -1052,219 +1167,260 @@
             </button>
         </nav>
 
-        <!-- Tab Panel: Projects -->
+        <!-- Tab Panel: Projects (Split 70/30) -->
         <section class="tab-panel active" id="tab-projects">
-            <!-- Filter Toolbar -->
-            <form class="filter-toolbar" method="get" action="{{ url_for('developer.manager_dashboard') }}">
-                <div class="filter-group">
-                    <label>Sort</label>
-                    <select class="filter-select" name="sort">
-                        <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
-                        <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select class="filter-select" name="status_filter">
-                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
-                        <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
-                        <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
-                        <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Date Range</label>
-                    <select class="filter-select" name="date_range">
-                        <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
-                        <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
-                        <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
-                        <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
-                    </select>
-                </div>
-                <button type="submit" class="filter-submit-btn">
-                    <i class="fas fa-filter"></i> Apply Filters
-                </button>
-            </form>
+            <div class="tab-grid-70-30">
+                <!-- Left panel: Projects Feed & Filters -->
+                <div>
+                    <!-- Filter Toolbar -->
+                    <form class="filter-toolbar" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+                        <div class="filter-group">
+                            <label>Sort</label>
+                            <select class="filter-select" name="sort">
+                                <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                                <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select class="filter-select" name="status_filter">
+                                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                                <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                                <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
+                                <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range</label>
+                            <select class="filter-select" name="date_range">
+                                <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
+                                <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
+                                <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
+                                <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="filter-submit-btn">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                    </form>
 
-            <div class="bento-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h2><i class="fas fa-cube"></i> Scans Feed</h2>
-                    <span class="project-badge">{{ scans|length }} projects total</span>
-                </div>
+                    <div class="bento-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2><i class="fas fa-cube"></i> Scans Feed</h2>
+                            <span class="project-badge">{{ scans|length }} projects</span>
+                        </div>
 
-                <div class="projects-list">
-                    {% for scan, defect_count, reported, review, fixed in scans %}
-                    <div class="project-item">
-                        <div class="project-row">
-                            <div class="project-info">
-                                <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                        <div class="projects-list">
+                            {% for scan, defect_count, reported, review, fixed in scans %}
+                            <div class="project-item">
+                                <div class="project-row">
+                                    <div class="project-info">
+                                        <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                                    </div>
+                                    {% if scan.assigned_to %}
+                                    <span class="status-badge assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
+                                    {% else %}
+                                    <span class="status-badge unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="project-badges">
+                                    <span class="project-badge">{{ defect_count }} defects</span>
+                                    <span class="project-badge">{{ reported }} reported</span>
+                                    <span class="project-badge">{{ review }} review</span>
+                                    <span class="project-badge">{{ fixed }} resolved</span>
+                                </div>
+
+                                {% set scan_escalation = project_escalations.get(scan.id) %}
+                                {% if scan_escalation and scan_escalation.flags %}
+                                <div class="project-flags">
+                                    {% for flag in scan_escalation.flags %}
+                                    <div class="flag-card {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                {% if defect_count > 0 %}
+                                {% set pct = ((fixed / defect_count) * 100) | int %}
+                                <div class="progress-box">
+                                    <span class="progress-box-label">Progress</span>
+                                    <div class="progress-box-bar">
+                                        <div class="progress-box-fill {% if pct == 100 %}complete{% endif %}" style="width: {{ pct }}%"></div>
+                                    </div>
+                                    <span class="progress-box-pct">{{ pct }}%</span>
+                                </div>
+                                {% endif %}
+
+                                <div class="project-card-actions">
+                                    <form class="assign-form" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <select class="assign-select" name="assigned_to_user_id">
+                                            <option value="">Unassigned</option>
+                                            {% for dev in developers %}
+                                            <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Assign Owner</button>
+                                    </form>
+
+                                    {% if current_user.username in ('manager', 'Afiq_M') %}
+                                    <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
-                            {% if scan.assigned_to %}
-                            <span class="status-badge assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
                             {% else %}
-                            <span class="status-badge unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="project-badges">
-                            <span class="project-badge">{{ defect_count }} defects</span>
-                            <span class="project-badge">{{ reported }} reported</span>
-                            <span class="project-badge">{{ review }} under review</span>
-                            <span class="project-badge">{{ fixed }} resolved</span>
-                        </div>
-
-                        {% set scan_escalation = project_escalations.get(scan.id) %}
-                        {% if scan_escalation and scan_escalation.flags %}
-                        <div class="project-flags">
-                            {% for flag in scan_escalation.flags %}
-                            <div class="flag-card {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</div>
+                            <div class="ldms-empty">
+                                <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
+                                <h3>No projects found</h3>
+                                <p>Adjust your filters or query to find the scans you are looking for.</p>
+                            </div>
                             {% endfor %}
                         </div>
-                        {% endif %}
-
-                        {% if defect_count > 0 %}
-                        {% set pct = ((fixed / defect_count) * 100) | int %}
-                        <div class="progress-box">
-                            <span class="progress-box-label">Progress</span>
-                            <div class="progress-box-bar">
-                                <div class="progress-box-fill {% if pct == 100 %}complete{% endif %}" style="width: {{ pct }}%"></div>
-                            </div>
-                            <span class="progress-box-pct">{{ pct }}%</span>
-                        </div>
-                        {% endif %}
-
-                        <div class="project-card-actions">
-                            <form class="assign-form" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <select class="assign-select" name="assigned_to_user_id">
-                                    <option value="">Unassigned</option>
-                                    {% for dev in developers %}
-                                    <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Reassign Owner</button>
-                            </form>
-
-                            {% if current_user.username in ('manager', 'Afiq_M') %}
-                            <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')">
-                                <i class="fas fa-trash"></i> Delete Project
-                            </button>
-                            {% endif %}
-                        </div>
                     </div>
-                    {% else %}
-                    <div class="ldms-empty">
-                        <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
-                        <h3>No projects found</h3>
-                        <p>Adjust your filters or query to find the scans you are looking for.</p>
-                    </div>
-                    {% endfor %}
+                </div>
+
+                <!-- Right panel: Quick stats sidebar -->
+                <div class="kpi-sidebar-grid">
+                    <h3 class="meta-label">Quick Stats</h3>
+                    <article class="hero-summary-card projects">
+                        <div class="card-info">
+                            <span class="label">All Projects</span>
+                            <span class="detail">Total registered</span>
+                        </div>
+                        <span class="value">{{ metrics.project_counts.all }}</span>
+                    </article>
+                    
+                    <article class="hero-summary-card unassigned">
+                        <div class="card-info">
+                            <span class="label">Unassigned</span>
+                            <span class="detail">Needs assignment</span>
+                        </div>
+                        <span class="value">{{ metrics.project_counts.unassigned }}</span>
+                    </article>
+
+                    <article class="hero-summary-card urgent">
+                        <div class="card-info">
+                            <span class="label">Urgent Defects</span>
+                            <span class="detail">Requires attention</span>
+                        </div>
+                        <span class="value">{{ metrics.urgent_attention }}</span>
+                    </article>
+
+                    <article class="hero-summary-card new24h">
+                        <div class="card-info">
+                            <span class="label">New Scans (24h)</span>
+                            <span class="detail">Recently uploaded</span>
+                        </div>
+                        <span class="value">{{ metrics.new_24h }}</span>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <!-- Tab Panel: Workload -->
+        <!-- Tab Panel: Workload (Split 65/35) -->
         <section class="tab-panel" id="tab-workload">
-            <div class="bento-card">
-                <h2><i class="fas fa-users"></i> Team Workload Balance</h2>
-                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.88rem;">Monitor active capacity levels for each developer in the organization.</p>
-                <div class="table-scroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Developer</th>
-                                <th>Projects</th>
-                                <th>Open Defects</th>
-                                <th>Urgent</th>
-                                <th>Avg Age</th>
-                                <th>Load State</th>
-                                <th>Capacity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in team_workload %}
-                            <tr class="{{ row.load_state }}">
-                                <td>{{ row.developer.username }}</td>
-                                <td>{{ row.assigned_projects }}</td>
-                                <td>{{ row.open_defects }}</td>
-                                <td>{{ row.urgent_open }}</td>
-                                <td>{{ row.average_age_days }}d</td>
-                                <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
-                                <td>
-                                    <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
-                                    <span class="cap-text">{{ row.utilization_percent }}% capacity</span>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="7"><div class="empty">No active developers available</div></td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="tab-grid-65-35">
+                <!-- Left panel: Workload balance table -->
+                <div class="bento-card">
+                    <h2><i class="fas fa-users"></i> Team Workload Balance</h2>
+                    <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.84rem;">Monitor active capacity levels for each developer in the organization.</p>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Developer</th>
+                                    <th>Projects</th>
+                                    <th>Open Defects</th>
+                                    <th>Urgent</th>
+                                    <th>Avg Age</th>
+                                    <th>Load State</th>
+                                    <th>Capacity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in team_workload %}
+                                <tr class="{{ row.load_state }}">
+                                    <td>{{ row.developer.username }}</td>
+                                    <td>{{ row.assigned_projects }}</td>
+                                    <td>{{ row.open_defects }}</td>
+                                    <td>{{ row.urgent_open }}</td>
+                                    <td>{{ row.average_age_days }}d</td>
+                                    <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
+                                    <td>
+                                        <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
+                                        <span class="cap-text">{{ row.utilization_percent }}% capacity</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="7"><div class="empty">No active developers available</div></td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            {% if current_user.username in ('manager', 'Afiq_M') %}
-            <div class="bento-card">
-                <h2><i class="fas fa-trash"></i> Reset User Projects</h2>
-                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.88rem;">Deletes all defects and projects assigned to a specific account.</p>
-                <div class="clear-user-widget">
-                    <select id="clear-user-select" class="clear-user-select">
-                        <option value="">Select a user...</option>
-                        {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
-                        {% endfor %}
-                    </select>
-                    <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
-                        <i class="fas fa-trash"></i> Wipe All Assignments
-                    </button>
+                <!-- Right panel: Admin reset tool -->
+                {% if current_user.username in ('manager', 'Afiq_M') %}
+                <div class="bento-card">
+                    <h2><i class="fas fa-trash"></i> Reset User Projects</h2>
+                    <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.84rem;">Deletes all defects and projects assigned to a specific account.</p>
+                    <div class="clear-user-widget">
+                        <select id="clear-user-select" class="clear-user-select">
+                            <option value="">Select a user...</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
+                            <i class="fas fa-trash"></i> Reset All
+                        </button>
+                    </div>
+                    <div id="clear-result" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.01); border: 1px solid var(--edge); border-radius: 6px; display: none; font-size: 0.86rem;"></div>
                 </div>
-                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; display: none; font-size: 0.86rem;"></div>
+                {% endif %}
             </div>
-            {% endif %}
         </section>
 
         <!-- Tab Panel: Escalations & KPIs -->
         <section class="tab-panel" id="tab-escalations">
-            <h3 class="escalation-header">System Metrics Overview</h3>
-            <div class="kpi-grid">
-                <article class="kpi-card blue">
-                    <span class="kpi-label">Registered Projects</span>
-                    <span class="kpi-value">{{ metrics.project_counts.all }}</span>
-                    <span class="kpi-desc">Total scans tracked</span>
-                </article>
-                <article class="kpi-card amber">
-                    <span class="kpi-label">Unassigned Projects</span>
-                    <span class="kpi-value">{{ metrics.project_counts.unassigned }}</span>
-                    <span class="kpi-desc">Awaiting developer assignment</span>
-                </article>
-                <article class="kpi-card red">
-                    <span class="kpi-label">Urgent Defects</span>
-                    <span class="kpi-value">{{ metrics.urgent_attention }}</span>
-                    <span class="kpi-desc">Requires immediate repair</span>
-                </article>
-                <article class="kpi-card green">
-                    <span class="kpi-label">New Scans (24h)</span>
-                    <span class="kpi-value">{{ metrics.new_24h }}</span>
-                    <span class="kpi-desc">Uploaded during last day</span>
-                </article>
-            </div>
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <h3 class="escalation-header">Active Escalations & Warnings</h3>
+                    <div class="escalation-grid">
+                        <div class="escalation-box red">
+                            <div class="label">Urgent Hotspots</div>
+                            <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
+                            <div class="hint">Scans with 3+ High/Urgent defects remaining unresolved.</div>
+                        </div>
+                        <div class="escalation-box amber">
+                            <div class="label">Stale Reviews</div>
+                            <div class="value">{{ escalation_summary.stale_reviews }}</div>
+                            <div class="hint">Scans kept under review for more than 7 days.</div>
+                        </div>
+                        <div class="escalation-box critical">
+                            <div class="label">Overdue Backlog</div>
+                            <div class="value">{{ escalation_summary.overdue_backlog }}</div>
+                            <div class="hint">Scans containing 3+ unresolved overdue items.</div>
+                        </div>
+                    </div>
+                </div>
 
-            <h3 class="escalation-header">Active Escalations & Warnings</h3>
-            <div class="escalation-grid">
-                <div class="escalation-box red">
-                    <div class="label">Urgent Hotspots</div>
-                    <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
-                    <div class="hint">Projects with 3+ urgent or high unresolved defects.</div>
-                </div>
-                <div class="escalation-box amber">
-                    <div class="label">Stale Reviews</div>
-                    <div class="value">{{ escalation_summary.stale_reviews }}</div>
-                    <div class="hint">Items under review for more than 7 days.</div>
-                </div>
-                <div class="escalation-box critical">
-                    <div class="label">Overdue Backlog</div>
-                    <div class="value">{{ escalation_summary.overdue_backlog }}</div>
-                    <div class="hint">Projects with 3+ unresolved overdue defects.</div>
+                <div class="bento-card">
+                    <h2><i class="fas fa-shield-halved"></i> Escalation Resolution Guidelines</h2>
+                    <p style="color: var(--muted); margin-bottom: 0.75rem; font-size: 0.86rem;">As a manager, follow these operational policies when resolving defects backlog warnings:</p>
+                    <ul class="guidelines-list">
+                        <li>
+                            <strong>Urgent Hotspots:</strong> Reassign high-priority defects immediately to developers with <em>underloaded</em> capacity (utilization below 50%).
+                        </li>
+                        <li>
+                            <strong>Stale Reviews:</strong> Contact the assigned developer to complete status reviews. Force resolution or reassign if developer remains unavailable.
+                        </li>
+                        <li>
+                            <strong>Overdue Backlog:</strong> Check due dates of active defects on the scan detail page, adjust deadlines or allocate backup inspector support.
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
