@@ -447,10 +447,12 @@
   </div>
 
   <script>
-    document.querySelectorAll('a[href]').forEach(link => { if (link.hasAttribute("data-confirm")) return; {
+    document.querySelectorAll('a[href]').forEach(link => {
+      if (link.hasAttribute('data-confirm')) return;
       const href = link.getAttribute('href') || '';
-      if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '')
+      if (!href.startsWith('#') && !href.startsWith('javascript') && href !== '') {
         link.addEventListener('click', () => document.getElementById('ldms-loader').classList.add('active'));
+      }
     });
 
     (function() {
