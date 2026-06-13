@@ -98,21 +98,37 @@ body.light-mode {
   position: fixed;
   inset: 0;
   z-index: 99999;
+  background: rgba(11, 16, 32, 0.85);
+  backdrop-filter: blur(5px);
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 16px;
 }
 .ldms-loader.active { display: flex; }
-.ldms-loader-spinner {
+body.light-mode .ldms-loader {
+  background: rgba(241, 245, 249, 0.85);
+}
+.ldms-loader-spinner, .loader-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
+  border: 4px solid rgba(255, 255, 255, 0.15);
   border-top-color: #3b82f6;
   border-radius: 50%;
   animation: ldms-spin 0.8s linear infinite;
 }
-.ldms-loader-text { color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
+body.light-mode .ldms-loader-spinner, body.light-mode .loader-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.06);
+  border-top-color: #2563eb;
+}
+.ldms-loader-text, .loader-text {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+body.light-mode .ldms-loader-text, body.light-mode .loader-text {
+  color: #1e293b;
+}
 
 @keyframes ldms-spin { to { transform: rotate(360deg); } }
 
