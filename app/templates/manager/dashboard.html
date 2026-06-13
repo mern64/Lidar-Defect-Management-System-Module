@@ -30,11 +30,11 @@
         }
 
         body.light-mode {
-            --bg: #f8fafc;
-            --panel: #ffffff;
+            --bg: #eef2f7;
+            --panel: #f8fafc;
             --ink: #0f172a;
             --muted: #475569;
-            --edge: rgba(15, 23, 42, 0.08);
+            --edge: rgba(15, 23, 42, 0.06);
             --accent: #1f7aec;
             --accent-2: #0ea5e9;
             --success: #059669;
@@ -69,7 +69,7 @@
         }
 
         body.light-mode .topbar {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(238, 242, 247, 0.85);
         }
 
         .topbar-left {
@@ -130,7 +130,7 @@
         }
 
         body.light-mode .topbar-btn {
-            background: #ffffff;
+            background: var(--panel);
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
@@ -238,9 +238,25 @@
         }
 
         body.light-mode .cockpit-card {
-            background: #ffffff;
-            border-color: rgba(15, 23, 42, 0.08);
+            background: var(--panel);
+            border-color: rgba(15, 23, 42, 0.06);
             box-shadow: var(--shadow-card-light);
+        }
+
+        body.light-mode .cockpit-card.blue {
+            background: linear-gradient(135deg, rgba(31, 122, 236, 0.06) 0%, rgba(31, 122, 236, 0.02) 100%);
+        }
+
+        body.light-mode .cockpit-card.amber {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.06) 0%, rgba(217, 119, 6, 0.02) 100%);
+        }
+
+        body.light-mode .cockpit-card.red {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.06) 0%, rgba(220, 38, 38, 0.02) 100%);
+        }
+
+        body.light-mode .cockpit-card.green {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.06) 0%, rgba(5, 150, 105, 0.02) 100%);
         }
 
         .cockpit-card:hover {
@@ -415,7 +431,7 @@
         }
 
         body.light-mode .filter-toolbar {
-            background: #ffffff;
+            background: var(--panel);
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
@@ -447,8 +463,8 @@
         }
 
         body.light-mode .filter-select {
-            background: #ffffff;
-            border-color: rgba(15, 23, 42, 0.08);
+            background: var(--panel);
+            border-color: rgba(15, 23, 42, 0.06);
         }
 
         .filter-select option {
@@ -457,8 +473,8 @@
         }
 
         body.light-mode .filter-select option {
-            background: #fff;
-            color: #000;
+            background: var(--panel);
+            color: var(--ink);
         }
 
         .filter-submit-btn {
@@ -508,7 +524,7 @@
         }
 
         body.light-mode .project-item {
-            background: #ffffff;
+            background: var(--panel);
             box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
 
@@ -714,8 +730,8 @@
         }
 
         body.light-mode .assign-select {
-            background: #ffffff;
-            border-color: rgba(15, 23, 42, 0.08);
+            background: var(--panel);
+            border-color: rgba(15, 23, 42, 0.06);
         }
 
         .assign-select option {
@@ -724,8 +740,8 @@
         }
 
         body.light-mode .assign-select option {
-            background: #fff;
-            color: #000;
+            background: var(--panel);
+            color: var(--ink);
         }
 
         .assign-btn {
@@ -931,8 +947,8 @@
         }
 
         body.light-mode .clear-user-select {
-            background: #ffffff;
-            border-color: rgba(15, 23, 42, 0.08);
+            background: var(--panel);
+            border-color: rgba(15, 23, 42, 0.06);
         }
 
         .clear-user-select option {
@@ -941,8 +957,8 @@
         }
 
         body.light-mode .clear-user-select option {
-            background: #fff;
-            color: #000;
+            background: var(--panel);
+            color: var(--ink);
         }
 
         .clear-user-btn {
