@@ -394,12 +394,8 @@
         <i class="fas fa-user"></i>
         {{ current_user.username }}
       </a>
-      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">        <i class="fas fa-user"></i>
-        {{ current_user.username }}
-      </a>
-      <a href="{{ url_for('auth.logout') }}" class="user-pill" title="Logout">
->>>>>>> 07a82da (feat: add profile edit page, fix tour backdrop, remove admin button, clean up JS errors)
-        <i class="fas fa-sign-out-alt"></i>
+      <a href="{{ url_for('auth.logout') }}" class="user-pill" style="color:#b91c1c;" data-confirm="Sign out now?" data-confirm-btn="Sign out" data-tooltip="Sign out">
+        <i class="fas fa-sign-out-alt"></i> Logout
       </a>
     </div>
   </header>
