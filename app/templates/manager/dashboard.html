@@ -12,8 +12,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
         :root {
-            --bg: #0b1020;
-            --panel: rgba(255, 255, 255, 0.05);
+            --bg: #0a0f1d;
+            --panel: rgba(255, 255, 255, 0.03);
             --ink: #e2e8f0;
             --muted: #94a3b8;
             --edge: rgba(255, 255, 255, 0.08);
@@ -22,19 +22,19 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --control-radius: 0.72rem;
-            --control-height: 2.35rem;
+            --control-radius: 8px;
+            --control-height: 2.2rem;
             --chip-radius: 999px;
-            --shadow-card-dark: rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px, rgba(0, 0, 0, 0.24) 0px 8px 20px;
-            --shadow-card-light: rgba(19, 19, 22, 0.2) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.08) 0px 8px 20px;
+            --shadow-card-dark: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            --shadow-card-light: 0 4px 20px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.08);
         }
 
         body.light-mode {
-            --bg: #f5f5f5;
-            --panel: rgba(0, 0, 0, 0.03);
+            --bg: #f8fafc;
+            --panel: #ffffff;
             --ink: #0f172a;
             --muted: #475569;
-            --edge: rgba(0, 0, 0, 0.08);
+            --edge: rgba(15, 23, 42, 0.08);
             --accent: #1f7aec;
             --accent-2: #0ea5e9;
             --success: #059669;
@@ -46,19 +46,11 @@
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
-                linear-gradient(135deg, #0b1020 0%, #0f172a 45%, #0a101d 100%);
+            background: var(--bg);
             color: var(--ink);
             min-height: 100vh;
             font-size: 15px;
             line-height: 1.5;
-        }
-
-        body.light-mode {
-            background: radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.08), transparent 35%),
-                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 30%),
-                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 45%, #f5f5f5 100%);
         }
 
         /* ── Topbar ── */
@@ -68,8 +60,8 @@
             justify-content: space-between;
             height: 56px;
             padding: 0 24px;
-            background: rgba(11, 16, 32, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 15, 29, 0.8);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--edge);
             position: sticky;
             top: 0;
@@ -99,14 +91,14 @@
         }
 
         .topbar-tag {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
             border-radius: 4px;
             background: rgba(31, 122, 236, 0.15);
             color: var(--accent);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
         }
 
         .topbar-right {
@@ -119,482 +111,344 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            min-height: var(--control-height);
-            padding: 0.45rem 0.95rem;
+            min-height: 2.1rem;
+            padding: 0 0.85rem;
             border-radius: var(--chip-radius);
             border: 1px solid var(--edge);
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
             font-weight: 600;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
 
         .topbar-btn:hover {
-            transform: translateY(-1px);
-            border-color: rgba(59, 130, 246, 0.45);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         body.light-mode .topbar-btn {
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         body.light-mode .topbar-btn:hover {
-            background: rgba(255, 255, 255, 0.95);
             border-color: var(--accent);
+            background: rgba(0,0,0,0.01);
         }
 
         .topbar-logout {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.25);
             color: #fca5a5;
         }
 
         body.light-mode .topbar-logout {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.15);
             color: var(--danger);
         }
 
         .topbar-logout:hover {
-            background: rgba(239, 68, 68, 0.25) !important;
+            background: var(--danger) !important;
             border-color: var(--danger) !important;
             color: #fff !important;
         }
 
-        /* ── Split Layout ── */
-        .dashboard-split {
-            max-width: 1200px;
+        /* ── Container Workspace ── */
+        .container {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 2rem 2rem 5rem;
-            display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
-            gap: 1.5rem;
-            align-items: start;
-        }
-
-        @media (max-width: 992px) {
-            .dashboard-split {
-                grid-template-columns: 1fr;
-                padding: 1.5rem 1.5rem 3rem;
-            }
-        }
-
-        .left-panel, .right-panel {
+            padding: 2.5rem 1.5rem 5rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
         }
 
-        /* ── Hero / Command Center Header ── */
-        .hero {
-            display: grid;
-            gap: 1rem;
-            padding: 1.5rem;
-            border-radius: 20px;
-            background:
-                radial-gradient(circle at top right, rgba(34, 211, 238, 0.14), transparent 32%),
-                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.14), transparent 30%),
-                linear-gradient(145deg, rgba(10, 15, 28, 0.88), rgba(17, 24, 39, 0.92));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: rgba(0, 0, 0, 0.26) 0px 20px 40px -20px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px inset;
-        }
-
-        body.light-mode .hero {
-            background:
-                radial-gradient(circle at top right, rgba(34, 211, 238, 0.08), transparent 32%),
-                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent 30%),
-                linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.96));
-            border-color: rgba(15, 23, 42, 0.08);
-            box-shadow: var(--shadow-card-light);
-        }
-
-        .hero-top {
+        /* ── Header ── */
+        .page-header {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .breadcrumbs {
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .breadcrumbs i {
-            color: var(--accent-2);
-        }
-
-        .hero-kicker {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.4rem 0.8rem;
-            border-radius: 999px;
-            background: rgba(31, 122, 236, 0.15);
-            color: var(--ink);
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
+            flex-direction: column;
+            gap: 0.25rem;
             margin-bottom: 0.5rem;
         }
 
-        body.light-mode .hero-kicker {
-            background: rgba(37, 99, 235, 0.08);
-            color: var(--accent);
-        }
-
-        .hero h1 {
+        .page-header h1 {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
             letter-spacing: -0.03em;
-            line-height: 1.15;
             color: var(--ink);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .hero h1 i {
-            color: var(--accent-2);
+        .page-header h1 i {
+            color: var(--accent);
         }
 
-        .hero p.subtitle {
+        .page-header p {
             color: var(--muted);
-            font-size: 0.96rem;
-            margin-top: 0.25rem;
+            font-size: 0.94rem;
         }
 
-        /* ── Bento & Glass Cards ── */
+        /* ── Tab Navigation Bar ── */
+        .tab-navigation {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--edge);
+            margin-bottom: 0.5rem;
+            padding-bottom: 2px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        body.light-mode .tab-btn:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-2);
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        body.light-mode .tab-btn.active {
+            color: var(--accent);
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        /* ── Tab Panels ── */
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* ── Glass Cards ── */
         .bento-card {
             position: relative;
             padding: 1.5rem;
-            border-radius: 18px;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            border-radius: 14px;
+            background: var(--panel);
             border: 1px solid var(--edge);
             box-shadow: var(--shadow-card-dark);
-            overflow: hidden;
         }
 
         body.light-mode .bento-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82));
             box-shadow: var(--shadow-card-light);
-            border-color: rgba(15, 23, 42, 0.08);
         }
 
         .bento-card h2 {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 0.25rem;
-        }
-
-        .bento-card h2 i {
-            color: var(--accent-2);
-            margin-right: 6px;
-        }
-
-        /* ── Projects Area Header ── */
-        .projects-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.25rem;
-        }
-
-        .pill {
-            padding: 0.35rem 0.65rem;
-            border-radius: var(--chip-radius);
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            border: 1px solid var(--edge);
-            box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 8px;
-        }
-
-        .pill-auto {
-            background: rgba(34, 211, 238, 0.15);
-            color: var(--ink);
-            border-color: rgba(34, 211, 238, 0.25);
-        }
-
-        body.light-mode .pill-auto {
-            background: rgba(34, 211, 238, 0.1);
-            color: #0891b2;
-            border-color: rgba(34, 211, 238, 0.2);
-        }
-
-        .theme-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            min-height: var(--control-height);
-            padding: 0.45rem 0.95rem;
-            border-radius: var(--chip-radius);
-            border: 1px solid var(--edge);
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--ink);
-            font-weight: 600;
-            font-size: 0.84rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .theme-toggle:hover {
-            transform: translateY(-1px);
-            border-color: rgba(59, 130, 246, 0.45);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        body.light-mode .theme-toggle {
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: var(--shadow-card-light);
-            border-color: rgba(15, 23, 42, 0.08);
-        }
-
-        /* ── Collapsible Filters Panel ── */
-        .filter-drawer-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 7, 16, 0.6);
-            backdrop-filter: blur(5px);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .filter-drawer-backdrop.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .filter-drawer {
-            position: fixed;
-            top: 0;
-            right: -360px;
-            width: 340px;
-            height: 100vh;
-            background: rgba(11, 16, 32, 0.95);
-            backdrop-filter: blur(12px);
-            border-left: 1px solid var(--edge);
-            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.light-mode .filter-drawer {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: -10px 0 40px rgba(15, 23, 42, 0.08);
-            border-left: 1px solid rgba(15, 23, 42, 0.08);
-        }
-
-        .filter-drawer.active {
-            right: 0;
-        }
-
-        .filter-drawer-header {
-            padding: 1.25rem;
-            border-bottom: 1px solid var(--edge);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .filter-drawer-header h3 {
             font-size: 1.1rem;
             font-weight: 700;
-            font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--ink);
+            margin-bottom: 0.75rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .filter-drawer-header h3 i {
+        .bento-card h2 i {
             color: var(--accent-2);
         }
 
-        .filter-drawer-close {
-            background: none;
-            border: none;
-            color: var(--muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 4px;
-            transition: color 0.15s;
+        body.light-mode .bento-card h2 i {
+            color: var(--accent);
         }
 
-        .filter-drawer-close:hover {
-            color: var(--ink);
-        }
-
-        .filter-drawer-body {
-            padding: 1.5rem 1.25rem;
-            flex: 1;
-            overflow-y: auto;
+        /* ── Horizontal Filter Toolbar ── */
+        .filter-toolbar {
             display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--edge);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
         }
 
-        .filter-drawer-field {
+        body.light-mode .filter-toolbar {
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .filter-group {
             display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
+            align-items: center;
+            gap: 8px;
         }
 
-        .filter-drawer-field label {
-            font-size: 0.74rem;
-            font-weight: 700;
+        .filter-group label {
+            font-size: 0.72rem;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--muted);
         }
 
-        .filter-drawer-field select {
-            min-height: var(--control-height);
-            padding: 0.55rem 0.75rem;
-            border-radius: var(--control-radius);
+        .filter-select {
+            min-height: 2.1rem;
+            padding: 0 0.75rem;
+            border-radius: 6px;
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
-            font-weight: 600;
             font-family: inherit;
-            font-size: 0.9rem;
-            box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px inset;
+            font-size: 0.86rem;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        body.light-mode .filter-drawer-field select {
-            background: rgba(255, 255, 255, 0.85);
+        body.light-mode .filter-select {
+            background: #ffffff;
             border-color: rgba(15, 23, 42, 0.08);
-            color: var(--ink);
         }
 
-        .filter-drawer-field select option {
+        .filter-select option {
             background: var(--bg);
             color: var(--ink);
         }
 
-        body.light-mode .filter-drawer-field select option {
+        body.light-mode .filter-select option {
             background: #fff;
             color: #000;
         }
 
-        .filter-drawer-submit {
-            margin-top: 0.5rem;
-            min-height: var(--control-height);
-            padding: 0.52rem 0.95rem;
-            border-radius: var(--control-radius);
-            border: 1px solid rgba(99, 102, 241, 0.4);
+        .filter-submit-btn {
+            min-height: 2.1rem;
+            padding: 0 1.1rem;
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-2);
+            font-weight: 700;
+            font-size: 0.84rem;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
-            color: #fff;
-            box-shadow: rgba(255, 255, 255, 0.15) 0px 1px 0px inset;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            transition: all 0.15s;
         }
 
-        .filter-drawer-submit:hover {
+        body.light-mode .filter-submit-btn {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent);
+            border-color: rgba(37, 99, 235, 0.18);
+        }
+
+        .filter-submit-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
         }
 
-        /* Responsive Mobile Drawer styling */
-        @media (max-width: 768px) {
-            .filter-drawer {
-                right: 0;
-                bottom: -100%;
-                top: auto;
-                width: 100%;
-                height: auto;
-                max-height: 85vh;
-                border-left: none;
-                border-top: 1px solid var(--edge);
-                border-radius: 20px 20px 0 0;
-                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
-                transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            body.light-mode .filter-drawer {
-                border-top: 1px solid rgba(15, 23, 42, 0.08);
-            }
-            .filter-drawer.active {
-                bottom: 0;
-            }
-        }
-
-        /* ── Project Cards ── */
+        /* ── Project Rows Feed ── */
         .projects-list {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
-        .project-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        .project-item {
+            background: rgba(255, 255, 255, 0.01);
             border: 1px solid var(--edge);
-            border-radius: 14px;
-            padding: 1.25rem;
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+            border-radius: 10px;
+            padding: 1.15rem;
             display: flex;
             flex-direction: column;
             gap: 0.8rem;
+            transition: all 0.15s ease;
         }
 
-        body.light-mode .project-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-            border-color: rgba(15, 23, 42, 0.06);
+        body.light-mode .project-item {
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
 
-        .project-card:hover {
-            transform: translateY(-2px);
+        .project-item:hover {
             border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: var(--shadow-card-dark);
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        body.light-mode .project-card:hover {
-            box-shadow: var(--shadow-card-light);
+        body.light-mode .project-item:hover {
+            background: rgba(0,0,0,0.005);
         }
 
-        .project-header {
+        .project-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-info {
+            display: flex;
             align-items: center;
             gap: 12px;
         }
 
         .project-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--ink);
             display: flex;
             align-items: center;
             gap: 8px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .project-title i {
             color: var(--accent);
+        }
+
+        .project-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .project-badge {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--edge);
+            color: var(--muted);
+        }
+
+        body.light-mode .project-badge {
+            background: rgba(0,0,0,0.02);
+            border-color: rgba(15, 23, 42, 0.05);
         }
 
         .status-badge {
@@ -611,48 +465,27 @@
         }
 
         .status-badge.assigned {
-            background: rgba(16, 185, 129, 0.14);
+            background: rgba(16, 185, 129, 0.12);
             color: #34d399;
-            border-color: rgba(16, 185, 129, 0.25);
+            border-color: rgba(16, 185, 129, 0.2);
         }
 
         body.light-mode .status-badge.assigned {
-            background: rgba(16, 185, 129, 0.08);
+            background: rgba(16, 185, 129, 0.06);
             color: #059669;
-            border-color: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.15);
         }
 
         .status-badge.unassigned {
-            background: rgba(245, 158, 11, 0.14);
+            background: rgba(245, 158, 11, 0.12);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.25);
+            border-color: rgba(245, 158, 11, 0.2);
         }
 
         body.light-mode .status-badge.unassigned {
-            background: rgba(245, 158, 11, 0.08);
+            background: rgba(245, 158, 11, 0.06);
             color: #d97706;
-            border-color: rgba(245, 158, 11, 0.18);
-        }
-
-        .project-meta-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-        }
-
-        .project-meta-pill {
-            font-size: 0.76rem;
-            color: var(--muted);
-            background: rgba(255, 255, 255, 0.04);
-            padding: 0.3rem 0.65rem;
-            border-radius: 8px;
-            font-weight: 600;
-            border: 1px solid var(--edge);
-        }
-
-        body.light-mode .project-meta-pill {
-            background: rgba(0, 0, 0, 0.02);
-            border-color: rgba(15, 23, 42, 0.05);
+            border-color: rgba(245, 158, 11, 0.15);
         }
 
         /* ── Project Escalation Flags ── */
@@ -663,10 +496,10 @@
         }
 
         .flag-card {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
+            padding: 0.45rem 0.75rem;
+            border-radius: 6px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -674,27 +507,27 @@
         }
 
         .flag-card.danger, .flag-card.critical {
-            background: rgba(239, 68, 68, 0.12);
+            background: rgba(239, 68, 68, 0.1);
             color: #f87171;
-            border-color: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
         body.light-mode .flag-card.danger, body.light-mode .flag-card.critical {
-            background: rgba(220, 38, 38, 0.06);
+            background: rgba(220, 38, 38, 0.04);
             color: #dc2626;
-            border-color: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.12);
         }
 
         .flag-card.warning {
-            background: rgba(245, 158, 11, 0.12);
+            background: rgba(245, 158, 11, 0.1);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.25);
+            border-color: rgba(245, 158, 11, 0.2);
         }
 
         body.light-mode .flag-card.warning {
-            background: rgba(217, 119, 6, 0.06);
+            background: rgba(217, 119, 6, 0.04);
             color: #d97706;
-            border-color: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.12);
         }
 
         /* ── Progress Indicators ── */
@@ -705,7 +538,7 @@
         }
 
         .progress-box-label {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--muted);
             min-width: 60px;
@@ -714,19 +547,19 @@
         .progress-box-bar {
             flex: 1;
             height: 6px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 4px;
             overflow: hidden;
         }
 
         body.light-mode .progress-box-bar {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.05);
         }
 
         .progress-box-fill {
             height: 100%;
             border-radius: 4px;
-            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            background: linear-gradient(90deg, #3b82f6, #4f46e5);
             transition: width 0.3s;
         }
 
@@ -735,7 +568,7 @@
         }
 
         .progress-box-pct {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: var(--ink);
             min-width: 32px;
@@ -743,18 +576,28 @@
         }
 
         /* ── Assignment Form Widget ── */
+        .project-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.15rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--edge);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .assign-form {
             display: flex;
             gap: 0.5rem;
             align-items: center;
-            margin-top: 0.25rem;
+            flex-wrap: wrap;
         }
 
         .assign-select {
-            flex: 1;
-            min-height: var(--control-height);
-            padding: 0 0.75rem;
-            border-radius: var(--control-radius);
+            min-height: 2rem;
+            padding: 0 0.5rem;
+            border-radius: 6px;
             border: 1px solid var(--edge);
             background: rgba(255, 255, 255, 0.04);
             color: var(--ink);
@@ -765,7 +608,7 @@
         }
 
         body.light-mode .assign-select {
-            background: rgba(255, 255, 255, 0.85);
+            background: #ffffff;
             border-color: rgba(15, 23, 42, 0.08);
         }
 
@@ -780,49 +623,38 @@
         }
 
         .assign-btn {
-            min-height: var(--control-height);
-            padding: 0 1rem;
-            border-radius: var(--control-radius);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            background: rgba(59, 130, 246, 0.15);
+            min-height: 2rem;
+            padding: 0 0.85rem;
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            background: rgba(59, 130, 246, 0.12);
             color: var(--accent-2);
             font-weight: 700;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
-            font-family: inherit;
-            white-space: nowrap;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            transition: all 0.15s;
         }
 
         body.light-mode .assign-btn {
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(37, 99, 235, 0.06);
             color: var(--accent);
-            border-color: rgba(37, 99, 235, 0.18);
+            border-color: rgba(37, 99, 235, 0.15);
         }
 
         .assign-btn:hover {
-            background: rgba(59, 130, 246, 0.25);
+            background: rgba(59, 130, 246, 0.2);
             transform: translateY(-1px);
-        }
-
-        .project-card-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.25rem;
-            padding-top: 0.8rem;
-            border-top: 1px dashed var(--edge);
         }
 
         .btn-delete-project-custom {
             min-height: 1.85rem;
             padding: 0 0.75rem;
-            background: rgba(239, 68, 68, 0.12);
+            background: rgba(239, 68, 68, 0.1);
             color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            border: 1px solid rgba(239, 68, 68, 0.2);
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.76rem;
@@ -830,13 +662,13 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         body.light-mode .btn-delete-project-custom {
-            background: rgba(220, 38, 38, 0.06);
+            background: rgba(220, 38, 38, 0.04);
             color: var(--danger);
-            border-color: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.12);
         }
 
         .btn-delete-project-custom:hover {
@@ -845,124 +677,9 @@
             border-color: var(--danger);
         }
 
-        /* Empty state */
-        .ldms-empty {
-            text-align: center;
-            padding: 3rem 2rem;
-            border: 1px dashed var(--edge);
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.01);
-        }
-
-        .ldms-empty-icon {
-            font-size: 2.2rem;
-            color: var(--muted);
-            margin-bottom: 0.8rem;
-        }
-
-        .ldms-empty h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .ldms-empty p {
-            font-size: 0.86rem;
-            color: var(--muted);
-        }
-
-        /* ── Right Panel Sidebar KPI Cards ── */
-        .kpi-sidebar-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .hero-summary-card {
-            border-radius: 14px;
-            padding: 1.1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--edge);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-card-dark);
-            transition: transform 0.15s ease;
-        }
-
-        body.light-mode .hero-summary-card {
-            background: rgba(255, 255, 255, 0.88);
-            border-color: rgba(15, 23, 42, 0.08);
-            box-shadow: var(--shadow-card-light);
-        }
-
-        .hero-summary-card:hover {
-            transform: translateX(4px);
-        }
-
-        .hero-summary-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent);
-        }
-
-        .hero-summary-card.projects::after { background-color: #60a5fa; }
-        .hero-summary-card.unassigned::after { background-color: var(--warning); }
-        .hero-summary-card.urgent::after { background-color: var(--danger); }
-        .hero-summary-card.new24h::after { background-color: var(--success); }
-
-        .hero-summary-card.hotspot::after { background-color: var(--danger); }
-        .hero-summary-card.stale::after { background-color: var(--warning); }
-        .hero-summary-card.overdue::after { background-color: var(--danger); }
-
-        .hero-summary-card .card-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-            padding-left: 6px;
-        }
-
-        .hero-summary-card .label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .hero-summary-card .detail {
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .hero-summary-card .value {
-            font-size: 1.8rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            text-align: right;
-            padding-right: 4px;
-        }
-
-        .hero-summary-card.projects .value { color: #60a5fa; }
-        .hero-summary-card.unassigned .value { color: var(--warning); }
-        .hero-summary-card.urgent .value { color: var(--danger); }
-        .hero-summary-card.new24h .value { color: var(--success); }
-
-        .hero-summary-card.hotspot .value { color: var(--danger); }
-        .hero-summary-card.stale .value { color: var(--warning); }
-        .hero-summary-card.overdue .value { color: var(--danger); }
-
         /* ── Team Workload & Table ── */
         .table-scroll {
             overflow-x: auto;
-            margin-top: 0.75rem;
             border-radius: 8px;
             border: 1px solid var(--edge);
         }
@@ -981,12 +698,12 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: var(--muted);
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.01);
             border-bottom: 1px solid var(--edge);
         }
 
         body.light-mode th {
-            background: rgba(0, 0, 0, 0.01);
+            background: rgba(0, 0, 0, 0.005);
             border-bottom-color: rgba(15, 23, 42, 0.08);
         }
 
@@ -1020,59 +737,59 @@
         }
 
         .load.overloaded {
-            background: rgba(239, 68, 68, 0.12);
+            background: rgba(239, 68, 68, 0.1);
             color: #f87171;
-            border-color: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.2);
         }
 
         body.light-mode .load.overloaded {
-            background: rgba(220, 38, 38, 0.06);
+            background: rgba(220, 38, 38, 0.04);
             color: var(--danger);
-            border-color: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.12);
         }
 
         .load.balanced {
-            background: rgba(245, 158, 11, 0.12);
+            background: rgba(245, 158, 11, 0.1);
             color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.25);
+            border-color: rgba(245, 158, 11, 0.2);
         }
 
         body.light-mode .load.balanced {
-            background: rgba(217, 119, 6, 0.06);
+            background: rgba(217, 119, 6, 0.04);
             color: #d97706;
-            border-color: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.12);
         }
 
         .load.underloaded {
-            background: rgba(16, 185, 129, 0.12);
+            background: rgba(16, 185, 129, 0.1);
             color: #34d399;
-            border-color: rgba(16, 185, 129, 0.25);
+            border-color: rgba(16, 185, 129, 0.2);
         }
 
         body.light-mode .load.underloaded {
-            background: rgba(16, 185, 129, 0.06);
+            background: rgba(16, 185, 129, 0.04);
             color: #059669;
-            border-color: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.12);
         }
 
         .cap-bar {
             width: 100%;
             min-width: 60px;
             height: 5px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 3px;
             overflow: hidden;
             margin-bottom: 2px;
         }
 
         body.light-mode .cap-bar {
-            background: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.05);
         }
 
         .cap-fill {
             height: 100%;
             border-radius: 3px;
-            background: linear-gradient(90deg, #3b82f6, #22d3ee);
+            background: linear-gradient(90deg, #3b82f6, #0ea5e9);
         }
 
         .cap-text {
@@ -1081,9 +798,9 @@
             font-weight: 700;
         }
 
-        tr.overloaded td { background: rgba(239, 68, 68, 0.015); }
-        tr.balanced td { background: rgba(245, 158, 11, 0.015); }
-        tr.underloaded td { background: rgba(16, 185, 129, 0.015); }
+        tr.overloaded td { background: rgba(239, 68, 68, 0.008); }
+        tr.balanced td { background: rgba(245, 158, 11, 0.008); }
+        tr.underloaded td { background: rgba(16, 185, 129, 0.008); }
 
         /* User delete clear widget */
         .clear-user-widget {
@@ -1091,12 +808,11 @@
             gap: 0.6rem;
             align-items: center;
             flex-wrap: wrap;
-            margin-top: 0.8rem;
+            margin-top: 0.5rem;
         }
 
         .clear-user-select {
-            flex: 1;
-            min-height: var(--control-height);
+            min-height: 2.1rem;
             padding: 0 0.75rem;
             border-radius: var(--control-radius);
             border: 1px solid var(--edge);
@@ -1109,7 +825,7 @@
         }
 
         body.light-mode .clear-user-select {
-            background: rgba(255, 255, 255, 0.85);
+            background: #ffffff;
             border-color: rgba(15, 23, 42, 0.08);
         }
 
@@ -1124,7 +840,7 @@
         }
 
         .clear-user-btn {
-            min-height: var(--control-height);
+            min-height: 2.1rem;
             padding: 0 1.1rem;
             background: var(--danger);
             color: white;
@@ -1136,21 +852,165 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
         .clear-user-btn:hover {
-            opacity: 0.9;
+            opacity: 0.95;
             transform: translateY(-1px);
         }
 
-        .meta-label {
-            font-size: 0.76rem;
-            letter-spacing: 0.04em;
-            color: var(--muted);
+        /* ── Tab C: Escalations Dashboard ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .kpi-card {
+            border-radius: 12px;
+            padding: 1.25rem;
+            background: var(--panel);
+            border: 1px solid var(--edge);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card-dark);
+        }
+
+        body.light-mode .kpi-card {
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .kpi-card.blue::after { background-color: var(--accent); }
+        .kpi-card.amber::after { background-color: var(--warning); }
+        .kpi-card.red::after { background-color: var(--danger); }
+        .kpi-card.green::after { background-color: var(--success); }
+
+        .kpi-label {
+            font-size: 0.74rem;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
             font-weight: 700;
-            margin-top: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+
+        .kpi-card.blue .kpi-value { color: var(--accent-2); }
+        body.light-mode .kpi-card.blue .kpi-value { color: var(--accent); }
+        .kpi-card.amber .kpi-value { color: var(--warning); }
+        .kpi-card.red .kpi-value { color: var(--danger); }
+        .kpi-card.green .kpi-value { color: var(--success); }
+
+        .kpi-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .escalation-header {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-top: 1rem;
+        }
+
+        .escalation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .escalation-box {
+            padding: 1.15rem;
+            border-radius: 12px;
+            background: var(--panel);
+            border: 1px solid var(--edge);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            box-shadow: var(--shadow-card-dark);
+            border-left: 4px solid var(--danger);
+        }
+
+        body.light-mode .escalation-box {
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .escalation-box.amber { border-left-color: var(--warning); }
+        .escalation-box.red { border-left-color: var(--danger); }
+        .escalation-box.critical { border-left-color: #ef4444; }
+
+        .escalation-box .label {
+            font-size: 0.74rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+        }
+
+        .escalation-box .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .escalation-box.amber .value { color: var(--warning); }
+        .escalation-box.red .value { color: var(--danger); }
+        .escalation-box.critical .value { color: var(--danger); }
+
+        .escalation-box .hint {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* Empty state */
+        .ldms-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            border: 1px dashed var(--edge);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.005);
+        }
+
+        .ldms-empty-icon {
+            font-size: 2rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .ldms-empty h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .ldms-empty p {
+            font-size: 0.86rem;
+            color: var(--muted);
         }
     </style>
 </head>
@@ -1172,64 +1032,87 @@
         </div>
     </header>
 
-    <main class="dashboard-split">
-        <!-- Left Panel: Command Center Hero & Projects List -->
-        <div class="left-panel">
-            <header class="hero">
-                <div class="hero-top">
-                    <div class="breadcrumbs">
-                        <i class="fas fa-home"></i>
-                        <span>Manager Workspace</span>
-                    </div>
+    <main class="container">
+        <!-- Title Header -->
+        <header class="page-header">
+            <h1><i class="fas fa-sitemap"></i> Command Center</h1>
+            <p>Assign inspector projects, view escalations, and monitor team workload allocation.</p>
+        </header>
+
+        <!-- Horizontal Tab Navigation Bar -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-tab="projects">
+                <i class="fas fa-cube"></i> Projects
+            </button>
+            <button class="tab-btn" data-tab="workload">
+                <i class="fas fa-users"></i> Team Workload
+            </button>
+            <button class="tab-btn" data-tab="escalations">
+                <i class="fas fa-chart-line"></i> Escalations & KPIs
+            </button>
+        </nav>
+
+        <!-- Tab Panel: Projects -->
+        <section class="tab-panel active" id="tab-projects">
+            <!-- Filter Toolbar -->
+            <form class="filter-toolbar" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+                <div class="filter-group">
+                    <label>Sort</label>
+                    <select class="filter-select" name="sort">
+                        <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                        <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+                    </select>
                 </div>
-                <div class="hero-panel-title" style="margin-top:0.5rem;">
-                    <div class="hero-kicker"><i class="fas fa-sitemap"></i> Command Center</div>
-                    <h1><i class="fas fa-sitemap"></i> Command Center</h1>
-                    <p class="subtitle">Assign inspector projects to developers and balance team workload.</p>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select class="filter-select" name="status_filter">
+                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                        <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                        <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
+                        <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+                    </select>
                 </div>
-                
-                <section class="ldms-page-note" style="margin-top:0.5rem;">
-                    <div>
-                        <h3 style="font-size:0.98rem;">Portfolio overview</h3>
-                        <p>This view spans every project, highlights urgent backlog, and shows where the team is under or over capacity.</p>
-                    </div>
-                    <div class="note-chips">
-                        <span class="ldms-chip"><i class="fas fa-diagram-project"></i> All projects</span>
-                        <span class="ldms-chip"><i class="fas fa-triangle-exclamation"></i> Escalations</span>
-                        <span class="ldms-chip"><i class="fas fa-users"></i> Workload balance</span>
-                    </div>
-                </section>
-            </header>
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <select class="filter-select" name="date_range">
+                        <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
+                        <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
+                        <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
+                        <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
+                    </select>
+                </div>
+                <button type="submit" class="filter-submit-btn">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+            </form>
 
             <div class="bento-card">
-                <div class="projects-header">
-                    <h2><i class="fas fa-cube"></i> Projects</h2>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span class="pill pill-auto">{{ scans|length }} projects</span>
-                        <button class="theme-toggle" id="filter-toggle-btn" type="button">
-                            <i class="fas fa-filter"></i> Filters
-                        </button>
-                    </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2><i class="fas fa-cube"></i> Scans Feed</h2>
+                    <span class="project-badge">{{ scans|length }} projects total</span>
                 </div>
 
                 <div class="projects-list">
                     {% for scan, defect_count, reported, review, fixed in scans %}
-                    <div class="project-card">
-                        <div class="project-header">
-                            <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                    <div class="project-item">
+                        <div class="project-row">
+                            <div class="project-info">
+                                <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
+                            </div>
                             {% if scan.assigned_to %}
                             <span class="status-badge assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
                             {% else %}
                             <span class="status-badge unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
                             {% endif %}
                         </div>
-                        <div class="project-meta-grid">
-                            <span class="project-meta-pill">{{ defect_count }} defects</span>
-                            <span class="project-meta-pill">{{ reported }} reported</span>
-                            <span class="project-meta-pill">{{ review }} in review</span>
-                            <span class="project-meta-pill">{{ fixed }} fixed</span>
+
+                        <div class="project-badges">
+                            <span class="project-badge">{{ defect_count }} defects</span>
+                            <span class="project-badge">{{ reported }} reported</span>
+                            <span class="project-badge">{{ review }} under review</span>
+                            <span class="project-badge">{{ fixed }} resolved</span>
                         </div>
-                        
+
                         {% set scan_escalation = project_escalations.get(scan.id) %}
                         {% if scan_escalation and scan_escalation.flags %}
                         <div class="project-flags">
@@ -1238,7 +1121,7 @@
                             {% endfor %}
                         </div>
                         {% endif %}
-                        
+
                         {% if defect_count > 0 %}
                         {% set pct = ((fixed / defect_count) * 100) | int %}
                         <div class="progress-box">
@@ -1259,12 +1142,12 @@
                                     <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
                                     {% endfor %}
                                 </select>
-                                <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Assign</button>
+                                <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Reassign Owner</button>
                             </form>
-                            
+
                             {% if current_user.username in ('manager', 'Afiq_M') %}
                             <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')">
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i> Delete Project
                             </button>
                             {% endif %}
                         </div>
@@ -1272,90 +1155,29 @@
                     {% else %}
                     <div class="ldms-empty">
                         <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
-                        <h3>No projects match your filters</h3>
-                        <p>Try adjusting your search or filter criteria to find what you're looking for.</p>
+                        <h3>No projects found</h3>
+                        <p>Adjust your filters or query to find the scans you are looking for.</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Right Panel: KPIs and Workload Table -->
-        <div class="right-panel">
-            <h3 class="meta-label">System Performance</h3>
-            <div class="kpi-sidebar-grid">
-                <article class="hero-summary-card projects">
-                    <div class="card-info">
-                        <span class="label">All Projects</span>
-                        <span class="detail">Total registered</span>
-                    </div>
-                    <span class="value">{{ metrics.project_counts.all }}</span>
-                </article>
-                
-                <article class="hero-summary-card unassigned">
-                    <div class="card-info">
-                        <span class="label">Unassigned</span>
-                        <span class="detail">Needs assignment</span>
-                    </div>
-                    <span class="value">{{ metrics.project_counts.unassigned }}</span>
-                </article>
-
-                <article class="hero-summary-card urgent">
-                    <div class="card-info">
-                        <span class="label">Urgent Defects</span>
-                        <span class="detail">Critical attention</span>
-                    </div>
-                    <span class="value">{{ metrics.urgent_attention }}</span>
-                </article>
-
-                <article class="hero-summary-card new24h">
-                    <div class="card-info">
-                        <span class="label">New (24h)</span>
-                        <span class="detail">Added in last day</span>
-                    </div>
-                    <span class="value">{{ metrics.new_24h }}</span>
-                </article>
-            </div>
-
-            <h3 class="meta-label">Escalations</h3>
-            <div class="kpi-sidebar-grid">
-                <article class="hero-summary-card hotspot">
-                    <div class="card-info">
-                        <span class="label">Urgent Hotspots</span>
-                        <span class="detail">Projects with 3+ high defects</span>
-                    </div>
-                    <span class="value">{{ escalation_summary.urgent_hotspots }}</span>
-                </article>
-
-                <article class="hero-summary-card stale">
-                    <div class="card-info">
-                        <span class="label">Stale Reviews</span>
-                        <span class="detail">Review stage > 7 days</span>
-                    </div>
-                    <span class="value">{{ escalation_summary.stale_reviews }}</span>
-                </article>
-
-                <article class="hero-summary-card overdue">
-                    <div class="card-info">
-                        <span class="label">Overdue Backlog</span>
-                        <span class="detail">Projects with 3+ overdue defects</span>
-                    </div>
-                    <span class="value">{{ escalation_summary.overdue_backlog }}</span>
-                </article>
-            </div>
-
+        <!-- Tab Panel: Workload -->
+        <section class="tab-panel" id="tab-workload">
             <div class="bento-card">
-                <h2><i class="fas fa-users"></i> Team Capacity</h2>
+                <h2><i class="fas fa-users"></i> Team Workload Balance</h2>
+                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.88rem;">Monitor active capacity levels for each developer in the organization.</p>
                 <div class="table-scroll">
                     <table>
                         <thead>
                             <tr>
                                 <th>Developer</th>
                                 <th>Projects</th>
-                                <th>Open</th>
+                                <th>Open Defects</th>
                                 <th>Urgent</th>
                                 <th>Avg Age</th>
-                                <th>Load</th>
+                                <th>Load State</th>
                                 <th>Capacity</th>
                             </tr>
                         </thead>
@@ -1370,11 +1192,11 @@
                                 <td><span class="load {{ row.load_state }}">{{ row.load_state }}</span></td>
                                 <td>
                                     <div class="cap-bar"><div class="cap-fill" style="width: {{ row.utilization_percent }}%"></div></div>
-                                    <span class="cap-text">{{ row.utilization_percent }}%</span>
+                                    <span class="cap-text">{{ row.utilization_percent }}% capacity</span>
                                 </td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="7"><div class="empty">No active developers</div></td></tr>
+                            <tr><td colspan="7"><div class="empty">No active developers available</div></td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -1383,8 +1205,8 @@
 
             {% if current_user.username in ('manager', 'Afiq_M') %}
             <div class="bento-card">
-                <h2><i class="fas fa-trash"></i> Clear User Projects</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.86rem;">Delete all projects and defects assigned to a user.</p>
+                <h2><i class="fas fa-trash"></i> Reset User Projects</h2>
+                <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.88rem;">Deletes all defects and projects assigned to a specific account.</p>
                 <div class="clear-user-widget">
                     <select id="clear-user-select" class="clear-user-select">
                         <option value="">Select a user...</option>
@@ -1393,55 +1215,60 @@
                         {% endfor %}
                     </select>
                     <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
-                        <i class="fas fa-trash"></i> Clear
+                        <i class="fas fa-trash"></i> Wipe All Assignments
                     </button>
                 </div>
-                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; display: none; font-size: 0.86rem;"></div>
+                <div id="clear-result" style="margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; display: none; font-size: 0.86rem;"></div>
             </div>
             {% endif %}
-        </div>
-    </main>
+        </section>
 
-    <!-- Collapsible Filter Drawer -->
-    <div class="filter-drawer-backdrop" id="filter-backdrop"></div>
-    <div class="filter-drawer" id="filter-drawer">
-        <div class="filter-drawer-header">
-            <h3><i class="fas fa-filter"></i> Filters</h3>
-            <button class="filter-drawer-close" id="filter-close-btn" type="button">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <form class="filter-drawer-body" method="get" action="{{ url_for('developer.manager_dashboard') }}">
-            <div class="filter-drawer-field">
-                <label>Sort</label>
-                <select name="sort">
-                    <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
-                    <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
-                </select>
+        <!-- Tab Panel: Escalations & KPIs -->
+        <section class="tab-panel" id="tab-escalations">
+            <h3 class="escalation-header">System Metrics Overview</h3>
+            <div class="kpi-grid">
+                <article class="kpi-card blue">
+                    <span class="kpi-label">Registered Projects</span>
+                    <span class="kpi-value">{{ metrics.project_counts.all }}</span>
+                    <span class="kpi-desc">Total scans tracked</span>
+                </article>
+                <article class="kpi-card amber">
+                    <span class="kpi-label">Unassigned Projects</span>
+                    <span class="kpi-value">{{ metrics.project_counts.unassigned }}</span>
+                    <span class="kpi-desc">Awaiting developer assignment</span>
+                </article>
+                <article class="kpi-card red">
+                    <span class="kpi-label">Urgent Defects</span>
+                    <span class="kpi-value">{{ metrics.urgent_attention }}</span>
+                    <span class="kpi-desc">Requires immediate repair</span>
+                </article>
+                <article class="kpi-card green">
+                    <span class="kpi-label">New Scans (24h)</span>
+                    <span class="kpi-value">{{ metrics.new_24h }}</span>
+                    <span class="kpi-desc">Uploaded during last day</span>
+                </article>
             </div>
-            <div class="filter-drawer-field">
-                <label>Status</label>
-                <select name="status_filter">
-                    <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
-                    <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
-                    <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
-                    <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
-                </select>
+
+            <h3 class="escalation-header">Active Escalations & Warnings</h3>
+            <div class="escalation-grid">
+                <div class="escalation-box red">
+                    <div class="label">Urgent Hotspots</div>
+                    <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
+                    <div class="hint">Projects with 3+ urgent or high unresolved defects.</div>
+                </div>
+                <div class="escalation-box amber">
+                    <div class="label">Stale Reviews</div>
+                    <div class="value">{{ escalation_summary.stale_reviews }}</div>
+                    <div class="hint">Items under review for more than 7 days.</div>
+                </div>
+                <div class="escalation-box critical">
+                    <div class="label">Overdue Backlog</div>
+                    <div class="value">{{ escalation_summary.overdue_backlog }}</div>
+                    <div class="hint">Projects with 3+ unresolved overdue defects.</div>
+                </div>
             </div>
-            <div class="filter-drawer-field">
-                <label>Date Range</label>
-                <select name="date_range">
-                    <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
-                    <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
-                    <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
-                    <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
-                </select>
-            </div>
-            <button type="submit" class="filter-drawer-submit">
-                <i class="fas fa-check"></i> Apply Filters
-            </button>
-        </form>
-    </div>
+        </section>
+    </main>
 
     <div id="ldms-flash-data" data-messages='{{ get_flashed_messages(with_categories=true) | tojson | safe }}' style="display:none;"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1463,36 +1290,37 @@
             }
         }
 
-        // Filter Drawer Toggling
-        const filterToggleBtn = document.getElementById('filter-toggle-btn');
-        const filterDrawer = document.getElementById('filter-drawer');
-        const filterBackdrop = document.getElementById('filter-backdrop');
-        const filterCloseBtn = document.getElementById('filter-close-btn');
+        // Tab Switching Logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
 
-        if (filterToggleBtn && filterDrawer && filterBackdrop) {
-            filterToggleBtn.addEventListener('click', function() {
-                filterDrawer.classList.add('active');
-                filterBackdrop.classList.add('active');
-                document.body.style.overflow = 'hidden';
+        function switchTab(tabId) {
+            tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
             });
+
+            tabPanels.forEach(panel => {
+                if (panel.id === 'tab-' + tabId) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+
+            localStorage.setItem('manager-dashboard-active-tab', tabId);
         }
 
-        function closeDrawer() {
-            if (filterDrawer && filterBackdrop) {
-                filterDrawer.classList.remove('active');
-                filterBackdrop.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab(this.getAttribute('data-tab'));
+            });
+        });
 
-        if (filterCloseBtn) {
-            filterCloseBtn.addEventListener('click', closeDrawer);
-        }
-        if (filterBackdrop) {
-            filterBackdrop.addEventListener('click', closeDrawer);
-        }
-
-        // Delete single project (SweetAlert confirmed)
+        // Delete project (SweetAlert)
         function deleteProject(scanId, scanName) {
             ldmsConfirm({
                 title: 'Delete Project?',
@@ -1526,7 +1354,7 @@
             });
         }
 
-        // Clear all projects for a user (SweetAlert confirmed)
+        // Clear user projects (SweetAlert)
         function clearUserProjects() {
             const userSelect = document.getElementById('clear-user-select');
             const userId = userSelect.value;
@@ -1577,6 +1405,10 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Restore active tab
+            const activeTab = localStorage.getItem('manager-dashboard-active-tab') || 'projects';
+            switchTab(activeTab);
+
             updateThemeButton();
             const btn = document.getElementById('ldms-theme-btn');
             if (btn) {
