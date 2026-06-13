@@ -36,7 +36,7 @@ def login():
 
         # If user was trying to access a specific page, go there
         next_page = request.args.get('next')
-        if next_page and next_page.startswith('/'):
+        if next_page and next_page.startswith('/') and next_page != '/logout':
             return redirect(next_page)
 
         # Otherwise redirect based on role
