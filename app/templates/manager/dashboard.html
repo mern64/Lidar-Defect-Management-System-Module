@@ -23,7 +23,7 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --control-radius: 6px;
-            --control-height: 2.1rem;
+            --control-height: 1.95rem;
             --chip-radius: 999px;
             --shadow-card-dark: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
             --shadow-card-light: 0 4px 20px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.08);
@@ -194,12 +194,119 @@
             font-size: 0.9rem;
         }
 
+        /* ── Top Cockpit Dashboard ── */
+        .cockpit-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cockpit-row-title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 0.1rem;
+        }
+
+        .kpi-row-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .warning-row-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        /* ── Gradient SaaS Widgets ── */
+        .cockpit-card {
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            background: var(--panel);
+            border: 1px solid var(--edge);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: var(--shadow-card-dark);
+            transition: transform 0.15s ease;
+        }
+
+        body.light-mode .cockpit-card {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-card-light);
+        }
+
+        .cockpit-card:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Status gradients + left borders */
+        .cockpit-card.blue {
+            border-left: 3.5px solid var(--accent);
+            background: linear-gradient(135deg, rgba(31, 122, 236, 0.05) 0%, rgba(31, 122, 236, 0.01) 100%);
+        }
+
+        .cockpit-card.amber {
+            border-left: 3.5px solid var(--warning);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 100%);
+        }
+
+        .cockpit-card.red {
+            border-left: 3.5px solid var(--danger);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, rgba(239, 68, 68, 0.01) 100%);
+        }
+
+        .cockpit-card.green {
+            border-left: 3.5px solid var(--success);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%);
+        }
+
+        .cockpit-card .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .cockpit-card .label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .cockpit-card .detail {
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        .cockpit-card .value {
+            font-size: 1.6rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 850;
+            letter-spacing: -0.04em;
+        }
+
+        .cockpit-card.blue .value { color: var(--accent-2); }
+        body.light-mode .cockpit-card.blue .value { color: var(--accent); }
+        .cockpit-card.amber .value { color: var(--warning); }
+        .cockpit-card.red .value { color: var(--danger); }
+        .cockpit-card.green .value { color: var(--success); }
+
         /* ── Tab Navigation Bar ── */
         .tab-navigation {
             display: flex;
             gap: 4px;
             border-bottom: 1px solid var(--edge);
             padding-bottom: 2px;
+            margin-top: 0.5rem;
         }
 
         .tab-btn {
@@ -243,26 +350,21 @@
         }
 
         .tab-panel.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
 
         /* ── Split Layout Grids ── */
-        .tab-grid-70-30 {
+        .tab-grid-65-35 {
             display: grid;
             grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
             gap: 1.25rem;
             align-items: start;
         }
 
-        .tab-grid-65-35 {
-            display: grid;
-            grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-            gap: 1.25rem;
-            align-items: start;
-        }
-
         @media (max-width: 950px) {
-            .tab-grid-70-30, .tab-grid-65-35 {
+            .tab-grid-65-35 {
                 grid-template-columns: 1fr;
             }
         }
@@ -310,7 +412,6 @@
             background: rgba(255, 255, 255, 0.01);
             border: 1px solid var(--edge);
             border-radius: 10px;
-            margin-bottom: 1rem;
         }
 
         body.light-mode .filter-toolbar {
@@ -397,11 +498,12 @@
         .project-item {
             background: var(--panel);
             border: 1px solid var(--edge);
-            border-radius: 10px;
-            padding: 1rem 1.15rem;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
             display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
             transition: all 0.15s ease;
         }
 
@@ -411,21 +513,20 @@
         }
 
         .project-item:hover {
-            border-color: rgba(59, 130, 246, 0.35);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .project-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+        body.light-mode .project-item:hover {
+            background: rgba(0,0,0,0.005);
         }
 
-        .project-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        @media (max-width: 900px) {
+            .project-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
         }
 
         .project-title {
@@ -433,19 +534,12 @@
             font-weight: 700;
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: var(--ink);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .project-title i {
-            color: var(--accent);
         }
 
         .project-badges {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 4px;
         }
 
         .project-badge {
@@ -689,86 +783,6 @@
             border-color: var(--danger);
         }
 
-        /* ── Compact Sidebar KPI Cards ── */
-        .kpi-sidebar-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 0.65rem;
-        }
-
-        .hero-summary-card {
-            border-radius: 10px;
-            padding: 0.85rem;
-            background: var(--panel);
-            border: 1px solid var(--edge);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-card-dark);
-            transition: transform 0.15s ease;
-        }
-
-        body.light-mode .hero-summary-card {
-            background: #ffffff;
-            border-color: rgba(15, 23, 42, 0.06);
-            box-shadow: var(--shadow-card-light);
-        }
-
-        .hero-summary-card:hover {
-            transform: translateX(3px);
-        }
-
-        .hero-summary-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 3px;
-            height: 100%;
-            background: var(--accent);
-        }
-
-        .hero-summary-card.projects::after { background-color: #60a5fa; }
-        .hero-summary-card.unassigned::after { background-color: var(--warning); }
-        .hero-summary-card.urgent::after { background-color: var(--danger); }
-        .hero-summary-card.new24h::after { background-color: var(--success); }
-
-        .hero-summary-card .card-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.1rem;
-            padding-left: 4px;
-        }
-
-        .hero-summary-card .label {
-            font-size: 0.68rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .hero-summary-card .detail {
-            font-size: 0.76rem;
-            color: var(--muted);
-        }
-
-        .hero-summary-card .value {
-            font-size: 1.5rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            text-align: right;
-            padding-right: 2px;
-        }
-
-        .hero-summary-card.projects .value { color: #60a5fa; }
-        .hero-summary-card.unassigned .value { color: var(--warning); }
-        .hero-summary-card.urgent .value { color: var(--danger); }
-        .hero-summary-card.new24h .value { color: var(--success); }
-
         /* ── Team Workload & Table ── */
         .table-scroll {
             overflow-x: auto;
@@ -952,133 +966,6 @@
             transform: translateY(-1px);
         }
 
-        /* ── Tab C: Escalations Dashboard ── */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-        }
-
-        .kpi-card {
-            border-radius: 10px;
-            padding: 1.15rem;
-            background: var(--panel);
-            border: 1px solid var(--edge);
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-card-dark);
-        }
-
-        body.light-mode .kpi-card {
-            box-shadow: var(--shadow-card-light);
-        }
-
-        .kpi-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--accent);
-        }
-
-        .kpi-card.blue::after { background-color: var(--accent); }
-        .kpi-card.amber::after { background-color: var(--warning); }
-        .kpi-card.red::after { background-color: var(--danger); }
-        .kpi-card.green::after { background-color: var(--success); }
-
-        .kpi-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-            font-weight: 700;
-        }
-
-        .kpi-value {
-            font-size: 2rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            line-height: 1;
-        }
-
-        .kpi-card.blue .kpi-value { color: var(--accent-2); }
-        body.light-mode .kpi-card.blue .kpi-value { color: var(--accent); }
-        .kpi-card.amber .kpi-value { color: var(--warning); }
-        .kpi-card.red .kpi-value { color: var(--danger); }
-        .kpi-card.green .kpi-value { color: var(--success); }
-
-        .kpi-desc {
-            font-size: 0.78rem;
-            color: var(--muted);
-        }
-
-        .escalation-header {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-            margin-top: 0.8rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .escalation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        .escalation-box {
-            padding: 1.1rem;
-            border-radius: 10px;
-            background: var(--panel);
-            border: 1px solid var(--edge);
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            box-shadow: var(--shadow-card-dark);
-            border-left: 4px solid var(--danger);
-        }
-
-        body.light-mode .escalation-box {
-            box-shadow: var(--shadow-card-light);
-        }
-
-        .escalation-box.amber { border-left-color: var(--warning); }
-        .escalation-box.red { border-left-color: var(--danger); }
-        .escalation-box.critical { border-left-color: #ef4444; }
-
-        .escalation-box .label {
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--muted);
-        }
-
-        .escalation-box .value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            letter-spacing: -0.02em;
-        }
-
-        .escalation-box.amber .value { color: var(--warning); }
-        .escalation-box.red .value { color: var(--danger); }
-        .escalation-box.critical .value { color: var(--danger); }
-
-        .escalation-box .hint {
-            font-size: 0.78rem;
-            color: var(--muted);
-        }
-
         /* ── Guidelines List ── */
         .guidelines-list {
             margin-top: 0.5rem;
@@ -1086,7 +973,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             color: var(--muted);
         }
 
@@ -1151,175 +1038,190 @@
         <!-- Title Header -->
         <header class="page-header">
             <h1><i class="fas fa-sitemap"></i> Command Center</h1>
-            <p>Assign inspector projects, view escalations, and monitor team workload allocation.</p>
+            <p>Assign inspector projects, view active escalations, and monitor team workload allocation.</p>
         </header>
+
+        <!-- Top Cockpit Section (SaaS Gradient Widgets) -->
+        <section class="cockpit-section">
+            <h3 class="cockpit-row-title">System Performance Metrics</h3>
+            <div class="kpi-row-grid">
+                <article class="cockpit-card blue">
+                    <div class="card-info">
+                        <span class="label">All Projects</span>
+                        <span class="detail">Total registered</span>
+                    </div>
+                    <span class="value">{{ metrics.project_counts.all }}</span>
+                </article>
+                <article class="cockpit-card amber">
+                    <div class="card-info">
+                        <span class="label">Unassigned</span>
+                        <span class="detail">Needs assignment</span>
+                    </div>
+                    <span class="value">{{ metrics.project_counts.unassigned }}</span>
+                </article>
+                <article class="cockpit-card red">
+                    <div class="card-info">
+                        <span class="label">Urgent Defects</span>
+                        <span class="detail">Requires attention</span>
+                    </div>
+                    <span class="value">{{ metrics.urgent_attention }}</span>
+                </article>
+                <article class="cockpit-card green">
+                    <div class="card-info">
+                        <span class="label">New Scans (24h)</span>
+                        <span class="detail">Recently uploaded</span>
+                    </div>
+                    <span class="value">{{ metrics.new_24h }}</span>
+                </article>
+            </div>
+
+            <h3 class="cockpit-row-title">Active Escalations & Warnings</h3>
+            <div class="warning-row-grid">
+                <article class="cockpit-card red">
+                    <div class="card-info">
+                        <span class="label">Urgent Hotspots</span>
+                        <span class="detail">3+ high/urgent open defects</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.urgent_hotspots }}</span>
+                </article>
+                <article class="cockpit-card amber">
+                    <div class="card-info">
+                        <span class="label">Stale Reviews</span>
+                        <span class="detail">Under review for over 7 days</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.stale_reviews }}</span>
+                </article>
+                <article class="cockpit-card red">
+                    <div class="card-info">
+                        <span class="label">Overdue Backlog</span>
+                        <span class="detail">3+ unresolved overdue items</span>
+                    </div>
+                    <span class="value">{{ escalation_summary.overdue_backlog }}</span>
+                </article>
+            </div>
+        </section>
 
         <!-- Horizontal Tab Navigation Bar -->
         <nav class="tab-navigation">
             <button class="tab-btn active" data-tab="projects">
-                <i class="fas fa-cube"></i> Projects
+                <i class="fas fa-cube"></i> Projects & Assignments
             </button>
             <button class="tab-btn" data-tab="workload">
                 <i class="fas fa-users"></i> Team Workload
             </button>
-            <button class="tab-btn" data-tab="escalations">
-                <i class="fas fa-chart-line"></i> Escalations & KPIs
-            </button>
         </nav>
 
-        <!-- Tab Panel: Projects (Split 70/30) -->
+        <!-- Tab Panel: Projects -->
         <section class="tab-panel active" id="tab-projects">
-            <div class="tab-grid-70-30">
-                <!-- Left panel: Projects Feed & Filters -->
-                <div>
-                    <!-- Filter Toolbar -->
-                    <form class="filter-toolbar" method="get" action="{{ url_for('developer.manager_dashboard') }}">
-                        <div class="filter-group">
-                            <label>Sort</label>
-                            <select class="filter-select" name="sort">
-                                <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
-                                <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Status</label>
-                            <select class="filter-select" name="status_filter">
-                                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
-                                <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
-                                <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
-                                <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Date Range</label>
-                            <select class="filter-select" name="date_range">
-                                <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
-                                <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
-                                <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
-                                <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="filter-submit-btn">
-                            <i class="fas fa-filter"></i> Apply
-                        </button>
-                    </form>
+            <!-- Filter Toolbar -->
+            <form class="filter-toolbar" method="get" action="{{ url_for('developer.manager_dashboard') }}">
+                <div class="filter-group">
+                    <label>Sort</label>
+                    <select class="filter-select" name="sort">
+                        <option value="recent" {{ 'selected' if sort == 'recent' else '' }}>Newest first</option>
+                        <option value="oldest" {{ 'selected' if sort != 'recent' else '' }}>Oldest first</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select class="filter-select" name="status_filter">
+                        <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>All</option>
+                        <option value="started" {{ 'selected' if status_filter == 'started' else '' }}>Started</option>
+                        <option value="in_progress" {{ 'selected' if status_filter == 'in_progress' else '' }}>In Progress</option>
+                        <option value="complete" {{ 'selected' if status_filter == 'complete' else '' }}>Complete</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <select class="filter-select" name="date_range">
+                        <option value="all" {{ 'selected' if date_range == 'all' else '' }}>All Time</option>
+                        <option value="week" {{ 'selected' if date_range == 'week' else '' }}>Last 7 Days</option>
+                        <option value="month" {{ 'selected' if date_range == 'month' else '' }}>Last 30 Days</option>
+                        <option value="3months" {{ 'selected' if date_range == '3months' else '' }}>Last 3 Months</option>
+                    </select>
+                </div>
+                <button type="submit" class="filter-submit-btn">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+            </form>
 
-                    <div class="bento-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h2><i class="fas fa-cube"></i> Scans Feed</h2>
-                            <span class="project-badge">{{ scans|length }} projects</span>
-                        </div>
-
-                        <div class="projects-list">
-                            {% for scan, defect_count, reported, review, fixed in scans %}
-                            <div class="project-item">
-                                <div class="project-row">
-                                    <div class="project-info">
-                                        <div class="project-title"><i class="fas fa-cube"></i> {{ scan.name }}</div>
-                                    </div>
-                                    {% if scan.assigned_to %}
-                                    <span class="status-badge assigned"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
-                                    {% else %}
-                                    <span class="status-badge unassigned"><i class="fas fa-user-slash"></i> Unassigned</span>
-                                    {% endif %}
-                                </div>
-
-                                <div class="project-badges">
-                                    <span class="project-badge">{{ defect_count }} defects</span>
-                                    <span class="project-badge">{{ reported }} reported</span>
-                                    <span class="project-badge">{{ review }} review</span>
-                                    <span class="project-badge">{{ fixed }} resolved</span>
-                                </div>
-
-                                {% set scan_escalation = project_escalations.get(scan.id) %}
-                                {% if scan_escalation and scan_escalation.flags %}
-                                <div class="project-flags">
-                                    {% for flag in scan_escalation.flags %}
-                                    <div class="flag-card {{ flag.level }}"><i class="fas fa-exclamation-triangle"></i> {{ flag.label }}: {{ flag.detail }}</div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-
-                                {% if defect_count > 0 %}
-                                {% set pct = ((fixed / defect_count) * 100) | int %}
-                                <div class="progress-box">
-                                    <span class="progress-box-label">Progress</span>
-                                    <div class="progress-box-bar">
-                                        <div class="progress-box-fill {% if pct == 100 %}complete{% endif %}" style="width: {{ pct }}%"></div>
-                                    </div>
-                                    <span class="progress-box-pct">{{ pct }}%</span>
-                                </div>
-                                {% endif %}
-
-                                <div class="project-card-actions">
-                                    <form class="assign-form" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <select class="assign-select" name="assigned_to_user_id">
-                                            <option value="">Unassigned</option>
-                                            {% for dev in developers %}
-                                            <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <button type="submit" class="assign-btn"><i class="fas fa-user-check"></i> Assign Owner</button>
-                                    </form>
-
-                                    {% if current_user.username in ('manager', 'Afiq_M') %}
-                                    <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% else %}
-                            <div class="ldms-empty">
-                                <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
-                                <h3>No projects found</h3>
-                                <p>Adjust your filters or query to find the scans you are looking for.</p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+            <div class="bento-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2><i class="fas fa-cube"></i> Scans Feed</h2>
+                    <span class="project-badge">{{ scans|length }} projects</span>
                 </div>
 
-                <!-- Right panel: Quick stats sidebar -->
-                <div class="kpi-sidebar-grid">
-                    <h3 class="meta-label">Quick Stats</h3>
-                    <article class="hero-summary-card projects">
-                        <div class="card-info">
-                            <span class="label">All Projects</span>
-                            <span class="detail">Total registered</span>
+                <div class="projects-list">
+                    {% for scan, defect_count, reported, review, fixed in scans %}
+                    <div class="project-item">
+                        <!-- Left: Icon & Title -->
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 220px; flex: 1 1 auto;">
+                            <i class="fas fa-cube" style="color: var(--accent); font-size: 1.1rem;"></i>
+                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                <div class="project-title">{{ scan.name }}</div>
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    {% if scan.assigned_to %}
+                                    <span class="status-badge assigned" style="padding: 1px 6px; font-size: 0.65rem;"><i class="fas fa-user-check"></i> {{ scan.assigned_to.username }}</span>
+                                    {% else %}
+                                    <span class="status-badge unassigned" style="padding: 1px 6px; font-size: 0.65rem;"><i class="fas fa-user-slash"></i> Unassigned</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <span class="value">{{ metrics.project_counts.all }}</span>
-                    </article>
-                    
-                    <article class="hero-summary-card unassigned">
-                        <div class="card-info">
-                            <span class="label">Unassigned</span>
-                            <span class="detail">Needs assignment</span>
-                        </div>
-                        <span class="value">{{ metrics.project_counts.unassigned }}</span>
-                    </article>
 
-                    <article class="hero-summary-card urgent">
-                        <div class="card-info">
-                            <span class="label">Urgent Defects</span>
-                            <span class="detail">Requires attention</span>
+                        <!-- Middle: Badges -->
+                        <div class="project-badges" style="flex: 0 0 auto; gap: 4px;">
+                            <span class="project-badge">{{ defect_count }} defects</span>
+                            <span class="project-badge">{{ reported }} reported</span>
+                            <span class="project-badge">{{ review }} review</span>
+                            <span class="project-badge">{{ fixed }} resolved</span>
                         </div>
-                        <span class="value">{{ metrics.urgent_attention }}</span>
-                    </article>
 
-                    <article class="hero-summary-card new24h">
-                        <div class="card-info">
-                            <span class="label">New Scans (24h)</span>
-                            <span class="detail">Recently uploaded</span>
+                        <!-- Middle-Right: Progress bar -->
+                        {% if defect_count > 0 %}
+                        {% set pct = ((fixed / defect_count) * 100) | int %}
+                        <div class="progress-box" style="min-width: 140px; flex: 0 1 auto;">
+                            <span class="progress-box-pct" style="font-size: 0.74rem;">{{ pct }}%</span>
+                            <div class="progress-box-bar" style="height: 5px;">
+                                <div class="progress-box-fill {% if pct == 100 %}complete{% endif %}" style="width: {{ pct }}%"></div>
+                            </div>
                         </div>
-                        <span class="value">{{ metrics.new_24h }}</span>
-                    </article>
+                        {% else %}
+                        <div style="min-width: 140px; flex: 0 1 auto; font-size: 0.74rem; color: var(--muted); text-align: center;">No defects</div>
+                        {% endif %}
+
+                        <!-- Right: Reassign Owner and Delete -->
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto; flex-wrap: wrap;">
+                            <form class="assign-form" method="post" action="{{ url_for('developer.assign_project', scan_id=scan.id) }}" style="display: flex; gap: 4px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <select class="assign-select" name="assigned_to_user_id" style="min-height: 1.85rem; font-size: 0.78rem;">
+                                    <option value="">Unassigned</option>
+                                    {% for dev in developers %}
+                                    <option value="{{ dev.id }}" {{ 'selected' if scan.assigned_to_user_id == dev.id else '' }}>{{ dev.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="assign-btn" style="min-height: 1.85rem; font-size: 0.76rem; padding: 0 0.65rem;"><i class="fas fa-user-check"></i> Assign</button>
+                            </form>
+
+                            {% if current_user.username in ('manager', 'Afiq_M') %}
+                            <button class="btn-delete-project-custom" onclick="deleteProject({{ scan.id }}, '{{ scan.name }}')" style="min-height: 1.85rem; font-size: 0.74rem; padding: 0 0.5rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="ldms-empty">
+                        <div class="ldms-empty-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3>No projects found</h3>
+                        <p>Adjust your filters or query to find the scans you are looking for.</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </section>
 
-        <!-- Tab Panel: Workload (Split 65/35) -->
+        <!-- Tab Panel: Workload -->
         <section class="tab-panel" id="tab-workload">
             <div class="tab-grid-65-35">
                 <!-- Left panel: Workload balance table -->
@@ -1361,66 +1263,42 @@
                     </div>
                 </div>
 
-                <!-- Right panel: Admin reset tool -->
-                {% if current_user.username in ('manager', 'Afiq_M') %}
-                <div class="bento-card">
-                    <h2><i class="fas fa-trash"></i> Reset User Projects</h2>
-                    <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.84rem;">Deletes all defects and projects assigned to a specific account.</p>
-                    <div class="clear-user-widget">
-                        <select id="clear-user-select" class="clear-user-select">
-                            <option value="">Select a user...</option>
-                            {% for user in users %}
-                            <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
-                            {% endfor %}
-                        </select>
-                        <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
-                            <i class="fas fa-trash"></i> Reset All
-                        </button>
+                <!-- Right panel: Admin reset tool & Guidelines -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    {% if current_user.username in ('manager', 'Afiq_M') %}
+                    <div class="bento-card">
+                        <h2><i class="fas fa-trash"></i> Reset User Projects</h2>
+                        <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.84rem;">Deletes all defects and projects assigned to a specific account.</p>
+                        <div class="clear-user-widget">
+                            <select id="clear-user-select" class="clear-user-select">
+                                <option value="">Select a user...</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="clear-user-btn" onclick="clearUserProjects()">
+                                <i class="fas fa-trash"></i> Reset All
+                            </button>
+                        </div>
+                        <div id="clear-result" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.01); border: 1px solid var(--edge); border-radius: 6px; display: none; font-size: 0.86rem;"></div>
                     </div>
-                    <div id="clear-result" style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.01); border: 1px solid var(--edge); border-radius: 6px; display: none; font-size: 0.86rem;"></div>
-                </div>
-                {% endif %}
-            </div>
-        </section>
+                    {% endif %}
 
-        <!-- Tab Panel: Escalations & KPIs -->
-        <section class="tab-panel" id="tab-escalations">
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <div>
-                    <h3 class="escalation-header">Active Escalations & Warnings</h3>
-                    <div class="escalation-grid">
-                        <div class="escalation-box red">
-                            <div class="label">Urgent Hotspots</div>
-                            <div class="value">{{ escalation_summary.urgent_hotspots }}</div>
-                            <div class="hint">Scans with 3+ High/Urgent defects remaining unresolved.</div>
-                        </div>
-                        <div class="escalation-box amber">
-                            <div class="label">Stale Reviews</div>
-                            <div class="value">{{ escalation_summary.stale_reviews }}</div>
-                            <div class="hint">Scans kept under review for more than 7 days.</div>
-                        </div>
-                        <div class="escalation-box critical">
-                            <div class="label">Overdue Backlog</div>
-                            <div class="value">{{ escalation_summary.overdue_backlog }}</div>
-                            <div class="hint">Scans containing 3+ unresolved overdue items.</div>
-                        </div>
+                    <div class="bento-card">
+                        <h2><i class="fas fa-shield-halved"></i> Resolution Guidelines</h2>
+                        <p style="color: var(--muted); margin-bottom: 0.75rem; font-size: 0.84rem;">As a manager, follow these operational policies when balancing workload and reassigning projects:</p>
+                        <ul class="guidelines-list">
+                            <li>
+                                <strong>Urgent Hotspots:</strong> Reassign high-priority defects immediately to developers with <em>underloaded</em> capacity (utilization below 50%).
+                            </li>
+                            <li>
+                                <strong>Stale Reviews:</strong> Contact the assigned developer to complete status reviews. Force resolution if developer remains unavailable.
+                            </li>
+                            <li>
+                                <strong>Overdue Backlog:</strong> Check due dates of active defects on the scan detail page, adjust deadlines or allocate backup inspector support.
+                            </li>
+                        </ul>
                     </div>
-                </div>
-
-                <div class="bento-card">
-                    <h2><i class="fas fa-shield-halved"></i> Escalation Resolution Guidelines</h2>
-                    <p style="color: var(--muted); margin-bottom: 0.75rem; font-size: 0.86rem;">As a manager, follow these operational policies when resolving defects backlog warnings:</p>
-                    <ul class="guidelines-list">
-                        <li>
-                            <strong>Urgent Hotspots:</strong> Reassign high-priority defects immediately to developers with <em>underloaded</em> capacity (utilization below 50%).
-                        </li>
-                        <li>
-                            <strong>Stale Reviews:</strong> Contact the assigned developer to complete status reviews. Force resolution or reassign if developer remains unavailable.
-                        </li>
-                        <li>
-                            <strong>Overdue Backlog:</strong> Check due dates of active defects on the scan detail page, adjust deadlines or allocate backup inspector support.
-                        </li>
-                    </ul>
                 </div>
             </div>
         </section>
@@ -1446,11 +1324,16 @@
             }
         }
 
-        // Tab Switching Logic
+        // Tab Switching Logic (2 tabs)
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabPanels = document.querySelectorAll('.tab-panel');
 
         function switchTab(tabId) {
+            // Guarantee tab defaults to projects if invalid
+            if (tabId !== 'projects' && tabId !== 'workload') {
+                tabId = 'projects';
+            }
+
             tabBtns.forEach(btn => {
                 if (btn.getAttribute('data-tab') === tabId) {
                     btn.classList.add('active');
