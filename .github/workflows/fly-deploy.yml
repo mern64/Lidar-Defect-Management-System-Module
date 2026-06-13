@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - if: ${{ env.FLY_API_TOKEN == '' }}
+      - if: ${{ !env.FLY_API_TOKEN }}
         run: echo "Skipping Fly deploy because FLY_API_TOKEN is not configured."
-      - if: ${{ env.FLY_API_TOKEN != '' }}
+      - if: ${{ env.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only
