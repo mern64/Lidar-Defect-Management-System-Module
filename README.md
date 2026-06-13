@@ -17,6 +17,8 @@ Flask web app for managing building defects from LiDAR/Point Cloud Data scans.
 7. [Security](#security)
 8. [Quick Start](#quick-start)
 9. [Configuration Reference](#configuration-reference)
+10. [Screenshots](#screenshots)
+11. [System Walkthrough Video](#system-walkthrough-video)
 
 ---
 
@@ -308,3 +310,104 @@ docker exec flask_app pytest
 | GOOGLE_MAPS_API_KEY | No | - | Maps address autocomplete |
 
 > **Important**: The `.env` file stores secrets and is never committed. Migrations are handled by Alembic/Flask-Migrate. PostgreSQL runs via Docker.
+
+---
+
+## Screenshots
+
+> Screenshots captured from the live deployment at [pcd-app.fly.dev](https://pcd-app.fly.dev/login)
+
+---
+
+### 🔐 Login
+
+![Login Page](docs/screenshots/01_login.png)
+
+---
+
+### 👷 Inspector Role
+
+**Dashboard** — Landing page after login, showing quick-action cards to upload or view projects.
+
+![Inspector Dashboard](docs/screenshots/02_inspector_dashboard.png)
+
+**Upload Scan Data** — Upload a GLB 3D model and PDF inspection report (up to 100 MB).
+
+![Upload Scan Data](docs/screenshots/04_inspector_upload.png)
+
+**Process Data / AI Analysis** — Review DBSCAN-extracted defect points and link PDF images before saving.
+
+![Process Data](docs/screenshots/05_inspector_process_data.png)
+
+**Projects List** — All uploaded scans with defect counts and quick links.
+
+![Projects List](docs/screenshots/06_projects_list.png)
+
+**Profile** — View and edit account details, change email or password.
+
+![Inspector Profile](docs/screenshots/09_inspector_profile.png)
+
+---
+
+### 👨‍💻 Developer Role
+
+**Dashboard** — System metrics, portfolio health overview, and active claim cards.
+
+![Developer Dashboard](docs/screenshots/10_developer_dashboard.png)
+
+![Developer Dashboard (scrolled)](docs/screenshots/10b_developer_dashboard_bottom.png)
+
+**Scan Detail** — Per-scan defect analytics: status/priority/severity charts and AI spatial cluster insights.
+
+![Scan Detail – Overview](docs/screenshots/11_developer_scan_detail.png)
+
+**Scan Detail – Defect Cards** — Individual defect cards with location, type, severity, status update and notes.
+
+![Scan Detail – Defects](docs/screenshots/11b_developer_scan_defects.png)
+
+**My Tasks Queue** — Filterable task queue (Mine / Unassigned / All) with bulk assign and CSV export.
+
+![My Tasks Queue](docs/screenshots/12_developer_tasks.png)
+
+**Profile**
+
+![Developer Profile](docs/screenshots/13_developer_profile.png)
+
+---
+
+### 👔 Manager Role
+
+**Manager Command Center** — Cross-project overview, developer capacity heatmap, escalation flags.
+
+![Manager Dashboard](docs/screenshots/14_manager_dashboard.png)
+
+![Manager Dashboard (scrolled)](docs/screenshots/14b_manager_dashboard_bottom.png)
+
+**User Management** — Create users, toggle active/available status, change roles, reset passwords.
+
+![User Management](docs/screenshots/15_manager_user_admin.png)
+
+**Projects View** — Full project portfolio visible to the manager.
+
+![Manager Projects View](docs/screenshots/16_manager_projects.png)
+
+**Profile**
+
+![Manager Profile](docs/screenshots/17_manager_profile.png)
+
+---
+
+## System Walkthrough Video
+
+A full end-to-end walkthrough demonstrating all three user roles — Inspector → Developer → Manager — recorded from the live deployment.
+
+> 📹 **[Download Walkthrough Video (WebM)](docs/videos/pcd_walkthrough.webm)**
+
+**Walkthrough covers:**
+1. 🔐 Login page
+2. 👷 **Inspector** — Dashboard, Upload Scan Data, Process Data (AI Analysis), Projects List, Profile
+3. 👨‍💻 **Developer** — Dashboard with metrics, Scan Detail with defect cards, My Tasks Queue, Profile
+4. 👔 **Manager** — Command Center dashboard, User Management, Profile
+
+
+
